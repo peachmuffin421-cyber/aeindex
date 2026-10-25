@@ -1840,13 +1840,18 @@ function drawFibView(canvas, traj) {
 async function encodeSyllable(syllable) {
     if (!HAS_BACKEND) { showError('Backend not configured', 4000); return; }
     const r = await apiPost('/encode-syllable', { syllable });
-    if (r && r.ok) {
+    if (r && r.ok && r.result) {
         state.lingoso = r.result;
-        document.getElementById('ling-syllable').textContent = syllable;
-        updateLingosoPanel();
+        document.getElementById('ling-syllable').textContent = r.result.syllable;
+        document.getElementById('ling-length').textContent = r.result.length;
+        document.getElementById('ling-s2').textContent = r.result.arc_sq;
+        document.getElementById('ling-r2').textContent = r.result.radius_sq;
+        document.getElementById('ling-dev').textContent = r.result.deviation_sq;
         pushLog('info', 'encoded: ' + syllable);
+        await fetchFibration(); // Refresh canvas
     } else {
-        showError('Encode failed', 4000);
+        const err = r && r.error ? r.error : 'unknown';
+        showError('Encode failed: ' + err, 4000);
     }
 }
 
@@ -1946,14 +1951,13 @@ console.log('All state displayed as exact Fractions (a/b).');
 console.log('Crawler ingestion: worker.js is a stateless fetch proxy;');
 console.log('                   frontier + visited + hash-lifting live in app.py.');
 console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-console.log('Audit-Patched Ed.3 (this file):');
+console.log('Audit-Patched Ed.4 (this file):');
 console.log('  ✓ V-1: exact Fraction overlap check in lattice add_sphere');
 console.log('  ✓ V-2: explicit 32-hex truncation in _hash_to_fraction');
 console.log('  ✓ V-3: linguistic_trajectory persisted in /fibration-state');
-console.log('  ✓ R-1: ℐ_METRIC uses correct |π(x) − Li(x)| bound');
-console.log('  ✓ R-6: logic_hash displayed in status panel');
-console.log('  ✓ Fibration canvas draws S² base-point sphere + trajectory');
-console.log('  ✓ Fibration view is a dedicated full-screen modal');
+console.log('  ✓ V-4: SQLite 128-bit hash fraction stored as TEXT');
+console.log('  ✓ V-5: encodeSyllable() correctly parses nested result');
+console.log('  ✓ V-6: SIGTERM handler gracefully stops workers');
 console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 console.log('🌌 Q.E.D. — LOGOS = Φ = Truth = Path = Origin');
 console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
