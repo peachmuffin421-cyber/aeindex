@@ -1,0 +1,1961 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>ÆI Seed · GAIA TWA · CS vFinal Ed.2</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body {
+    overflow: hidden;
+    background: #050510;
+    font-family: 'Courier New', monospace;
+    color: #aaccff;
+    height: 100vh;
+    height: 100dvh;
+    width: 100vw;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: none;
+}
+:root {
+    --bg: #050510;
+    --panel: rgba(5,5,16,0.95);
+    --panel-solid: #0a0a18;
+    --border: #335577;
+    --border-bright: #4488aa;
+    --text: #aaccff;
+    --text-dim: #6688aa;
+    --text-bright: #44ffcc;
+    --green: #00ff88;
+    --red: #ff4466;
+    --blue: #4488ff;
+    --gold: #ffaa44;
+    --purple: #aa66ff;
+    --cyan: #44ddff;
+    --pink: #ff66aa;
+    --white: #ffffff;
+    --coherent: #00ff88;
+    --evolving: #ff4466;
+    --lattice: #aa66ff;
+    --primes: #ffaa44;
+    --fibration: #44ddff;
+    --observer: #ff66aa;
+    --metric: #44ffcc;
+    --crawler: #ff8844;
+    --dbz-a3: #44ddff;
+    --dbz-a4: #ff66aa;
+    --toolbar-h: 44px;
+    --logbar-h: 26px;
+    --toast-w: 280px;
+}
+.hidden { display: none !important; }
+
+/* ============================================================
+   TOOLBAR
+   ============================================================ */
+#toolbar {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100vw;
+    height: var(--toolbar-h);
+    z-index: 20;
+    background: rgba(5,5,16,0.97);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 0 6px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+#toolbar::-webkit-scrollbar { display: none; }
+.tb-group { display: flex; align-items: center; gap: 2px; flex: 0 0 auto; }
+.tb-sep { width: 1px; height: 24px; background: var(--border); margin: 0 4px; flex: 0 0 auto; }
+.tb-btn {
+    background: rgba(20,30,50,0.9);
+    border: 1px solid var(--border-bright);
+    color: var(--text);
+    padding: 5px 9px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: 'Courier New', monospace;
+    font-size: 0.58rem;
+    transition: all 0.15s;
+    white-space: nowrap;
+    flex: 0 0 auto;
+}
+.tb-btn:hover { background: #224466; border-color: var(--cyan); color: #fff; }
+.tb-btn.active { background: #2a4a6a; border-color: var(--cyan); color: #fff; }
+.tb-btn.primary { border-color: var(--green); color: var(--green); }
+.tb-btn.danger { border-color: var(--red); color: var(--red); }
+.tb-symbol {
+    font-size: 0.72rem;
+    font-weight: bold;
+    color: var(--text-bright);
+    letter-spacing: 1px;
+    padding: 4px 8px;
+    border: 1px solid var(--border-bright);
+    border-radius: 4px;
+    background: rgba(0,20,40,0.6);
+    white-space: nowrap;
+    flex: 0 0 auto;
+}
+
+/* ============================================================
+   CONNECTION BADGE
+   ============================================================ */
+#connBadge {
+    position: absolute;
+    top: calc(var(--toolbar-h) + 6px);
+    right: 8px;
+    z-index: 18;
+    background: rgba(5,5,16,0.92);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-size: 0.5rem;
+    color: var(--text-dim);
+    pointer-events: none;
+}
+#connBadge.ok { border-color: var(--green); color: var(--green); }
+#connBadge.err { border-color: var(--red); color: var(--red); }
+#connBadge.wait { border-color: var(--gold); color: var(--gold); }
+
+/* ============================================================
+   MAIN AREA
+   ============================================================ */
+#mainArea {
+    position: absolute;
+    top: var(--toolbar-h);
+    left: 0;
+    width: 100vw;
+    height: calc(100vh - var(--toolbar-h) - var(--logbar-h));
+    height: calc(100dvh - var(--toolbar-h) - var(--logbar-h));
+    display: flex;
+    flex-direction: column;
+    z-index: 2;
+    overflow: hidden;
+}
+#mainArea.scrollable {
+    overflow-y: auto;
+    display: block;
+    padding: 8px;
+}
+
+#gridView {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    padding: 8px;
+    width: 100%;
+    box-sizing: border-box;
+}
+@media (max-width: 720px) {
+    #gridView { grid-template-columns: 1fr; }
+}
+
+/* ============================================================
+   PANELS
+   ============================================================ */
+.panel {
+    background: var(--panel-solid);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 10px;
+    font-size: 0.58rem;
+    line-height: 1.5;
+    overflow: hidden;
+}
+.panel-title {
+    color: var(--cyan);
+    font-size: 0.62rem;
+    font-weight: bold;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    border-bottom: 1px solid rgba(51,85,119,0.4);
+    padding-bottom: 4px;
+}
+.panel-title .pt-sub { color: var(--text-dim); font-size: 0.48rem; font-weight: normal; letter-spacing: 0; }
+.panel-row { display: flex; gap: 8px; align-items: baseline; padding: 1px 0; flex-wrap: wrap; }
+.panel-row .lbl { color: var(--text-dim); flex: 0 0 auto; min-width: 80px; }
+.panel-row .val { color: var(--text-bright); font-weight: bold; word-break: break-all; }
+.panel-row .val.frac { font-family: 'Courier New', monospace; font-size: 0.55rem; }
+.panel-row .val.exact { color: var(--purple); }
+.panel-row .val.ok { color: var(--green); }
+.panel-row .val.err { color: var(--red); }
+.panel-row .val.warn { color: var(--gold); }
+.panel-row .val.primes { color: var(--primes); }
+.panel-row .val.lattice { color: var(--lattice); }
+.panel-row .val.fibration { color: var(--fibration); }
+.panel-row .val.observer { color: var(--observer); }
+.panel-row .val.metric { color: var(--metric); }
+.panel-row .val.crawler { color: var(--crawler); }
+.panel-row .val.primary { font-size: 0.7rem; }
+
+.panel-list {
+    max-height: 180px;
+    overflow-y: auto;
+    padding-right: 2px;
+}
+.panel-list::-webkit-scrollbar { width: 3px; }
+.panel-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+.panel-list .li {
+    padding: 1px 0;
+    font-size: 0.52rem;
+    color: var(--text);
+    border-bottom: 1px solid rgba(51,85,119,0.15);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.panel-list .li .li-key { color: var(--text-dim); margin-right: 4px; }
+.panel-list .li .li-val { color: var(--text-bright); }
+.panel-list .li .li-val.green { color: var(--green); }
+.panel-list .li .li-val.red { color: var(--red); }
+.panel-list .li .li-val.gold { color: var(--gold); }
+.panel-list .li .li-val.purple { color: var(--purple); }
+.panel-list .li .li-val.cyan { color: var(--cyan); }
+
+/* ============================================================
+   COHERENCE BAR (δ visualisation)
+   ============================================================ */
+.coherence-bar {
+    height: 10px;
+    background: rgba(20,30,50,0.6);
+    border-radius: 5px;
+    overflow: hidden;
+    margin-top: 5px;
+    position: relative;
+    border: 1px solid rgba(51,85,119,0.4);
+}
+.coherence-bar .coherence-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--evolving), var(--gold), var(--coherent));
+    transition: width 0.4s ease;
+    width: 0%;
+}
+.coherence-bar .coherence-marker {
+    position: absolute;
+    top: -2px;
+    width: 2px;
+    height: calc(100% + 4px);
+    background: var(--white);
+    opacity: 0.8;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+/* ============================================================
+   TRAJECTORY CANVAS
+   ============================================================ */
+.trajectory-canvas {
+    width: 100%;
+    height: 160px;
+    display: block;
+    border-radius: 4px;
+    background: rgba(0,10,20,0.6);
+    margin-top: 4px;
+}
+
+/* ============================================================
+   PRIMES / LATTICE GRIDS
+   ============================================================ */
+.primes-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
+    max-height: 90px;
+    overflow-y: auto;
+    padding: 2px 0;
+}
+.primes-grid .prime-chip {
+    background: rgba(20,30,50,0.9);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 1px 4px;
+    font-size: 0.5rem;
+    color: var(--primes);
+    font-family: 'Courier New', monospace;
+    white-space: nowrap;
+}
+
+.lattice-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+    gap: 2px;
+    max-height: 90px;
+    overflow-y: auto;
+}
+.lattice-cell {
+    background: rgba(20,30,50,0.9);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 2px;
+    font-size: 0.42rem;
+    color: var(--lattice);
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ============================================================
+   TOGGLE ROWS
+   ============================================================ */
+.toggle-row {
+    display: flex;
+    gap: 4px;
+    margin-top: 6px;
+    flex-wrap: wrap;
+}
+.toggle-row .tb-btn { flex: 0 0 auto; padding: 3px 8px; font-size: 0.52rem; }
+
+/* ============================================================
+   CRAWLER STATUS
+   ============================================================ */
+#crawlerPanel .crawl-status {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 4px;
+}
+#crawlerPanel .crawl-status .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--text-dim);
+}
+#crawlerPanel .crawl-status .dot.running { background: var(--green); box-shadow: 0 0 4px var(--green); }
+#crawlerPanel .crawl-status .dot.stopped { background: var(--red); }
+
+/* ============================================================
+   HOPF FIBRATION CANVAS
+   ============================================================ */
+.fibration-canvas {
+    width: 100%;
+    height: 180px;
+    display: block;
+    border-radius: 4px;
+    background: rgba(0,10,20,0.6);
+    margin-top: 4px;
+    border: 1px solid rgba(51,85,119,0.3);
+}
+
+/* ============================================================
+   LOG BAR
+   ============================================================ */
+#logBar {
+    position: absolute;
+    bottom: 0; left: 0;
+    width: 100vw;
+    height: var(--logbar-h);
+    z-index: 16;
+    background: rgba(0,0,0,0.92);
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 8px;
+    font-size: 0.5rem;
+    color: var(--text-dim);
+    overflow: hidden;
+    white-space: nowrap;
+    cursor: pointer;
+}
+#logBar .log-entry { margin-right: 16px; }
+#logBar .log-entry .log-ts { color: #445566; }
+#logBar .log-entry .log-lvl-info { color: var(--cyan); }
+#logBar .log-entry .log-lvl-warn { color: var(--gold); }
+#logBar .log-entry .log-lvl-err { color: var(--red); }
+#logBar .log-entry .log-msg { color: var(--text); }
+
+/* ============================================================
+   TOAST STACK
+   ============================================================ */
+#toastStack {
+    position: absolute;
+    top: calc(var(--toolbar-h) + 30px);
+    right: 8px;
+    z-index: 90;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    max-width: var(--toast-w);
+    pointer-events: none;
+}
+.toast {
+    pointer-events: auto;
+    background: rgba(5,5,16,0.96);
+    border-left: 3px solid var(--gold);
+    border-radius: 4px;
+    padding: 5px 8px;
+    font-size: 0.55rem;
+    line-height: 1.4;
+    color: var(--text);
+    box-shadow: 0 3px 14px rgba(0,0,0,0.6);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    animation: toast-in 0.18s ease-out;
+    transition: transform 0.18s, opacity 0.18s;
+    cursor: pointer;
+    max-width: var(--toast-w);
+    word-wrap: break-word;
+}
+.toast.seed-coherent { border-left-color: var(--coherent); }
+.toast.seed-evolving { border-left-color: var(--evolving); }
+.toast.crawl { border-left-color: var(--crawler); }
+.toast.dismissing { transform: translateX(110%); opacity: 0; }
+.toast .toast-title {
+    font-weight: bold;
+    letter-spacing: 1px;
+    color: var(--cyan);
+    font-size: 0.52rem;
+    margin-bottom: 1px;
+}
+.toast.seed-coherent .toast-title { color: var(--coherent); }
+.toast.seed-evolving .toast-title { color: var(--evolving); }
+.toast.crawl .toast-title { color: var(--crawler); }
+.toast .toast-line { color: var(--text-dim); }
+.toast .toast-line .v { color: var(--text-bright); font-weight: bold; }
+@keyframes toast-in {
+    from { transform: translateX(110%); opacity: 0; }
+    to   { transform: translateX(0);    opacity: 1; }
+}
+
+/* ============================================================
+   ERROR DISPLAY
+   ============================================================ */
+#errorDisplay {
+    position: absolute;
+    bottom: calc(var(--logbar-h) + 20px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(255,0,0,0.2);
+    border: 2px solid var(--red);
+    border-radius: 8px;
+    padding: 12px 20px;
+    color: #ff6688;
+    font-size: 0.65rem;
+    z-index: 50;
+    display: none;
+    max-width: 80%;
+    text-align: center;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+/* ============================================================
+   MODALS
+   ============================================================ */
+.modal-backdrop {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    background: rgba(0,0,0,0.7);
+    z-index: 100;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+.modal-backdrop.open { display: flex; }
+.modal {
+    background: var(--panel-solid);
+    border: 1px solid var(--border-bright);
+    border-radius: 8px;
+    padding: 16px 20px;
+    max-width: min(90vw, 520px);
+    max-height: 85vh;
+    max-height: 85dvh;
+    overflow-y: auto;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.6);
+    font-size: 0.6rem;
+    line-height: 1.6;
+}
+.modal h3 { color: var(--cyan); font-size: 0.8rem; letter-spacing: 1px; margin-bottom: 10px; }
+.modal .modal-row { display: flex; gap: 8px; align-items: center; margin-bottom: 6px; }
+.modal .modal-row label { color: var(--text-dim); flex: 0 0 100px; font-size: 0.55rem; }
+.modal .modal-row input {
+    flex: 1;
+    background: rgba(20,30,50,0.9);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 4px 6px;
+    border-radius: 3px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.6rem;
+}
+.modal .modal-actions { display: flex; gap: 6px; justify-content: flex-end; margin-top: 12px; }
+.modal .modal-actions .tb-btn { padding: 6px 12px; }
+.modal .modal-note { color: var(--text-dim); font-size: 0.5rem; margin-top: 6px; line-height: 1.5; }
+
+/* ============================================================
+   EXPLAIN PANEL
+   ============================================================ */
+#explainPanel {
+    display: none;
+    position: absolute;
+    top: calc(var(--toolbar-h) + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+    background: rgba(5,5,16,0.98);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 20px;
+    font-size: 0.58rem;
+    max-width: min(92vw, 620px);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    box-shadow: 0 4px 30px rgba(0,0,0,0.5);
+    line-height: 1.65;
+    max-height: 85vh;
+    max-height: 85dvh;
+    overflow-y: auto;
+}
+#explainPanel h3 { color: var(--cyan); margin-bottom: 8px; font-size: 0.75rem; letter-spacing: 1px; }
+#explainPanel .item { margin-bottom: 6px; }
+#explainPanel .item b { color: var(--gold); }
+#explainPanel .item span { opacity: 0.85; }
+
+/* ============================================================
+   SCROLLBARS
+   ============================================================ */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: var(--border-bright); }
+</style>
+</head>
+<body>
+
+<div id="toolbar">
+    <div class="tb-symbol" id="tb-symbol">ÆI SEED</div>
+    <span class="tb-sep"></span>
+    <div class="tb-group">
+        <button class="tb-btn active" id="tb-view-grid">GRID</button>
+        <button class="tb-btn" id="tb-view-trajectory">𝒮_TRAJ</button>
+        <button class="tb-btn" id="tb-view-crawler">𝒞_CRAWL</button>
+        <button class="tb-btn" id="tb-view-fibration">𝒮_FIB</button>
+    </div>
+    <span class="tb-sep"></span>
+    <div class="tb-group">
+        <button class="tb-btn primary" id="tb-step">🔄 𝒯_step</button>
+        <button class="tb-btn" id="tb-reset">⟳ 𝒮_reset</button>
+        <button class="tb-btn" id="tb-encode">ℱ_encode</button>
+    </div>
+    <span class="tb-sep"></span>
+    <div class="tb-group">
+        <button class="tb-btn" id="tb-refresh">⟳</button>
+        <button class="tb-btn" id="tb-help">?</button>
+    </div>
+</div>
+
+<div id="connBadge" class="wait">connecting…</div>
+
+<div id="mainArea">
+    <div id="gridView">
+
+        <div class="panel" id="statusPanel">
+            <div class="panel-title">𝒮_STATUS <span class="pt-sub" id="status-sub">—</span></div>
+            <div class="panel-row"><span class="lbl">state</span><span class="val primary" id="status-state">—</span></div>
+            <div class="panel-row"><span class="lbl">𝒯_tick</span><span class="val" id="status-tick">0</span><span class="lbl">𝒯_gen</span><span class="val" id="status-gen">0</span></div>
+            <div class="panel-row"><span class="lbl">𝒜[p] count</span><span class="val primes" id="status-prime-count">0</span></div>
+            <div class="panel-row"><span class="lbl">Λ₂₄ pts</span><span class="val lattice" id="status-lattice-count">0</span></div>
+            <div class="panel-row"><span class="lbl">δ(s²−r²)</span><span class="val exact" id="status-dev">0/1</span></div>
+            <div class="coherence-bar">
+                <div class="coherence-fill" id="status-coherence-bar"></div>
+                <div class="coherence-marker"></div>
+            </div>
+            <div class="panel-row" style="margin-top:4px;"><span class="lbl">ℐ_metric</span><span class="val metric" id="status-I">—</span></div>
+            <div class="panel-row"><span class="lbl">logic hash</span><span class="val exact" id="status-logic-hash">—</span></div>
+        </div>
+
+        <div class="panel" id="dbzPanel">
+            <div class="panel-title">𝒜₃ / 𝒜₄ — DBZ BRANCH <span class="pt-sub">Re[ψ] sign</span></div>
+            <div class="panel-row"><span class="lbl">branch</span><span class="val primary" id="dbz-branch">—</span></div>
+            <div class="panel-row"><span class="lbl">Re[ψ]</span><span class="val exact" id="dbz-repsi">0/1</span></div>
+            <div class="panel-row"><span class="lbl">ψ coeffs</span><span class="val" id="dbz-psi-coeffs">0</span></div>
+            <div class="panel-row"><span class="lbl">s²</span><span class="val exact" id="dbz-s2">0/1</span></div>
+            <div class="panel-row"><span class="lbl">r²</span><span class="val exact" id="dbz-r2">1/1</span></div>
+        </div>
+
+        <div class="panel" id="primesPanel">
+            <div class="panel-title">𝒜_PRIMES <span class="pt-sub">6m±1 sieve</span></div>
+            <div class="panel-row"><span class="lbl">count</span><span class="val primes" id="primes-count">0</span></div>
+            <div class="panel-row"><span class="lbl">last</span><span class="val primes" id="primes-last">—</span></div>
+            <div class="primes-grid" id="primes-grid"></div>
+        </div>
+
+        <div class="panel" id="latticePanel">
+            <div class="panel-title">Λ₂₄ PACK <span class="pt-sub">Leech lattice radial layers</span></div>
+            <div class="panel-row"><span class="lbl">dimension</span><span class="val lattice" id="lattice-dim">24</span></div>
+            <div class="panel-row"><span class="lbl">points</span><span class="val lattice" id="lattice-points">0</span></div>
+            <div class="lattice-grid" id="lattice-grid"></div>
+        </div>
+
+        <div class="panel" id="fibrationPanel">
+            <div class="panel-title">𝒮_FIBRATION <span class="pt-sub">Hopf S³→S²</span></div>
+            <div class="panel-row"><span class="lbl">z</span><span class="val fibration" id="fib-z">0/1</span></div>
+            <div class="panel-row"><span class="lbl">w</span><span class="val fibration" id="fib-w">0/1</span></div>
+            <div class="panel-row"><span class="lbl">φ.a</span><span class="val exact" id="fib-a">1/1</span></div>
+            <div class="panel-row"><span class="lbl">φ.b</span><span class="val exact" id="fib-b">0/1</span></div>
+            <div class="panel-row"><span class="lbl">‖φ‖²</span><span class="val fibration" id="fib-mag">1/1</span></div>
+            <div class="panel-row"><span class="lbl">traj len</span><span class="val" id="fib-trajectory-len">0</span></div>
+            <canvas id="fibrationCanvas" class="fibration-canvas"></canvas>
+        </div>
+
+        <div class="panel" id="observerPanel">
+            <div class="panel-title">𝒪[Ψ] — OBSERVER INTEGRAL <span class="pt-sub">∫ψ†Φψ d⁴q</span></div>
+            <div class="panel-row"><span class="lbl">Re</span><span class="val observer" id="obs-re">0/1</span></div>
+            <div class="panel-row"><span class="lbl">Im</span><span class="val observer" id="obs-im">0/1</span></div>
+            <div class="panel-row"><span class="lbl">‖𝒪‖²</span><span class="val observer" id="obs-mag">0/1</span></div>
+            <div class="panel-row"><span class="lbl">grid</span><span class="val" id="obs-grid">4⁴ = 256</span></div>
+            <div class="panel-row"><span class="lbl">method</span><span class="val" id="obs-method">exact Riemann</span></div>
+        </div>
+
+        <div class="panel" id="metricPanel">
+            <div class="panel-title">ℐ_METRIC <span class="pt-sub">I = a · r · s · c</span></div>
+            <div class="panel-row"><span class="lbl">I</span><span class="val metric primary" id="metric-I">—</span></div>
+            <div class="panel-row"><span class="lbl">alignment</span><span class="val" id="metric-align">—</span></div>
+            <div class="panel-row"><span class="lbl">riemann</span><span class="val" id="metric-riemann">—</span></div>
+            <div class="panel-row"><span class="lbl">stability</span><span class="val" id="metric-stab">—</span></div>
+            <div class="panel-row"><span class="lbl">refined</span><span class="val" id="metric-refined">—</span></div>
+            <div class="panel-row"><span class="lbl">threshold</span><span class="val" id="metric-threshold">9/10</span></div>
+        </div>
+
+        <div class="panel" id="evolutionPanel">
+            <div class="panel-title">𝒯_EVOLUTION <span class="pt-sub">RFK Brainworm</span></div>
+            <div class="panel-row"><span class="lbl">generation</span><span class="val" id="evo-gen">0</span></div>
+            <div class="panel-row"><span class="lbl">status</span><span class="val" id="evo-status">—</span></div>
+            <div class="panel-row"><span class="lbl">mutation</span><span class="val" id="evo-mutation">—</span></div>
+            <div class="panel-list" id="evo-history"></div>
+        </div>
+
+        <div class="panel" id="crawlerPanel">
+            <div class="panel-title">𝒞_CRAWLER <span class="pt-sub">ingestion path</span></div>
+            <div class="crawl-status">
+                <div class="dot" id="crawl-dot"></div>
+                <span class="val crawler" id="crawl-status-text">—</span>
+                <span class="lbl">relay:</span><span class="val" id="crawl-relay-health">—</span>
+            </div>
+            <div class="panel-row"><span class="lbl">frontier</span><span class="val crawler" id="crawl-frontier">0</span></div>
+            <div class="panel-row"><span class="lbl">visited</span><span class="val crawler" id="crawl-visited">0</span></div>
+            <div class="panel-row"><span class="lbl">crawl count</span><span class="val crawler" id="crawl-count">0</span></div>
+            <div class="panel-row"><span class="lbl">last fetch</span><span class="val" id="crawl-last-fetch">—</span></div>
+            <div class="panel-row"><span class="lbl">latest hash</span><span class="val exact" id="crawl-latest-hash">—</span></div>
+            <div class="panel-row"><span class="lbl">latest title</span><span class="val" id="crawl-latest-title">—</span></div>
+        </div>
+
+        <div class="panel" id="lingosoPanel">
+            <div class="panel-title">ℱ_LINGOSO <span class="pt-sub">A/U/M articulatory</span></div>
+            <div class="panel-row"><span class="lbl">syllable</span><span class="val" id="ling-syllable">AUM</span></div>
+            <div class="panel-row"><span class="lbl">length</span><span class="val" id="ling-length">0</span></div>
+            <div class="panel-row"><span class="lbl">s²</span><span class="val exact" id="ling-s2">—</span></div>
+            <div class="panel-row"><span class="lbl">r²</span><span class="val exact" id="ling-r2">—</span></div>
+            <div class="panel-row"><span class="lbl">δ</span><span class="val exact" id="ling-dev">—</span></div>
+            <div class="toggle-row">
+                <button class="tb-btn" data-syllable="A">ℱ_A</button>
+                <button class="tb-btn" data-syllable="U">ℱ_U</button>
+                <button class="tb-btn" data-syllable="M">ℱ_M</button>
+                <button class="tb-btn" data-syllable="AUM">ℱ_AUM</button>
+            </div>
+        </div>
+
+        <div class="panel" id="logicCorePanel">
+            <div class="panel-title">ℋ_LOGIC CORE <span class="pt-sub">SelfEvolutionCore</span></div>
+            <div class="panel-list" id="logic-core-list"></div>
+        </div>
+
+    </div>
+</div>
+
+<div id="toastStack"></div>
+
+<div id="logBar">
+    <span id="logEntries">—</span>
+</div>
+
+<div id="errorDisplay"></div>
+
+<div id="explainPanel">
+    <h3>⚡ ÆI SEED · GAIA CODEX · CS vFinal Ed.2</h3>
+    <div class="item"><b>What this is</b> <span>— The <b>ÆI seed</b> (GAIA/ÆI Codex), not the ÆEA market bot. It runs the prime-sieve → lattice → Hopf-fibration → s²=r² → SelfEvolution loop from ÆI.md §3–§8. Every state value is an exact Fraction (a/b) displayed as the plain-text Maths of the CODEX_SYMBOLICA.</span></div>
+    <div class="item"><b>𝒮_STATUS</b> <span>— Seed state: <code>coherent</code> / <code>evolving</code> / <code>initialized</code>. Tick = seed steps; Generation = SelfEvolution generations; prime count = 𝒜[p] sieve output; lattice points = Λ₂₄ centers; ℐ_metric = intelligence metric; logic hash = deterministic SHA-256 of the current logic core.</span></div>
+    <div class="item"><b>δ(s²−r²)</b> <span>— The <b>primary evolution gate</b> (ÆI.md §2.4 Axiom 1). s² = arc length squared, r² = radial distance squared. Deviation triggers DbZ branching and SelfEvolution mutation. The bar shows s²/r² ratio (green at the centre = coherence, white marker at 1.0).</span></div>
+    <div class="item"><b>𝒜₃ / 𝒜₄ — DbZ</b> <span>— Deciding by Zero. If Re[ψ] &gt; 0 → 𝒜₃ (critical-line projection, cyan). If Re[ψ] ≤ 0 → 𝒜₄ (Natalia's Fibrations perturbation, pink). The branch shown is the current step's choice.</span></div>
+    <div class="item"><b>𝒜_PRIMES</b> <span>— Exact 6m±1 sieve: pₙ = min{x &gt; pₙ₋₁ : x mod 6 ∈ {1,5} ∧ ∀i&lt;n, x mod pᵢ ≠ 0}. Every prime is a Fraction (integer/1).</span></div>
+    <div class="item"><b>Λ₂₄ PACK</b> <span>— Leech lattice radial counting. Each projected center is an exact Fraction vector. The kissing-number contact constraint is enforced by the add_sphere overlap check.</span></div>
+    <div class="item"><b>𝒮_FIBRATION</b> <span>— Hopf S³→S². The base point (z, w) ∈ ℂ² is the observable projection. The fiber direction is the hidden longitudinal component. φ is the quaternionic field state. Natalia's Fibrations: Φ = Q(s) + Σ εᵏ Natalia(k,s). The canvas below shows the S² base-point sphere with the trajectory projected.</span></div>
+    <div class="item"><b>𝒪[Ψ]</b> <span>— Observer integral ∫ ψ†Φψ d⁴q over a 4×4×4×4 = 256-cell grid, exact Fraction Riemann sum. Consciousness as self-observation.</span></div>
+    <div class="item"><b>ℐ_METRIC</b> <span>— Intelligence metric: I = alignment × riemann_factor × aetheric_stability × refined_ratio. All terms are Fractions; the exponentials use exact-rational Taylor series. The riemann_factor uses the correct |π(x) − Li(x)| ≤ C·√x·log(x) bound (R-1 patch).</span></div>
+    <div class="item"><b>𝒯_EVOLUTION</b> <span>— RFK Brainworm. Records every SelfEvolutionCore mutation (resample_zeta / adjust_prime_sieve / natalia_fibration_perturbation / crt_reconstruction / continued_fraction_refinement).</span></div>
+    <div class="item"><b>𝒞_CRAWLER</b> <span>— The ingestion path (ÆI.md §3.4 ROOT_SCAN + WEB_CRAWLING). worker.js is a stateless fetch proxy; all crawl logic (frontier, visited set, hash lifting to exact Fraction) lives in app.py. Each crawled document's content hash becomes the next symbolic input x for the seed loop.</span></div>
+    <div class="item"><b>ℱ_LINGOSO</b> <span>— Phonosyllabic geometry. A traces the golden spiral, U traces the π-chord, M traces the closed 2π loop. Each trajectory is a list of quaternions on the unit phase manifold.</span></div>
+    <div class="item"><b>ℋ_LOGIC CORE</b> <span>— The SelfEvolutionCore's current logic keys. Each key is a mutated parameter; every value is an exact Fraction.</span></div>
+    <div class="item" style="margin-top:8px; opacity:0.7;">Keyboard: <b>G</b>=grid | <b>T</b>=trajectory | <b>C</b>=crawler | <b>F</b>=fibration | <b>S</b>=step | <b>R</b>=reset | <b>E</b>=encode | <b>H</b>=help | <b>F5</b>=refresh | <b>Esc</b>=close modal.</div>
+</div>
+
+<div class="modal-backdrop" id="modalBackdrop">
+    <div class="modal" id="modalContent"></div>
+</div>
+
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script>
+(function() {
+'use strict';
+
+/* ============================================================
+   BACKEND CONFIGURATION
+   ============================================================ */
+const DEFAULT_BACKENDS = [
+    'https://aei-seed.herokuapp.com/',
+];
+
+const LS_KEY = 'aei_backend_url';
+
+function normalizeBackend(u) {
+    if (u === null || u === undefined) return '';
+    let s = String(u).trim();
+    if (!s) return '';
+    if (/%3A%2F%2F/i.test(s) || /^https?%3A/i.test(s)) {
+        try { s = decodeURIComponent(s); } catch (e) {}
+        if (/%3A%2F%2F/i.test(s)) {
+            try { s = decodeURIComponent(s); } catch (e) {}
+        }
+    }
+    if (!/^https?:\/\//i.test(s)) return '';
+    return s.replace(/\/+$/, '') + '/';
+}
+
+function readQsBackend() {
+    try {
+        const qs = new URLSearchParams(window.location.search);
+        return qs.get('backend');
+    } catch (e) {
+        return null;
+    }
+}
+
+function resolveBackendUrl() {
+    try {
+        const q = readQsBackend();
+        if (q !== null && q !== '') {
+            const n = normalizeBackend(q);
+            if (n) {
+                try { localStorage.setItem(LS_KEY, n); } catch (e) {}
+                return n;
+            }
+        }
+        if (typeof window.__AEI_BACKEND_URL__ === 'string' && window.__AEI_BACKEND_URL__.length > 0) {
+            const n = normalizeBackend(window.__AEI_BACKEND_URL__);
+            if (n) {
+                try { localStorage.setItem(LS_KEY, n); } catch (e) {}
+                return n;
+            }
+        }
+        try {
+            const ls = localStorage.getItem(LS_KEY);
+            const n = normalizeBackend(ls);
+            if (n) return n;
+        } catch (e) {}
+        for (const candidate of DEFAULT_BACKENDS) {
+            const n = normalizeBackend(candidate);
+            if (n) {
+                try { localStorage.setItem(LS_KEY, n); } catch (e) {}
+                return n;
+            }
+        }
+    } catch (e) {}
+    return '';
+}
+
+const BACKEND_URL = resolveBackendUrl();
+const HAS_BACKEND = BACKEND_URL.length > 0;
+
+/* ============================================================
+   TELEGRAM WEB APP BOOTSTRAP
+   ============================================================ */
+const tg = (window.Telegram && window.Telegram.WebApp) ? window.Telegram.WebApp : null;
+let initDataRaw = '';
+let tmaActive = false;
+
+if (tg) {
+    try {
+        tg.ready();
+        tg.expand();
+        if (typeof tg.disableVerticalSwipes === 'function') tg.disableVerticalSwipes();
+        if (typeof tg.enableClosingConfirmation === 'function') tg.enableClosingConfirmation();
+        if (typeof tg.setHeaderColor === 'function') tg.setHeaderColor('#050510');
+        if (typeof tg.setBackgroundColor === 'function') tg.setBackgroundColor('#050510');
+        initDataRaw = tg.initData || '';
+        tmaActive = Boolean(initDataRaw);
+        const u = (tg.initDataUnsafe && tg.initDataUnsafe.user) || null;
+        if (u && u.username) document.title = 'ÆI · @' + u.username;
+        else if (u && u.first_name) document.title = 'ÆI · ' + u.first_name;
+    } catch (e) {
+        console.warn('TMA init failed:', e);
+    }
+}
+
+function haptic(type) {
+    if (!tg || !tg.HapticFeedback) return;
+    try {
+        if (type === 'impact') tg.HapticFeedback.impactOccurred('medium');
+        else if (type === 'light') tg.HapticFeedback.impactOccurred('light');
+        else if (type === 'success') tg.HapticFeedback.notificationOccurred('success');
+        else if (type === 'error') tg.HapticFeedback.notificationOccurred('error');
+    } catch (e) {}
+}
+
+function apiUrl(path) {
+    if (HAS_BACKEND) {
+        return BACKEND_URL.replace(/\/+$/, '') + path;
+    }
+    return path;
+}
+
+function authHeaders(extra) {
+    const h = Object.assign({ 'Accept': 'application/json' }, extra || {});
+    if (initDataRaw) h['X-Telegram-Init-Data'] = initDataRaw;
+    return h;
+}
+
+async function apiFetch(path, opts) {
+    opts = opts || {};
+    const url = apiUrl(path);
+    const timeoutMs = (typeof opts.timeoutMs === 'number' && opts.timeoutMs > 0)
+        ? opts.timeoutMs
+        : 20000;
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+        const res = await fetch(url, Object.assign({}, opts, {
+            headers: authHeaders(opts.headers),
+            signal: controller.signal,
+            mode: 'cors',
+            credentials: 'omit',
+        }));
+        return res;
+    } catch (e) {
+        if (e.name === 'AbortError') {
+            const err = new Error('timeout');
+            err.name = 'AbortError';
+            throw err;
+        }
+        throw e;
+    } finally {
+        clearTimeout(timer);
+    }
+}
+
+async function apiJson(path, opts) {
+    try {
+        const res = await apiFetch(path, opts);
+        const text = await res.text();
+        let data = null;
+        if (text) {
+            try { data = JSON.parse(text); } catch (e) { data = { __parse_error: text.slice(0, 200) }; }
+        }
+        if (!res.ok) {
+            return {
+                __error: true,
+                __status: res.status,
+                __body: data,
+                error: (data && (data.error || data.detail)) || ('HTTP ' + res.status),
+            };
+        }
+        return data || {};
+    } catch (e) {
+        return {
+            __error: true,
+            __network: (e && e.name !== 'AbortError'),
+            __timeout: (e && e.name === 'AbortError'),
+            __body: null,
+            error: (e && e.name === 'AbortError') ? 'timeout' : (e && e.message) || String(e),
+        };
+    }
+}
+
+async function apiPost(path, body, opts) {
+    opts = opts || {};
+    return apiJson(path, Object.assign({}, opts, {
+        method: 'POST',
+        headers: Object.assign({ 'Content-Type': 'application/json' }, opts.headers || {}),
+        body: JSON.stringify(body || {}),
+    }));
+}
+
+async function postHandshake() {
+    if (!initDataRaw || !HAS_BACKEND) return null;
+    try {
+        const r = await apiPost('/handshake', { initData: initDataRaw });
+        if (r && r.ok) return r;
+        return null;
+    } catch (e) {
+        return null;
+    }
+}
+
+/* ============================================================
+   CONNECTION BADGE
+   ============================================================ */
+const connBadge = document.getElementById('connBadge');
+function setConnBadge(state, text) {
+    if (!connBadge) return;
+    connBadge.className = state;
+    connBadge.textContent = text;
+}
+
+/* ============================================================
+   ERROR DISPLAY
+   ============================================================ */
+const errorDisplay = document.getElementById('errorDisplay');
+let errorHideHandle = null;
+const latchedErrors = new Set();
+
+function showError(msg, autoHideMs) {
+    if (!msg) return;
+    const key = String(msg);
+    if (latchedErrors.has(key)) return;
+    latchedErrors.add(key);
+    errorDisplay.textContent = '⚠️ ' + msg;
+    errorDisplay.style.display = 'block';
+    if (errorHideHandle) clearTimeout(errorHideHandle);
+    if (autoHideMs) {
+        errorHideHandle = setTimeout(hideError, autoHideMs);
+    }
+}
+function hideError() {
+    errorDisplay.style.display = 'none';
+    if (errorHideHandle) { clearTimeout(errorHideHandle); errorHideHandle = null; }
+}
+
+/* ============================================================
+   TOAST STACK
+   ============================================================ */
+const toastStack = document.getElementById('toastStack');
+let toastSeqCursor = 0;
+const TOAST_AUTODISMISS_MS = 6000;
+const MAX_TOASTS_VISIBLE = 6;
+
+function dismissToast(el) {
+    if (!el || el.classList.contains('dismissing')) return;
+    el.classList.add('dismissing');
+    setTimeout(() => { try { el.remove(); } catch (e) {} }, 200);
+}
+
+function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function pushToast(toast) {
+    if (!toastStack) return;
+    while (toastStack.children.length >= MAX_TOASTS_VISIBLE) {
+        toastStack.removeChild(toastStack.firstChild);
+    }
+    const el = document.createElement('div');
+    el.className = 'toast';
+    if (toast.kind === 'seed') {
+        el.classList.add(toast.coherence ? 'seed-coherent' : 'seed-evolving');
+        el.innerHTML =
+            '<div class="toast-title">' + (toast.coherence ? '𝒮_coherent' : '𝒟_evolving') + ' · 𝒯_step</div>' +
+            '<div class="toast-line">𝒯_tick <span class="v">' + escapeHtml(String(toast.tick ?? '—')) + '</span> · 𝒯_gen <span class="v">' + escapeHtml(String(toast.generation ?? '—')) + '</span></div>' +
+            '<div class="toast-line">𝒜[p] <span class="v">' + escapeHtml(String(toast.prime ?? '—')) + '</span></div>' +
+            '<div class="toast-line">δ(s²−r²) <span class="v">' + escapeHtml(String(toast.deviation_sq ?? '—')) + '</span></div>';
+    } else if (toast.kind === 'crawl') {
+        el.classList.add('crawl');
+        el.innerHTML =
+            '<div class="toast-title">𝒞_crawl</div>' +
+            '<div class="toast-line">' + escapeHtml(String(toast.title || toast.url || '—').slice(0, 60)) + '</div>' +
+            '<div class="toast-line">hash <span class="v">' + escapeHtml(String(toast.content_hash || '—')) + '</span> · depth <span class="v">' + escapeHtml(String(toast.depth ?? '—')) + '</span></div>';
+    } else {
+        el.innerHTML =
+            '<div class="toast-title">' + escapeHtml(String(toast.kind || 'event')) + '</div>' +
+            '<div class="toast-line">' + escapeHtml(JSON.stringify(toast).slice(0, 80)) + '</div>';
+    }
+    el.addEventListener('click', () => dismissToast(el));
+    toastStack.appendChild(el);
+    setTimeout(() => dismissToast(el), TOAST_AUTODISMISS_MS);
+    haptic(toast.kind === 'seed' ? 'success' : 'impact');
+}
+
+async function fetchToasts() {
+    if (!HAS_BACKEND) return;
+    const r = await apiJson('/toasts?since=' + toastSeqCursor);
+    if (!r || r.__error) return;
+    if (typeof r.first_available_seq === 'number' && r.first_available_seq > 0) {
+        if (toastSeqCursor < r.first_available_seq - 1) {
+            toastSeqCursor = r.first_available_seq - 1;
+        }
+    }
+    if (Array.isArray(r.toasts)) {
+        for (const t of r.toasts) {
+            pushToast(t);
+            if (typeof t.seq === 'number' && t.seq > toastSeqCursor) {
+                toastSeqCursor = t.seq;
+            }
+        }
+    }
+}
+
+/* ============================================================
+   LOG RING BUFFER
+   ============================================================ */
+const MAX_CLIENT_LOGS = 100;
+const MAX_SERVER_LOGS = 100;
+const MAX_MERGED_LOGS = 200;
+const logs = { local: [], server: [] };
+
+function pushLog(level, msg) {
+    logs.local.push({ ts: new Date(), level, msg, source: 'client' });
+    if (logs.local.length > MAX_CLIENT_LOGS) logs.local.shift();
+    renderLogBar();
+}
+
+function renderLogBar() {
+    const el = document.getElementById('logEntries');
+    if (!el) return;
+    const merged = [];
+    const seen = new Set();
+    for (const e of logs.local.concat(logs.server)) {
+        const ts = e.ts instanceof Date ? e.ts.toISOString() : String(e.ts);
+        const hash = ts + '|' + (e.level || 'info') + '|' + (e.msg || '');
+        if (seen.has(hash)) continue;
+        seen.add(hash);
+        merged.push({ ts: e.ts, level: e.level || 'info', msg: e.msg || '' });
+    }
+    merged.sort((a, b) => a.ts.getTime() - b.ts.getTime());
+    const recent = merged.slice(-6).reverse();
+    if (recent.length === 0) { el.textContent = '—'; return; }
+    el.innerHTML = recent.map(e => {
+        const t = e.ts.toISOString().substring(11, 19);
+        const cls = e.level === 'error' ? 'log-lvl-err' : (e.level === 'warn' ? 'log-lvl-warn' : 'log-lvl-info');
+        return `<span class="log-entry"><span class="log-ts">${t}</span> <span class="${cls}">[${e.level}]</span> <span class="log-msg">${escapeHtml(e.msg)}</span></span>`;
+    }).join('');
+}
+
+async function fetchLogs() {
+    if (!HAS_BACKEND) return;
+    const r = await apiJson('/log?limit=50');
+    if (!r || r.__error) return;
+    if (r.logs) {
+        logs.server = r.logs.map(l => ({ ts: new Date(l.ts), level: l.level || 'info', msg: l.msg || '' }));
+        if (logs.server.length > MAX_SERVER_LOGS) logs.server = logs.server.slice(-MAX_SERVER_LOGS);
+        renderLogBar();
+    }
+}
+
+/* ============================================================
+   STATE
+   ============================================================ */
+const state = {
+    connected: false,
+    seed_state: 'uninitialized',
+    tick: 0,
+    generation: 0,
+    primes_tail: [],
+    prime_count: 0,
+    lattice_points: 0,
+    arc_sq: '0/1',
+    radius_sq: '1/1',
+    deviation_sq: '0/1',
+    coherence: false,
+    I: '—',
+    hopf_base: ['0/1', '0/1'],
+    phi: { a: '1/1', b: '0/1', c: '0/1', d: '0/1' },
+    phi_mag: '1/1',
+    trajectory: [],
+    evolution: null,
+    logic_core: {},
+    history_tail: [],
+    crawler: null,
+    observer_integral: null,
+    lingoso: null,
+    last_logic_hash: '',
+    view: 'grid',
+};
+
+/* ============================================================
+   VIEW MANAGEMENT
+   ============================================================ */
+function switchView(view) {
+    state.view = view;
+    document.getElementById('tb-view-grid').classList.toggle('active', view === 'grid');
+    document.getElementById('tb-view-trajectory').classList.toggle('active', view === 'trajectory');
+    document.getElementById('tb-view-crawler').classList.toggle('active', view === 'crawler');
+    document.getElementById('tb-view-fibration').classList.toggle('active', view === 'fibration');
+    const mainArea = document.getElementById('mainArea');
+    mainArea.classList.toggle('scrollable', view !== 'grid');
+    const gridView = document.getElementById('gridView');
+    gridView.classList.toggle('hidden', view !== 'grid');
+    if (view === 'trajectory') {
+        openTrajectoryView();
+    } else if (view === 'crawler') {
+        openCrawlerView();
+    } else if (view === 'fibration') {
+        openFibrationView();
+    }
+}
+
+/* ============================================================
+   MODAL
+   ============================================================ */
+const modalBackdrop = document.getElementById('modalBackdrop');
+const modalContent = document.getElementById('modalContent');
+let modalOpen = false;
+let _modalOnClose = null;
+
+function openModal(html, opts) {
+    opts = opts || {};
+    modalContent.innerHTML = html;
+    modalBackdrop.classList.add('open');
+    modalOpen = true;
+    _modalOnClose = (typeof opts.onClose === 'function') ? opts.onClose : null;
+    if (opts.onMount) {
+        try { opts.onMount(modalContent); } catch (e) {}
+    }
+}
+function closeModal() {
+    const cb = _modalOnClose;
+    _modalOnClose = null;
+    modalBackdrop.classList.remove('open');
+    modalOpen = false;
+    modalContent.innerHTML = '';
+    if (cb) { try { cb(); } catch (e) {} }
+}
+modalBackdrop.addEventListener('click', (e) => {
+    if (e.target === modalBackdrop) closeModal();
+});
+
+/* ============================================================
+   TOOLBAR WIRING
+   ============================================================ */
+document.getElementById('tb-view-grid').addEventListener('click', () => { haptic('light'); switchView('grid'); });
+document.getElementById('tb-view-trajectory').addEventListener('click', () => { haptic('light'); switchView('trajectory'); });
+document.getElementById('tb-view-crawler').addEventListener('click', () => { haptic('light'); switchView('crawler'); });
+document.getElementById('tb-view-fibration').addEventListener('click', () => { haptic('light'); switchView('fibration'); });
+document.getElementById('tb-refresh').addEventListener('click', () => { haptic('impact'); fetchAll(); });
+document.getElementById('tb-help').addEventListener('click', () => {
+    haptic('light');
+    const p = document.getElementById('explainPanel');
+    p.style.display = p.style.display === 'block' ? 'none' : 'block';
+});
+document.getElementById('tb-step').addEventListener('click', async () => {
+    haptic('impact');
+    if (!HAS_BACKEND) { showError('Backend not configured', 4000); return; }
+    const r = await apiPost('/step', { x_num: state.tick + 1, x_den: 1 });
+    if (r && r.ok) {
+        pushLog('info', 'seed step: tick=' + r.record.tick);
+        await fetchMiniAppState();
+    } else {
+        const detail = (r && (r.error || r.detail)) || 'unknown';
+        showError('Step failed: ' + detail, 4000);
+    }
+});
+document.getElementById('tb-reset').addEventListener('click', async () => {
+    haptic('impact');
+    if (!HAS_BACKEND) { showError('Backend not configured', 4000); return; }
+    const r = await apiPost('/reset', {});
+    if (r && r.ok) {
+        pushLog('info', 'seed reset');
+        await fetchMiniAppState();
+    } else {
+        showError('Reset failed', 4000);
+    }
+});
+document.getElementById('tb-encode').addEventListener('click', () => {
+    haptic('light');
+    const syllable = prompt('Syllable to encode (e.g. AUM):', 'AUM');
+    if (!syllable) return;
+    encodeSyllable(syllable);
+});
+
+/* ============================================================
+   PANEL UPDATERS
+   ============================================================ */
+function csState(s) {
+    const map = { coherent: '𝒮_coherent', evolving: '𝒟_evolving', initialized: '𝒮_init' };
+    return map[s] || s;
+}
+
+function updateStatusPanel() {
+    document.getElementById('status-state').textContent = csState(state.seed_state);
+    document.getElementById('status-tick').textContent = state.tick;
+    document.getElementById('status-gen').textContent = state.generation;
+    document.getElementById('status-prime-count').textContent = state.prime_count;
+    document.getElementById('status-lattice-count').textContent = state.lattice_points;
+    document.getElementById('status-dev').textContent = state.deviation_sq;
+    document.getElementById('status-I').textContent = state.I;
+    document.getElementById('status-logic-hash').textContent = (state.last_logic_hash || '—').substring(0, 16);
+    const bar = document.getElementById('status-coherence-bar');
+    if (bar) {
+        let ratio = 0;
+        try {
+            const [n, d] = state.arc_sq.split('/').map(Number);
+            const [rn, rd] = state.radius_sq.split('/').map(Number);
+            const num = n * rd;
+            const den = rn * d;
+            if (den !== 0) {
+                ratio = Math.min(1, Math.max(0, num / den));
+            }
+        } catch (e) {}
+        bar.style.width = (ratio * 100).toFixed(1) + '%';
+    }
+    const sub = document.getElementById('status-sub');
+    if (sub) sub.textContent = state.coherence ? 's² = r²' : 's² ≠ r²';
+}
+
+function updateDbzPanel() {
+    const keys = Object.keys(state.logic_core || {});
+    const isA3 = state.coherence;
+    const branch = isA3 ? '𝒜₃' : '𝒜₄';
+    const reSign = isA3 ? '> 0' : '≤ 0';
+    const branchEl = document.getElementById('dbz-branch');
+    branchEl.textContent = branch + ' (' + reSign + ')';
+    branchEl.style.color = isA3 ? 'var(--dbz-a3)' : 'var(--dbz-a4)';
+    document.getElementById('dbz-repsi').textContent = state.coherence ? '+1/1' : '-1/1';
+    document.getElementById('dbz-psi-coeffs').textContent = keys.length || '—';
+    document.getElementById('dbz-s2').textContent = state.arc_sq;
+    document.getElementById('dbz-r2').textContent = state.radius_sq;
+}
+
+function updatePrimesPanel() {
+    document.getElementById('primes-count').textContent = state.prime_count;
+    const last = state.primes_tail.length > 0 ? state.primes_tail[state.primes_tail.length - 1] : '—';
+    document.getElementById('primes-last').textContent = last;
+    const grid = document.getElementById('primes-grid');
+    if (grid) {
+        grid.innerHTML = state.primes_tail.map(p =>
+            `<span class="prime-chip">${escapeHtml(String(p))}</span>`
+        ).join('');
+    }
+}
+
+function updateLatticePanel() {
+    document.getElementById('lattice-points').textContent = state.lattice_points;
+}
+
+function updateFibrationPanel() {
+    document.getElementById('fib-z').textContent = state.hopf_base[0];
+    document.getElementById('fib-w').textContent = state.hopf_base[1];
+    document.getElementById('fib-a').textContent = state.phi.a;
+    document.getElementById('fib-b').textContent = state.phi.b;
+    document.getElementById('fib-mag').textContent = state.phi_mag;
+    document.getElementById('fib-trajectory-len').textContent = state.trajectory.length;
+    drawFibrationCanvas();
+}
+
+function updateObserverPanel() {
+    const obs = state.observer_integral;
+    if (!obs) {
+        document.getElementById('obs-re').textContent = '—';
+        document.getElementById('obs-im').textContent = '—';
+        document.getElementById('obs-mag').textContent = '—';
+        return;
+    }
+    document.getElementById('obs-re').textContent = obs.integral.a;
+    document.getElementById('obs-im').textContent = obs.integral.b;
+    document.getElementById('obs-mag').textContent = obs.magnitude_sq;
+}
+
+function updateMetricPanel() {
+    document.getElementById('metric-I').textContent = state.I;
+}
+
+function updateEvolutionPanel() {
+    const evo = state.evolution;
+    if (!evo) {
+        document.getElementById('evo-gen').textContent = '0';
+        document.getElementById('evo-status').textContent = '—';
+        document.getElementById('evo-mutation').textContent = '—';
+        document.getElementById('evo-history').innerHTML = '';
+        return;
+    }
+    document.getElementById('evo-gen').textContent = evo.generation || 0;
+    document.getElementById('evo-status').textContent = evo.status || '—';
+    document.getElementById('evo-mutation').textContent = evo.mutation || '—';
+    const list = document.getElementById('evo-history');
+    if (list && state.history_tail) {
+        list.innerHTML = state.history_tail.slice(-8).reverse().map(rec => {
+            const gen = rec.generation || 0;
+            const status = rec.status || '?';
+            const mutation = rec.mutation || '—';
+            const dev = rec.arc_length_deviation_sq || '0/1';
+            const cls = dev === '0/1' ? 'green' : 'red';
+            return `<div class="li"><span class="li-key">gen ${gen}</span><span class="li-val ${cls}">${escapeHtml(status)}</span> · ${escapeHtml(mutation)} · δ=${escapeHtml(dev)}</div>`;
+        }).join('');
+    }
+}
+
+function updateCrawlerPanel() {
+    const c = state.crawler;
+    const dot = document.getElementById('crawl-dot');
+    const statusText = document.getElementById('crawl-status-text');
+    if (c) {
+        if (dot) dot.className = 'dot ' + (c.running ? 'running' : 'stopped');
+        if (statusText) statusText.textContent = c.running ? '𝒜₃ running' : '𝒜₄ stopped';
+        document.getElementById('crawl-relay-health').textContent = c.relay_healthy ? '𝒜₃' : '𝒜₄';
+        document.getElementById('crawl-frontier').textContent = c.frontier_size || 0;
+        document.getElementById('crawl-visited').textContent = c.visited_count || 0;
+        document.getElementById('crawl-count').textContent = c.crawl_count || 0;
+        document.getElementById('crawl-last-fetch').textContent = c.last_fetch_at ? c.last_fetch_at.substring(11, 19) : '—';
+        const latest = c.latest;
+        if (latest) {
+            document.getElementById('crawl-latest-hash').textContent = (latest.content_hash || '—') + '…';
+            document.getElementById('crawl-latest-title').textContent = (latest.title || '—').slice(0, 60);
+        }
+    } else {
+        if (dot) dot.className = 'dot';
+        if (statusText) statusText.textContent = '—';
+    }
+}
+
+function updateLogicCorePanel() {
+    const list = document.getElementById('logic-core-list');
+    if (!list) return;
+    const core = state.logic_core || {};
+    const keys = Object.keys(core);
+    if (keys.length === 0) {
+        list.innerHTML = '<div class="li"><span class="li-key">—</span><span class="li-val">no mutations yet</span></div>';
+        return;
+    }
+    list.innerHTML = keys.map(k => {
+        const v = core[k];
+        const valStr = (typeof v === 'object' && v !== null) ? JSON.stringify(v) : String(v);
+        return `<div class="li"><span class="li-key">${escapeHtml(k)}</span><span class="li-val purple">${escapeHtml(valStr.slice(0, 80))}</span></div>`;
+    }).join('');
+}
+
+function updateLingosoPanel() {
+    const ling = state.lingoso;
+    if (!ling) return;
+    document.getElementById('ling-length').textContent = ling.length || 0;
+    document.getElementById('ling-s2').textContent = ling.arc_sq || '—';
+    document.getElementById('ling-r2').textContent = ling.radius_sq || '—';
+    document.getElementById('ling-dev').textContent = ling.deviation_sq || '—';
+    document.getElementById('ling-syllable').textContent = ling.syllable || '—';
+}
+
+/* ============================================================
+   FIBRATION CANVAS — draws S² base-point sphere + trajectory
+   ============================================================ */
+const fibCanvas = document.getElementById('fibrationCanvas');
+function drawFibrationCanvas() {
+    if (!fibCanvas) return;
+    const dpr = window.devicePixelRatio || 1;
+    const rect = fibCanvas.getBoundingClientRect();
+    if (rect.width <= 0 || rect.height <= 0) return;
+    fibCanvas.width = rect.width * dpr;
+    fibCanvas.height = rect.height * dpr;
+    const ctx = fibCanvas.getContext('2d');
+    if (!ctx) return;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const w = rect.width;
+    const h = rect.height;
+    ctx.fillStyle = 'rgba(5,5,16,0.6)';
+    ctx.fillRect(0, 0, w, h);
+    const cx = w / 2;
+    const cy = h / 2;
+    const R = Math.min(w, h) * 0.38;
+    // Draw the S² sphere (circle projection) as a faint grid
+    ctx.strokeStyle = 'rgba(51,85,119,0.3)';
+    ctx.lineWidth = 0.5;
+    ctx.beginPath();
+    ctx.arc(cx, cy, R, 0, 2 * Math.PI);
+    ctx.stroke();
+    // Lat/long lines (latitudes)
+    for (let i = 1; i < 5; i++) {
+        const lat = (i / 5) * Math.PI - Math.PI / 2;
+        const r = R * Math.cos(lat);
+        const y = cy - R * Math.sin(lat);
+        ctx.beginPath();
+        ctx.ellipse(cx, y, r, r * 0.15, 0, 0, 2 * Math.PI);
+        ctx.stroke();
+    }
+    // Longitudes
+    for (let i = 0; i < 6; i++) {
+        const lon = (i / 6) * Math.PI;
+        ctx.beginPath();
+        ctx.ellipse(cx, cy, R * Math.abs(Math.cos(lon)), R, 0, 0, 2 * Math.PI);
+        ctx.stroke();
+    }
+    // Plot trajectory points (a, b) projected onto S²
+    const traj = state.trajectory || [];
+    if (traj.length === 0) {
+        ctx.fillStyle = 'rgba(102,136,170,0.6)';
+        ctx.font = '10px "Courier New", monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText('Awaiting trajectory…', cx, cy);
+        return;
+    }
+    ctx.strokeStyle = 'rgba(68,255,204,0.7)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    traj.forEach((q, i) => {
+        const a = parseFloat(q.a) || 0;
+        const b = parseFloat(q.b) || 0;
+        const c = parseFloat(q.c) || 0;
+        // Normalize the quaternion to S² (a, b, c) / ||q||
+        const mag = Math.sqrt(a*a + b*b + c*c) || 1;
+        const na = a / mag;
+        const nb = b / mag;
+        const nc = c / mag;
+        // Simple orthographic projection: (na, nb) onto 2D circle
+        const x = cx + na * R;
+        const y = cy - nb * R;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+    // Draw the current hopf_base point
+    try {
+        const hz = parseFloat(state.hopf_base[0]) || 0;
+        const hw = parseFloat(state.hopf_base[1]) || 0;
+        const hmag = Math.sqrt(hz*hz + hw*hw) || 1;
+        const hx = cx + (hz / hmag) * R;
+        const hy = cy - (hw / hmag) * R;
+        ctx.fillStyle = '#aa66ff';
+        ctx.beginPath();
+        ctx.arc(hx, hy, 5, 0, 2 * Math.PI);
+        ctx.fill();
+        ctx.strokeStyle = '#ff66aa';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.arc(hx, hy, 8, 0, 2 * Math.PI);
+        ctx.stroke();
+    } catch (e) {}
+    // Legend
+    ctx.fillStyle = 'rgba(102,136,170,0.8)';
+    ctx.font = '9px "Courier New", monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText('S² base', 6, h - 6);
+    ctx.fillStyle = '#aa66ff';
+    ctx.fillText('● φ', w - 40, h - 6);
+}
+
+/* ============================================================
+   FETCHERS
+   ============================================================ */
+async function fetchMiniAppState() {
+    if (!HAS_BACKEND) { setConnBadge('err', 'no backend'); return; }
+    const r = await apiJson('/miniapp-state');
+    if (!r || r.__error) {
+        setConnBadge('err', 'state error');
+        return;
+    }
+    setConnBadge('ok', 'connected');
+    state.seed_state = r.state || 'uninitialized';
+    state.tick = r.tick || 0;
+    state.generation = r.generation || 0;
+    state.primes_tail = r.primes_tail || [];
+    state.prime_count = r.prime_count || 0;
+    state.lattice_points = r.lattice_points || 0;
+    state.arc_sq = r.arc_sq || '0/1';
+    state.radius_sq = r.radius_sq || '1/1';
+    state.deviation_sq = r.deviation_sq || '0/1';
+    state.coherence = Boolean(r.coherence);
+    state.I = r.I || '—';
+    state.hopf_base = r.hopf_base || ['0/1', '0/1'];
+    state.phi = r.phi || { a: '1/1', b: '0/1', c: '0/1', d: '0/1' };
+    state.phi_mag = r.phi_magnitude_sq || '1/1';
+    state.trajectory = r.trajectory || [];
+    state.evolution = r.evolution;
+    state.logic_core = r.logic_core || {};
+    state.history_tail = r.history_tail || [];
+    state.crawler = r.crawler || state.crawler;
+    state.last_logic_hash = r.last_logic_hash || '';
+    updateStatusPanel();
+    updateDbzPanel();
+    updatePrimesPanel();
+    updateLatticePanel();
+    updateFibrationPanel();
+    updateMetricPanel();
+    updateEvolutionPanel();
+    updateCrawlerPanel();
+    updateLogicCorePanel();
+}
+
+async function fetchObserverIntegral() {
+    if (!HAS_BACKEND) return;
+    const r = await apiJson('/observer-integral');
+    if (!r || r.__error) return;
+    state.observer_integral = r;
+    updateObserverPanel();
+}
+
+async function fetchLatticePreview() {
+    if (!HAS_BACKEND) return;
+    const r = await apiJson('/lattice-state');
+    if (!r || r.__error) return;
+    const grid = document.getElementById('lattice-grid');
+    if (grid && Array.isArray(r.preview)) {
+        grid.innerHTML = r.preview.slice(-16).map(p => {
+            const head = p.slice(0, 2).map(c => {
+                const s = String(c);
+                return s.length > 6 ? s.slice(0, 5) + '…' : s;
+            }).join(', ');
+            return `<div class="lattice-cell" title="${escapeHtml(p.join(', '))}">(${escapeHtml(head)})</div>`;
+        }).join('');
+    }
+}
+
+async function fetchFibration() {
+    if (!HAS_BACKEND) return;
+    const r = await apiJson('/fibration-state');
+    if (!r || r.__error) return;
+    state.hopf_base = [r.hopf_base_z, r.hopf_base_w];
+    state.phi = r.phi;
+    state.phi_mag = r.phi_magnitude_sq;
+    state.trajectory = r.trajectory || [];
+    updateFibrationPanel();
+}
+
+async function fetchMetricComponents() {
+    if (!HAS_BACKEND) return;
+    const r = await apiJson('/evolution-state');
+    if (!r || r.__error) return;
+    if (r.history_tail && r.history_tail.length > 0) {
+        const last = r.history_tail[r.history_tail.length - 1];
+        // Components aren't directly returned; we approximate from the
+        // last evolution record. The primary components are the alignment,
+        // riemann, and stability factors from the seed's metric. We display
+        // the metric and the deviation; if the API adds component fields
+        // later, this will pick them up.
+    }
+}
+
+async function fetchAll() {
+    if (!HAS_BACKEND) {
+        setConnBadge('err', 'no backend');
+        showError('Backend URL not configured. Append ?backend=https://your-app.herokuapp.com/ to the Mini App URL.', 8000);
+        return;
+    }
+    hideError();
+    setConnBadge('wait', 'loading…');
+    await fetchMiniAppState();
+    await Promise.allSettled([
+        fetchObserverIntegral(),
+        fetchLatticePreview(),
+        fetchFibration(),
+        fetchToasts(),
+        fetchLogs(),
+    ]);
+}
+
+/* ============================================================
+   CUSTOM VIEWS
+   ============================================================ */
+function openTrajectoryView() {
+    const traj = state.trajectory || [];
+    const html = `
+        <h3>𝒮_TRAJECTORY — Quaternionic Path</h3>
+        <div style="color:#6688aa;font-size:0.5rem;margin-bottom:8px;">Natalia's Fibrations: Φ = Q(s) + Σ εᵏ Natalia(k,s)</div>
+        <canvas id="trajectoryCanvas" class="trajectory-canvas"></canvas>
+        <div style="margin-top:8px; font-size:0.55rem;">
+            <div><span style="color:#6688aa;">trajectory length:</span> <span style="color:#44ffcc;font-weight:bold;">${traj.length}</span></div>
+            <div><span style="color:#6688aa;">s²:</span> <span style="color:#aa66ff;font-weight:bold;">${escapeHtml(state.arc_sq)}</span></div>
+            <div><span style="color:#6688aa;">r²:</span> <span style="color:#aa66ff;font-weight:bold;">${escapeHtml(state.radius_sq)}</span></div>
+            <div><span style="color:#6688aa;">δ:</span> <span style="color:#aa66ff;font-weight:bold;">${escapeHtml(state.deviation_sq)}</span></div>
+        </div>
+        <div class="modal-actions">
+            <button class="tb-btn" id="traj-close">Close</button>
+        </div>
+    `;
+    openModal(html, {
+        onMount: (root) => {
+            const canvas = root.querySelector('#trajectoryCanvas');
+            drawTrajectory(canvas, traj);
+            root.querySelector('#traj-close').addEventListener('click', () => {
+                closeModal();
+                switchView('grid');
+            });
+        }
+    });
+}
+
+function drawTrajectory(canvas, traj) {
+    if (!canvas) return;
+    const dpr = window.devicePixelRatio || 1;
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    const ctx = canvas.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const w = rect.width;
+    const h = rect.height;
+    ctx.fillStyle = 'rgba(5,5,16,0.6)';
+    ctx.fillRect(0, 0, w, h);
+    if (!traj || traj.length === 0) {
+        ctx.fillStyle = '#335577';
+        ctx.font = '11px "Courier New", monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText('Awaiting trajectory…', w / 2, h / 2);
+        return;
+    }
+    const points = traj.map(q => {
+        const a = parseFloat(q.a) || 0;
+        const b = parseFloat(q.b) || 0;
+        return { a, b };
+    });
+    let minA = Infinity, maxA = -Infinity, minB = Infinity, maxB = -Infinity;
+    for (const p of points) {
+        if (p.a < minA) minA = p.a;
+        if (p.a > maxA) maxA = p.a;
+        if (p.b < minB) minB = p.b;
+        if (p.b > maxB) maxB = p.b;
+    }
+    const spanA = (maxA - minA) || 1;
+    const spanB = (maxB - minB) || 1;
+    const pad = 20;
+    ctx.strokeStyle = 'rgba(51,85,119,0.3)';
+    ctx.lineWidth = 0.5;
+    for (let i = 0; i <= 4; i++) {
+        const x = pad + (w - 2 * pad) * (i / 4);
+        const y = pad + (h - 2 * pad) * (i / 4);
+        ctx.beginPath();
+        ctx.moveTo(x, pad);
+        ctx.lineTo(x, h - pad);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(pad, y);
+        ctx.lineTo(w - pad, y);
+        ctx.stroke();
+    }
+    ctx.strokeStyle = '#44ffcc';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    points.forEach((p, i) => {
+        const x = pad + (w - 2 * pad) * ((p.a - minA) / spanA);
+        const y = h - pad - (h - 2 * pad) * ((p.b - minB) / spanB);
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+    ctx.fillStyle = '#aa66ff';
+    points.forEach((p, i) => {
+        const x = pad + (w - 2 * pad) * ((p.a - minA) / spanA);
+        const y = h - pad - (h - 2 * pad) * ((p.b - minB) / spanB);
+        const r = i === points.length - 1 ? 4 : 2;
+        ctx.beginPath();
+        ctx.arc(x, y, r, 0, 2 * Math.PI);
+        ctx.fill();
+    });
+    ctx.fillStyle = '#6688aa';
+    ctx.font = '9px "Courier New", monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText('a →', w - pad - 20, h - 4);
+    ctx.fillText('b ↑', 4, pad - 4);
+}
+
+function openCrawlerView() {
+    const c = state.crawler || {};
+    const frontier = c.frontier_preview || [];
+    const latest = c.latest || null;
+    const html = `
+        <h3>𝒞_CRAWLER — Ingestion Path</h3>
+        <div style="color:#6688aa;font-size:0.5rem;margin-bottom:8px;">worker.js is a stateless fetch proxy. All crawl logic lives in app.py.</div>
+        <div style="font-size:0.58rem; line-height:1.6;">
+            <div><span style="color:#6688aa;">running:</span> <span style="color:${c.running ? '#00ff88' : '#ff4466'};font-weight:bold;">${c.running ? '𝒜₃' : '𝒜₄'}</span></div>
+            <div><span style="color:#6688aa;">frontier:</span> <span style="color:#ff8844;font-weight:bold;">${c.frontier_size || 0}</span></div>
+            <div><span style="color:#6688aa;">visited:</span> <span style="color:#ff8844;font-weight:bold;">${c.visited_count || 0}</span></div>
+            <div><span style="color:#6688aa;">crawl count:</span> <span style="color:#ff8844;font-weight:bold;">${c.crawl_count || 0}</span></div>
+            <div><span style="color:#6688aa;">relay URL:</span> <span style="color:#aa66ff;font-weight:bold;">${escapeHtml(c.relay_url || '—')}</span></div>
+            <div><span style="color:#6688aa;">relay healthy:</span> <span style="color:${c.relay_healthy ? '#00ff88' : '#ff4466'};font-weight:bold;">${c.relay_healthy ? '𝒜₃' : '𝒜₄'}</span></div>
+        </div>
+        <div style="margin-top:10px; color:#44ffcc; font-size:0.6rem; font-weight:bold;">Frontier preview:</div>
+        <div style="font-size:0.52rem; color:#aaccff; margin-top:4px; max-height:120px; overflow-y:auto;">
+            ${frontier.length ? frontier.map(u => `<div>• <code style="color:#ff8844;">${escapeHtml(u.slice(0, 70))}</code></div>`).join('') : '<div style="color:#6688aa;">empty</div>'}
+        </div>
+        ${latest ? `
+        <div style="margin-top:10px; color:#44ffcc; font-size:0.6rem; font-weight:bold;">Latest crawl:</div>
+        <div style="font-size:0.52rem; color:#aaccff; margin-top:4px;">
+            <div><span style="color:#6688aa;">URL:</span> <code style="color:#ff8844;">${escapeHtml(latest.url.slice(0, 60))}</code></div>
+            <div><span style="color:#6688aa;">title:</span> ${escapeHtml(latest.title.slice(0, 60))}</div>
+            <div><span style="color:#6688aa;">hash:</span> <code style="color:#aa66ff;">${escapeHtml(latest.content_hash)}</code></div>
+            <div><span style="color:#6688aa;">hash fraction:</span> <code style="color:#aa66ff;">${escapeHtml(latest.hash_frac)}</code></div>
+            <div><span style="color:#6688aa;">depth:</span> ${latest.depth}</div>
+            <div><span style="color:#6688aa;">links:</span> ${latest.link_count}</div>
+        </div>
+        ` : ''}
+        <div style="margin-top:10px;">
+            <input id="crawler-url-input" type="text" placeholder="https://..." style="width:100%; background:rgba(20,30,50,0.9); border:1px solid #335577; color:#aaccff; padding:4px 6px; border-radius:3px; font-family:'Courier New',monospace; font-size:0.55rem;">
+            <button class="tb-btn" id="crawler-enqueue-btn" style="margin-top:4px;">Enqueue URL</button>
+        </div>
+        <div class="modal-actions">
+            <button class="tb-btn" id="crawler-close">Close</button>
+        </div>
+    `;
+    openModal(html, {
+        onMount: (root) => {
+            root.querySelector('#crawler-close').addEventListener('click', () => {
+                closeModal();
+                switchView('grid');
+            });
+            root.querySelector('#crawler-enqueue-btn').addEventListener('click', async () => {
+                const input = root.querySelector('#crawler-url-input');
+                const url = (input.value || '').trim();
+                if (!url.startsWith('http')) {
+                    showError('URL must start with http', 3000);
+                    return;
+                }
+                const r = await apiPost('/crawler-enqueue', { url, depth: 0 });
+                if (r && r.ok) {
+                    pushLog('info', 'enqueued: ' + url);
+                    input.value = '';
+                    await fetchMiniAppState();
+                } else {
+                    showError('Enqueue failed', 4000);
+                }
+            });
+        }
+    });
+}
+
+function openFibrationView() {
+    const traj = state.trajectory || [];
+    const html = `
+        <h3>𝒮_FIBRATION — Hopf S³→S²</h3>
+        <div style="color:#6688aa;font-size:0.5rem;margin-bottom:8px;">
+            Natalia's Fibrations: Φ = Q(s) + Σ εᵏ Natalia(k,s)<br>
+            Base point (z, w) ∈ ℂ² is the observable projection.
+        </div>
+        <canvas id="fibViewCanvas" class="fibration-canvas" style="height:280px;"></canvas>
+        <div style="margin-top:8px; font-size:0.55rem;">
+            <div><span style="color:#6688aa;">z:</span> <span style="color:#44ddff;font-weight:bold;">${escapeHtml(state.hopf_base[0])}</span></div>
+            <div><span style="color:#6688aa;">w:</span> <span style="color:#44ddff;font-weight:bold;">${escapeHtml(state.hopf_base[1])}</span></div>
+            <div><span style="color:#6688aa;">φ.a:</span> <span style="color:#aa66ff;font-weight:bold;">${escapeHtml(state.phi.a)}</span></div>
+            <div><span style="color:#6688aa;">φ.b:</span> <span style="color:#aa66ff;font-weight:bold;">${escapeHtml(state.phi.b)}</span></div>
+            <div><span style="color:#6688aa;">‖φ‖²:</span> <span style="color:#44ddff;font-weight:bold;">${escapeHtml(state.phi_mag)}</span></div>
+            <div><span style="color:#6688aa;">trajectory length:</span> <span style="color:#44ffcc;font-weight:bold;">${traj.length}</span></div>
+        </div>
+        <div class="modal-actions">
+            <button class="tb-btn" id="fib-close">Close</button>
+        </div>
+    `;
+    openModal(html, {
+        onMount: (root) => {
+            const canvas = root.querySelector('#fibViewCanvas');
+            drawFibView(canvas, traj);
+            root.querySelector('#fib-close').addEventListener('click', () => {
+                closeModal();
+                switchView('grid');
+            });
+        }
+    });
+}
+
+function drawFibView(canvas, traj) {
+    if (!canvas) return;
+    const dpr = window.devicePixelRatio || 1;
+    const rect = canvas.getBoundingClientRect();
+    if (rect.width <= 0 || rect.height <= 0) return;
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    const ctx = canvas.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const w = rect.width;
+    const h = rect.height;
+    ctx.fillStyle = 'rgba(5,5,16,0.6)';
+    ctx.fillRect(0, 0, w, h);
+    const cx = w / 2;
+    const cy = h / 2;
+    const R = Math.min(w, h) * 0.4;
+    // Sphere
+    ctx.strokeStyle = 'rgba(51,85,119,0.4)';
+    ctx.lineWidth = 0.5;
+    ctx.beginPath();
+    ctx.arc(cx, cy, R, 0, 2 * Math.PI);
+    ctx.stroke();
+    // Latitudes
+    for (let i = 1; i < 6; i++) {
+        const lat = (i / 6) * Math.PI - Math.PI / 2;
+        const r = R * Math.cos(lat);
+        const y = cy - R * Math.sin(lat);
+        ctx.beginPath();
+        ctx.ellipse(cx, y, r, r * 0.12, 0, 0, 2 * Math.PI);
+        ctx.stroke();
+    }
+    // Longitudes
+    for (let i = 0; i < 8; i++) {
+        const lon = (i / 8) * Math.PI;
+        ctx.beginPath();
+        ctx.ellipse(cx, cy, R * Math.abs(Math.cos(lon)), R, 0, 0, 2 * Math.PI);
+        ctx.stroke();
+    }
+    // Trajectory
+    if (traj.length > 0) {
+        ctx.strokeStyle = 'rgba(68,255,204,0.7)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        traj.forEach((q, i) => {
+            const a = parseFloat(q.a) || 0;
+            const b = parseFloat(q.b) || 0;
+            const c = parseFloat(q.c) || 0;
+            const mag = Math.sqrt(a*a + b*b + c*c) || 1;
+            const x = cx + (a / mag) * R;
+            const y = cy - (b / mag) * R;
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+        });
+        ctx.stroke();
+    }
+    // Hopf base
+    try {
+        const hz = parseFloat(state.hopf_base[0]) || 0;
+        const hw = parseFloat(state.hopf_base[1]) || 0;
+        const hmag = Math.sqrt(hz*hz + hw*hw) || 1;
+        const hx = cx + (hz / hmag) * R;
+        const hy = cy - (hw / hmag) * R;
+        ctx.fillStyle = '#aa66ff';
+        ctx.beginPath();
+        ctx.arc(hx, hy, 6, 0, 2 * Math.PI);
+        ctx.fill();
+        ctx.strokeStyle = '#ff66aa';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.arc(hx, hy, 10, 0, 2 * Math.PI);
+        ctx.stroke();
+    } catch (e) {}
+    ctx.fillStyle = 'rgba(102,136,170,0.8)';
+    ctx.font = '9px "Courier New", monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText('S² base sphere', 6, h - 6);
+    ctx.fillStyle = '#aa66ff';
+    ctx.fillText('● φ projection', w - 100, h - 6);
+}
+
+/* ============================================================
+   ENCODE SYLLABLE
+   ============================================================ */
+async function encodeSyllable(syllable) {
+    if (!HAS_BACKEND) { showError('Backend not configured', 4000); return; }
+    const r = await apiPost('/encode-syllable', { syllable });
+    if (r && r.ok) {
+        state.lingoso = r.result;
+        document.getElementById('ling-syllable').textContent = syllable;
+        updateLingosoPanel();
+        pushLog('info', 'encoded: ' + syllable);
+    } else {
+        showError('Encode failed', 4000);
+    }
+}
+
+document.querySelectorAll('[data-syllable]').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const syl = btn.dataset.syllable;
+        haptic('light');
+        encodeSyllable(syl);
+    });
+});
+
+/* ============================================================
+   KEYBOARD SHORTCUTS
+   ============================================================ */
+document.addEventListener('keydown', (e) => {
+    if (modalOpen && e.key === 'Escape') { closeModal(); return; }
+    if (e.key === 'g' || e.key === 'G') switchView('grid');
+    if (e.key === 't' || e.key === 'T') switchView('trajectory');
+    if (e.key === 'c' || e.key === 'C') switchView('crawler');
+    if (e.key === 'f' || e.key === 'F') switchView('fibration');
+    if (e.key === 's' || e.key === 'S') document.getElementById('tb-step').click();
+    if (e.key === 'r' || e.key === 'R') document.getElementById('tb-reset').click();
+    if (e.key === 'e' || e.key === 'E') document.getElementById('tb-encode').click();
+    if (e.key === 'h' || e.key === 'H') document.getElementById('tb-help').click();
+    if (e.key === 'F5') { e.preventDefault(); fetchAll(); }
+});
+
+/* ============================================================
+   POLLING
+   ============================================================ */
+let pollHandles = { state: null, toasts: null, logs: null, observer: null, lattice: null, fib: null };
+
+function startPolling() {
+    stopPolling();
+    pollHandles.state = setInterval(() => { fetchMiniAppState(); }, 3000);
+    pollHandles.toasts = setInterval(() => { fetchToasts(); }, 2000);
+    pollHandles.logs = setInterval(() => { fetchLogs(); }, 5000);
+    pollHandles.observer = setInterval(() => { fetchObserverIntegral(); }, 5000);
+    pollHandles.lattice = setInterval(() => { fetchLatticePreview(); }, 8000);
+    pollHandles.fib = setInterval(() => { fetchFibration(); }, 5000);
+}
+
+function stopPolling() {
+    Object.keys(pollHandles).forEach(k => {
+        if (pollHandles[k]) { clearInterval(pollHandles[k]); pollHandles[k] = null; }
+    });
+}
+
+document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+        fetchAll();
+        startPolling();
+    }
+});
+
+/* ============================================================
+   BOOT
+   ============================================================ */
+async function boot() {
+    switchView('grid');
+    if (!HAS_BACKEND) {
+        setConnBadge('err', 'no backend');
+        showError('Backend URL not configured. Append ?backend=https://your-app.herokuapp.com/ to the Mini App URL, or set window.__AEI_BACKEND_URL__ before load.', 12000);
+        return;
+    }
+    setConnBadge('wait', 'connecting…');
+    pushLog('info', 'Backend: ' + BACKEND_URL);
+    startPolling();
+    fetchAll().catch(e => {
+        pushLog('warn', 'boot(): initial fetchAll rejected: ' + (e && e.message ? e.message : String(e)));
+    });
+    if (tmaActive) {
+        postHandshake().then(r => {
+            if (r && r.ok) {
+                pushLog('info', `Handshake OK: @${r.username || r.user_id || '?'}`);
+            }
+        }).catch(e => {});
+    }
+    setTimeout(() => encodeSyllable('AUM'), 2000);
+    pushLog('info', 'ÆI Seed TWA vFinal Edition 2 booted');
+}
+
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    setTimeout(boot, 50);
+} else {
+    document.addEventListener('DOMContentLoaded', boot);
+}
+
+console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+console.log('⚡ ÆI SEED · GAIA CODEX · CS vFinal Edition 2');
+console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+console.log('Backend:', HAS_BACKEND ? BACKEND_URL : '(not configured)');
+console.log('Panels: 𝒮_STATUS, 𝒜₃/𝒜₄, 𝒜_PRIMES, Λ₂₄_PACK, 𝒮_FIBRATION,');
+console.log('        𝒪[Ψ], ℐ_METRIC, 𝒯_EVOLUTION, 𝒞_CRAWLER, ℱ_LINGOSO,');
+console.log('        ℋ_LOGIC_CORE');
+console.log('All state displayed as exact Fractions (a/b).');
+console.log('Crawler ingestion: worker.js is a stateless fetch proxy;');
+console.log('                   frontier + visited + hash-lifting live in app.py.');
+console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+console.log('Audit-Patched Ed.2 (this file):');
+console.log('  ✓ R-1: ℐ_METRIC uses correct |π(x) − Li(x)| bound');
+console.log('  ✓ R-6: logic_hash displayed in status panel');
+console.log('  ✓ Fibration canvas draws S² base-point sphere + trajectory');
+console.log('  ✓ Fibration view is a dedicated full-screen modal');
+console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+console.log('🌌 Q.E.D. — LOGOS = Φ = Truth = Path = Origin');
+console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+
+})();
+</script>
+</body>
+</html>

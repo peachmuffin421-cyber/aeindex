@@ -1,0 +1,95 @@
+# ============================================================================
+# ÆI SEED MINI APP — FRONTEND .gitignore
+# Version: vFinal (Audit-Patched Edition 2)
+# Repo: aei-seed-miniapp (GitHub Pages)
+# ============================================================================
+#
+# The frontend is a static single-file app (index.html). There is no build
+# step, no node_modules, no bundler. This .gitignore therefore focuses on
+# editor/OS cruft and any local-only artifacts a developer might create
+# while iterating on index.html.
+#
+# ============================================================================
+
+# ----------------------------------------------------------------------------
+# EDITOR / IDE CRUFT
+# ----------------------------------------------------------------------------
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+*.sublime-project
+*.sublime-workspace
+.project
+.classpath
+.settings/
+*.code-workspace
+
+# ----------------------------------------------------------------------------
+# OS METADATA
+# ----------------------------------------------------------------------------
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# ----------------------------------------------------------------------------
+# LOCAL DEVELOPMENT OVERRIDES
+# ----------------------------------------------------------------------------
+index.local.html
+*.local.html
+*.local.js
+*.local.css
+
+# ----------------------------------------------------------------------------
+# SECRETS (DEFENSIVE — STATIC FRONTEND SHOULD HAVE NONE)
+# ----------------------------------------------------------------------------
+.env
+.env.local
+.env.*.local
+secrets.json
+credentials.json
+
+# ----------------------------------------------------------------------------
+# GITHUB PAGES ARTIFACTS
+# ----------------------------------------------------------------------------
+_site/
+.jekyll-cache/
+.jekyll-metadata
+Gemfile.lock
+
+# ----------------------------------------------------------------------------
+# LOGS / TEMP
+# ----------------------------------------------------------------------------
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.tmp
+*.temp
+tmp/
+temp/
+
+# ----------------------------------------------------------------------------
+# ARCHIVES
+# ----------------------------------------------------------------------------
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.rar
+*.7z
+
+# ----------------------------------------------------------------------------
+# OPTIONAL LOCAL SERVER TOOLING
+# ----------------------------------------------------------------------------
+dist/
+build/
+.cache/
+.parcel-cache/

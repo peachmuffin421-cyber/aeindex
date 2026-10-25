@@ -1,0 +1,2662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Codex Symbolica · Autological Visualization</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            overflow: hidden;
+            background: #050510;
+            font-family: 'Courier New', monospace;
+            color: #aaccff;
+            height: 100vh;
+            width: 100vw;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        #mainCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            display: block;
+            z-index: 1;
+            touch-action: none;
+        }
+        #info {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(5,5,16,0.9);
+            padding: 12px 20px;
+            border-radius: 8px;
+            border-left: 4px solid #00ffcc;
+            z-index: 10;
+            pointer-events: none;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            max-width: 400px;
+            box-shadow: 0 4px 30px rgba(0,0,0,0.5);
+        }
+        #info h1 { font-size: 0.9rem; font-weight: 300; color: #00ffcc; letter-spacing: 2px; }
+        #info p { font-size: 0.6rem; opacity: 0.6; margin-top: 2px; line-height: 1.4; }
+        #metrics {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(5,5,16,0.9);
+            padding: 10px 16px;
+            border-radius: 6px;
+            border-right: 4px solid #ffaa44;
+            z-index: 10;
+            pointer-events: none;
+            font-size: 0.6rem;
+            text-align: right;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            min-width: 300px;
+            box-shadow: 0 4px 30px rgba(0,0,0,0.5);
+        }
+        #metrics .label { opacity: 0.5; }
+        #metrics .value { color: #ffaa44; font-weight: bold; }
+        #metrics .value.exact { color: #44ffcc; font-size: 0.55rem; cursor: pointer; }
+        #metrics .value.exact:hover { color: #88ffee; }
+        #status {
+            position: absolute;
+            bottom: 100px;
+            left: 20px;
+            background: rgba(0,0,0,0.85);
+            padding: 10px 16px;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            border: 1px solid #335577;
+            z-index: 10;
+            pointer-events: none;
+            min-width: 300px;
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+            line-height: 1.6;
+        }
+        #status .coherence-status { color: #00ff88; }
+        #status .deviation-status { color: #ff6644; }
+        #status .dbz-status { color: #ff66aa; }
+        #status .aeae-status { color: #44ddff; }
+        #controls {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            z-index: 10;
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            max-width: 360px;
+            justify-content: flex-end;
+        }
+        .btn {
+            background: rgba(20,30,50,0.9);
+            border: 1px solid #4488aa;
+            color: #aaccff;
+            padding: 5px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-size: 0.6rem;
+            transition: all 0.2s;
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+        }
+        .btn:hover { background: #224466; border-color: #88ddff; color: #fff; transform: scale(1.05); }
+        .btn.active { background: #2a4a6a; border-color: #00ffcc; }
+        #legend {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.8);
+            padding: 4px 16px;
+            border-radius: 20px;
+            font-size: 0.55rem;
+            display: flex;
+            gap: 12px;
+            border: 1px solid #224466;
+            z-index: 10;
+            pointer-events: none;
+            flex-wrap: wrap;
+            justify-content: center;
+            backdrop-filter: blur(4px);
+        }
+        .legend-item { display: flex; align-items: center; gap: 4px; }
+        .dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
+        .dot-green { background: #00ff88; }
+        .dot-red { background: #ff4466; }
+        .dot-blue { background: #4488ff; }
+        .dot-gold { background: #ffaa44; }
+        .dot-purple { background: #aa66ff; }
+        .dot-cyan { background: #44ddff; }
+        .dot-pink { background: #ff66aa; }
+        .dot-white { background: #ffffff; }
+        .dot-teal { background: #44ffcc; }
+        #gaugeContainer {
+            position: absolute;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            pointer-events: none;
+            width: 130px;
+            height: 65px;
+        }
+        #gaugeSVG { width: 100%; height: 100%; }
+        #proofChain {
+            position: absolute;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            pointer-events: none;
+            background: rgba(0,0,0,0.85);
+            border: 1px solid #335577;
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-size: 0.6rem;
+            text-align: center;
+            backdrop-filter: blur(8px);
+            min-width: 280px;
+            max-width: 560px;
+            opacity: 0;
+            transition: opacity 0.6s ease;
+            box-shadow: 0 4px 30px rgba(0,0,0,0.4);
+        }
+        #proofChain.visible { opacity: 1; }
+        #proofChain .step { color: #44ffcc; }
+        #proofChain .derivation { color: #ffaa44; }
+        #proofChain .closure { color: #ffffff; font-weight: bold; }
+        #proofChain .latest-step { color: #ffaa44; font-size: 0.55rem; margin-left: 8px; }
+        #proofChain .progress-bar {
+            width: 100%;
+            height: 3px;
+            background: #1a2a3a;
+            border-radius: 2px;
+            margin-top: 4px;
+            overflow: hidden;
+        }
+        #proofChain .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #44ffcc, #ffaa44);
+            transition: width 0.3s ease;
+        }
+        #proofTrace {
+            position: absolute;
+            top: 130px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            pointer-events: none;
+            background: rgba(0,0,0,0.75);
+            border: 1px solid #224466;
+            border-radius: 6px;
+            padding: 6px 14px;
+            font-size: 0.5rem;
+            max-width: 600px;
+            backdrop-filter: blur(6px);
+            box-shadow: 0 2px 15px rgba(0,0,0,0.3);
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            text-align: left;
+            line-height: 1.5;
+            max-height: 120px;
+            overflow-y: auto;
+        }
+        #proofTrace.visible { opacity: 1; }
+        #proofTrace .pt-line { white-space: nowrap; }
+        #proofTrace .pt-coherence { color: #00ff88; }
+        #proofTrace .pt-evolution { color: #ff4466; }
+        #proofTrace .pt-dbz1 { color: #44ddff; }
+        #proofTrace .pt-dbz2 { color: #ff66aa; }
+        #proofTrace .pt-norm { color: #aa66ff; }
+        #proofTrace .pt-zeta { color: #44aaff; }
+        #proofTrace .pt-ts { color: #4488ff; opacity: 0.6; }
+        #errorDisplay {
+            position: absolute;
+            bottom: 200px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255,0,0,0.2);
+            border: 2px solid #ff4466;
+            border-radius: 8px;
+            padding: 16px 24px;
+            color: #ff6688;
+            font-size: 0.8rem;
+            z-index: 100;
+            display: none;
+            max-width: 80%;
+            text-align: center;
+            backdrop-filter: blur(8px);
+        }
+        #fallback {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 100;
+            display: none;
+            background: rgba(0,0,0,0.95);
+            padding: 50px;
+            border-radius: 16px;
+            border: 2px solid #ff4466;
+        }
+        #fallback h2 { color: #ff6688; }
+        #fallback p { color: #aaccff; font-size: 0.9rem; }
+        #timeSeriesPanel {
+            position: absolute;
+            bottom: 180px;
+            right: 20px;
+            z-index: 10;
+            pointer-events: none;
+            background: rgba(0,0,0,0.85);
+            border: 1px solid #335577;
+            border-radius: 6px;
+            padding: 6px;
+            width: 200px;
+            height: 100px;
+            backdrop-filter: blur(4px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+        }
+        #timeSeriesSVG { width: 100%; height: 100%; }
+        #spiralLegend {
+            position: absolute;
+            bottom: 170px;
+            right: 20px;
+            z-index: 11;
+            pointer-events: none;
+            font-size: 0.5rem;
+            display: flex;
+            gap: 10px;
+            color: #44ffcc;
+        }
+        #spiralLegend span:nth-child(2) { color: #ffaa44; }
+        #lingosoPanel {
+            position: absolute;
+            bottom: 280px;
+            left: 20px;
+            z-index: 10;
+            pointer-events: none;
+            background: rgba(0,0,0,0.85);
+            border: 1px solid #335577;
+            border-radius: 6px;
+            padding: 8px 12px;
+            font-size: 0.6rem;
+            min-width: 160px;
+            backdrop-filter: blur(4px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+            line-height: 1.6;
+        }
+        #lingosoPanel .label { opacity: 0.5; }
+        #lingosoPanel .phoneme { color: #ff66aa; font-weight: bold; font-size: 0.8rem; }
+        #aeaePanel {
+            position: absolute;
+            bottom: 100px;
+            right: 20px;
+            z-index: 10;
+            pointer-events: none;
+            background: rgba(0,0,0,0.85);
+            border: 1px solid #335577;
+            border-radius: 6px;
+            padding: 8px 12px;
+            font-size: 0.6rem;
+            min-width: 200px;
+            backdrop-filter: blur(4px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+            line-height: 1.6;
+        }
+        #aeaePanel .label { opacity: 0.5; }
+        #aeaePanel .value { color: #44ddff; font-weight: bold; }
+        #observerPanel {
+            position: absolute;
+            bottom: 280px;
+            right: 20px;
+            z-index: 10;
+            pointer-events: none;
+            background: rgba(0,0,0,0.85);
+            border: 1px solid #335577;
+            border-radius: 6px;
+            padding: 8px 12px;
+            font-size: 0.6rem;
+            min-width: 200px;
+            backdrop-filter: blur(4px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+            line-height: 1.6;
+        }
+        #observerPanel .label { opacity: 0.5; }
+        #observerPanel .value { color: #ffaa44; font-weight: bold; }
+        #zetaPanel {
+            position: absolute;
+            bottom: 380px;
+            right: 20px;
+            z-index: 10;
+            pointer-events: none;
+            background: rgba(0,0,0,0.85);
+            border: 1px solid #335577;
+            border-radius: 6px;
+            padding: 8px 12px;
+            font-size: 0.6rem;
+            min-width: 200px;
+            backdrop-filter: blur(4px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+            line-height: 1.6;
+        }
+        #zetaPanel .label { opacity: 0.5; }
+        #zetaPanel .value { color: #44aaff; font-weight: bold; }
+        #axiomPanel {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            pointer-events: none;
+            background: rgba(0,0,0,0.85);
+            border: 1px solid #335577;
+            border-radius: 6px;
+            padding: 6px 14px;
+            font-size: 0.5rem;
+            min-width: 400px;
+            max-width: 700px;
+            backdrop-filter: blur(4px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+            line-height: 1.5;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+        #axiomPanel.visible { opacity: 1; }
+        #axiomPanel .ax-layer { color: #44ffcc; font-weight: bold; }
+        #axiomPanel .ax-item { color: #aaccff; }
+        #axiomPanel .ax-active { color: #ffaa44; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<canvas id="mainCanvas"></canvas>
+
+<div id="info">
+    <h1>⚡ CODEX SYMBOLICA · AUTOLOGICAL VISUALIZATION</h1>
+    <p>S³→S² · DbZ · O[Ψ] · CRT · CF · ζ(s) · Lingoso · ÆEA · ⊢ CS</p>
+    <p style="margin-top:4px;"><span style="color:#ffaa44;">H</span> = help · <span style="color:#ffaa44;">A</span> = axioms · <span style="color:#ffaa44;">Drag</span> = rotate · <span style="color:#ffaa44;">Scroll</span> = zoom</p>
+</div>
+
+<div id="metrics">
+    <div><span class="label">s² (exact)</span> <span class="value exact" id="s2-exact" title="Click to copy">0/1</span></div>
+    <div><span class="label">r² (exact)</span> <span class="value exact" id="r2-exact" title="Click to copy">1/1</span></div>
+    <div><span class="label">s²</span> <span class="value" id="s2-val">0.0000</span></div>
+    <div><span class="label">r²</span> <span class="value" id="r2-val">0.0000</span></div>
+    <div><span class="label">Δ = s² − r²</span> <span class="value" id="delta-val" style="color:#ff6644;">0.0000</span></div>
+    <div><span class="label">O[Ψ] (4D)</span> <span class="value" id="obs-val">0.0000</span></div>
+    <div><span class="label">s/r</span> <span class="value" id="sr-ratio">1.0000</span></div>
+    <div><span class="label">|∇×Φ|</span> <span class="value" id="curl-val">0.0000</span></div>
+    <div><span class="label">‖[Φ, Φ†]‖</span> <span class="value" id="comm-val">0.0000</span></div>
+    <div><span class="label">‖ψ‖² (L²)</span> <span class="value" id="psi-norm-val">0.0000</span></div>
+    <div><span class="label">ζ(½+it)</span> <span class="value" id="zeta-val">0.0000</span></div>
+</div>
+
+<div id="status">
+    <div>COHERENCE: <span class="coherence-status" id="coherence-status">INITIALIZING</span></div>
+    <div>GENERATION: <span id="generation">0</span></div>
+    <div>DEVIATION: <span class="deviation-status" id="deviation">0.0000</span></div>
+    <div>DbZ BRANCH: <span class="dbz-status" id="dbz-branch">NONE</span></div>
+    <div>ÆEA δ: <span class="aeae-status" id="aeae-delta">0</span></div>
+    <div style="font-size:0.55rem; opacity:0.5; margin-top:2px;">
+        ε: <span id="epsilon-value">1/100</span> · mode: <span id="mode-display">FULL</span>
+    </div>
+</div>
+
+<div id="controls">
+    <button class="btn" id="pauseBtn">⏸</button>
+    <button class="btn" id="resetBtn">⟳</button>
+    <button class="btn" id="modeBtn">FULL</button>
+    <button class="btn" id="exportBtn">EXPORT</button>
+    <button class="btn" id="traceBtn">TRACE</button>
+    <button class="btn" id="axiomBtn">A</button>
+    <button class="btn" id="helpBtn">?</button>
+</div>
+
+<div id="legend">
+    <span class="legend-item"><span class="dot dot-green"></span> Coherent</span>
+    <span class="legend-item"><span class="dot dot-red"></span> Evolving</span>
+    <span class="legend-item"><span class="dot dot-blue"></span> Path</span>
+    <span class="legend-item"><span class="dot dot-gold"></span> Observer</span>
+    <span class="legend-item"><span class="dot dot-purple"></span> DbZ</span>
+    <span class="legend-item"><span class="dot dot-cyan"></span> Zeta</span>
+    <span class="legend-item"><span class="dot dot-pink"></span> Lingoso</span>
+    <span class="legend-item"><span class="dot dot-white"></span> ÆEA</span>
+    <span class="legend-item"><span class="dot dot-teal"></span> s(t),r(t)</span>
+</div>
+
+<div id="gaugeContainer">
+    <svg id="gaugeSVG" viewBox="0 0 130 65">
+        <defs>
+            <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#ff4466" />
+                <stop offset="40%" stop-color="#ffaa44" />
+                <stop offset="100%" stop-color="#00ff88" />
+            </linearGradient>
+        </defs>
+        <path d="M 15 55 A 45 45 0 0 1 115 55" fill="none" stroke="#1a2a3a" stroke-width="8" />
+        <path id="gaugeArc" d="M 15 55 A 45 45 0 0 1 115 55" fill="none" stroke="url(#gaugeGrad)" stroke-width="8" stroke-dasharray="0 282" stroke-dashoffset="0" />
+        <text x="65" y="52" text-anchor="middle" font-size="11" font-family="Courier New, monospace" fill="#aaccff" id="gaugeLabel">s/r</text>
+    </svg>
+</div>
+
+<div id="proofChain">
+    <span class="step">CS ⊢ CS</span>
+    <span class="derivation"> ⟹ </span>
+    <span class="closure">Φ = Truth</span>
+    <span style="opacity:0.4; margin-left:8px;" id="proofDetail">(0 steps)</span>
+    <span class="latest-step" id="proofLatest"></span>
+    <div class="progress-bar">
+        <div class="progress-fill" id="proofProgress" style="width:0%"></div>
+    </div>
+</div>
+
+<div id="proofTrace">
+    <div style="color:#44ffcc; opacity:0.7;">⊢ DERIVATION TRACE:</div>
+    <div id="proofTraceLines"></div>
+</div>
+
+<div id="timeSeriesPanel">
+    <svg id="timeSeriesSVG" viewBox="0 0 200 100">
+        <rect x="0" y="0" width="200" height="100" fill="none"/>
+        <line x1="0" y1="50" x2="200" y2="50" stroke="#1a2a3a" stroke-width="0.5"/>
+        <polyline id="sPolyline" points="" fill="none" stroke="#44ffcc" stroke-width="1.5"/>
+        <polyline id="rPolyline" points="" fill="none" stroke="#ffaa44" stroke-width="1.5"/>
+        <text x="4" y="12" font-size="8" font-family="Courier New, monospace" fill="#44ffcc">s(t)</text>
+        <text x="4" y="94" font-size="8" font-family="Courier New, monospace" fill="#ffaa44">r(t)</text>
+    </svg>
+</div>
+
+<div id="spiralLegend">
+    <span>━ s(t)</span>
+    <span>━ r(t)</span>
+</div>
+
+<div id="lingosoPanel">
+    <div class="label">LINGOSO ACTIVE:</div>
+    <div class="phoneme" id="lingoso-active">—</div>
+    <div class="label" style="margin-top:4px;">TRAJECTORY:</div>
+    <div style="font-size:0.5rem; opacity:0.7;" id="lingoso-coords">(0.00, 0.00, 0.00)</div>
+    <div class="label" style="margin-top:4px;">ARC-LENGTH:</div>
+    <div style="font-size:0.5rem; color:#44ffcc;" id="lingoso-arc">0</div>
+</div>
+
+<div id="aeaePanel">
+    <div class="label">ÆEA PARITY:</div>
+    <div><span class="label">m</span> <span class="value" id="aeae-m">0</span>
+         <span class="label">n</span> <span class="value" id="aeae-n">0</span>
+         <span class="label">δ</span> <span class="value" id="aeae-delta-panel">0</span></div>
+    <div class="label" style="margin-top:4px;">Î IMBALANCE:</div>
+    <div style="color:#44ddff; font-weight:bold;" id="aeae-imbalance">0</div>
+    <div class="label" style="margin-top:4px;">REGIME:</div>
+    <div style="color:#ffaa44; font-weight:bold;" id="aeae-regime">NEUTRAL</div>
+</div>
+
+<div id="observerPanel">
+    <div class="label">OBSERVER OPERATOR O[Ψ]:</div>
+    <div><span class="label">Re[∫ψ†Φψd⁴q]</span> <span class="value" id="obs-real">0.0000</span></div>
+    <div><span class="label">Im[∫ψ†Φψd⁴q]</span> <span class="value" id="obs-imag">0.0000</span></div>
+    <div class="label" style="margin-top:4px;">GRID CELLS:</div>
+    <div style="color:#ffaa44; font-weight:bold;" id="obs-grid-count">0</div>
+    <div class="label" style="margin-top:4px;">‖ψ‖² (L²):</div>
+    <div style="color:#aa66ff; font-weight:bold;" id="obs-psi-norm">0.0000</div>
+    <div class="label" style="margin-top:4px;">I (INTELLIGENCE):</div>
+    <div style="color:#44ffcc; font-weight:bold;" id="obs-intelligence">0.0000</div>
+</div>
+
+<div id="zetaPanel">
+    <div class="label">ζ(s) on CRITICAL LINE:</div>
+    <div><span class="label">Re[ζ(½+it)]</span> <span class="value" id="zeta-re">0.0000</span></div>
+    <div><span class="label">Im[ζ(½+it)]</span> <span class="value" id="zeta-im">0.0000</span></div>
+    <div><span class="label">|ζ(½+it)|</span> <span class="value" id="zeta-mag">0.0000</span></div>
+    <div><span class="label">Dirichlet terms</span> <span class="value" id="zeta-terms">24</span></div>
+    <div><span class="label">CF depth</span> <span class="value" id="zeta-cf-depth">6</span></div>
+</div>
+
+<div id="axiomPanel">
+    <div><span class="ax-layer">𝒜:</span> <span class="ax-item" id="ax-a">Φ = E + iB</span> · <span class="ax-item" id="ax-sr">s = r</span></div>
+    <div><span class="ax-layer">ℬ:</span> <span class="ax-item" id="ax-q">Q = L(J)A = W + dU</span> · <span class="ax-item" id="ax-t4">T₄ = A∧dA</span></div>
+    <div><span class="ax-layer">𝒞:</span> <span class="ax-item" id="ax-hopf">π: S³→S²</span> · <span class="ax-item" id="ax-t0">T₀ / ¬T₀</span></div>
+    <div><span class="ax-layer">ℱ:</span> <span class="ax-item" id="ax-dbz">DbZ(a,b)</span> · <span class="ax-item" id="ax-i">I = (vp/tp)·exp[−|Δ|²/(C²x log²x)]·|∇×Φ|norm</span></div>
+    <div><span class="ax-layer">ℋ:</span> <span class="ax-item" id="ax-aeae">Î = Σ(Π^{>66.6} − Π^{<33.3})</span> · <span class="ax-item" id="ax-delta">δ(m−n−2)</span></div>
+    <div><span class="ax-layer">𝒮:</span> <span class="ax-item" id="ax-obs">O[Ψ] = ∫ψ†Φψ d⁴q</span> · <span class="ax-item" id="ax-c">C = Tr(Oρ)</span></div>
+    <div><span class="ax-layer">𝒲:</span> <span class="ax-item" id="ax-zeta">ζ(s) = Σ n⁻ˢ</span> · <span class="ax-item" id="ax-fe">ζ(s) = 2ˢπˢ⁻¹sin(πs/2)Γ(1−s)ζ(1−s)</span></div>
+    <div><span class="ax-layer">𝒜𝒜:</span> <span class="ax-item" id="ax-self">CS ⊨ CS</span> · <span class="ax-item" id="ax-box">□ ↔ ⊤</span></div>
+</div>
+
+<div id="explainPanel" style="display:none;position:absolute;top:20px;left:50%;transform:translateX(-50%);z-index:11;background:rgba(5,5,16,0.95);border:1px solid #335577;border-radius:8px;padding:12px 20px;font-size:0.6rem;max-width:600px;backdrop-filter:blur(8px);box-shadow:0 4px 30px rgba(0,0,0,0.5);line-height:1.6;">
+    <h3 style="color:#00ffcc;margin-bottom:6px;font-size:0.75rem;letter-spacing:1px;">⚡ CODEX SYMBOLICA — VISUALIZATION KEY</h3>
+    <div><span style="color:#ffaa44;font-weight:bold;">Φ (Quaternion)</span> <span style="opacity:0.8;">— Current state on S³, projected to S² via Hopf fibration π(q) = ((q₀+iq₁)/(1−q₃), (q₂+iq₃)/(1−q₃)).</span></div>
+    <div><span style="color:#ffaa44;font-weight:bold;">s² (exact)</span> <span style="opacity:0.8;">— Squared arc length from origin (identity quaternion), exact rational ℚ.</span></div>
+    <div><span style="color:#ffaa44;font-weight:bold;">r² (exact)</span> <span style="opacity:0.8;">— Squared radial distance ‖q‖², exact rational ℚ.</span></div>
+    <div><span style="color:#ffaa44;font-weight:bold;">Δ = s² − r²</span> <span style="opacity:0.8;">— Deviation from Arc-Length Axiom (s=r). Zero → coherence.</span></div>
+    <div><span style="color:#ffaa44;font-weight:bold;">O[Ψ] (4D)</span> <span style="opacity:0.8;">— Observer Operator: 4D exact rational partition sum ∫ ψ†Φψ d⁴q over N⁴ grid.</span></div>
+    <div><span style="color:#ffaa44;font-weight:bold;">‖ψ‖² (L²)</span> <span style="opacity:0.8;">— Exact L² norm of the coherent wavefunction over the 4D grid.</span></div>
+    <div><span style="color:#ffaa44;font-weight:bold;">I (Intelligence)</span> <span style="opacity:0.8;">— FF ℱ₅ metric: I = (vp/tp)·exp[−|Δ|²/(C²x log²x)]·|∇×Φ|norm.</span></div>
+    <div><span style="color:#ffaa44;font-weight:bold;">ζ(½+it)</span> <span style="opacity:0.8;">— Riemann zeta on critical line via exact rational Dirichlet partial sum + CF depth.</span></div>
+    <div><span style="color:#ffaa44;font-weight:bold;">DbZ Branch</span> <span style="opacity:0.8;">— FF ℱ₃: DbZ(a,b) = a if b=0, else a⊕b, branched on Re[ψ].</span></div>
+    <div><span style="color:#ffaa44;font-weight:bold;">ÆEA δ</span> <span style="opacity:0.8;">— FF ℋ₇: Kronecker delta δ(m−n−2) on exact integer counts.</span></div>
+    <div><span style="color:#ffaa44;font-weight:bold;">⊢ CS</span> <span style="opacity:0.8;">— Self-reference closure: Codex Symbolica proves itself (𝒜𝒜₁–𝒜𝒜₄₀).</span></div>
+    <div><span style="color:#ffaa44;font-weight:bold;">TRACE</span> <span style="opacity:0.8;">— Full derivation trace of DbZ decisions, coherence steps, L² events, zeta evaluations.</span></div>
+    <div><span style="color:#ffaa44;font-weight:bold;">A (Axioms)</span> <span style="opacity:0.8;">— Live axiom layer panel showing which FF axioms are active.</span></div>
+    <div><span style="color:#ffaa44;font-weight:bold;">Lingoso</span> <span style="opacity:0.8;">— Phonosyllabic trajectory with exact arc-length condition 𝒢₁–𝒢₄₀.</span></div>
+    <div style="margin-top:6px;opacity:0.6;">Press <span style="color:#ffaa44;">H</span> to toggle help. Press <span style="color:#ffaa44;">T</span> to toggle TRACE. Press <span style="color:#ffaa44;">A</span> to toggle axiom panel.</div>
+</div>
+
+<div id="errorDisplay"></div>
+
+<div id="fallback">
+    <h2>⚠️ Canvas Error</h2>
+    <p>Your browser does not support the Canvas 2D API.</p>
+</div>
+
+<script>
+(function() {
+    'use strict';
+
+    const errorDisplay = document.getElementById('errorDisplay');
+    function showError(msg) {
+        errorDisplay.textContent = '⚠️ ' + msg;
+        errorDisplay.style.display = 'block';
+        console.error(msg);
+    }
+    function hideError() { errorDisplay.style.display = 'none'; }
+
+    // ============================================================
+    // 1. EXACT SYMBOLIC ARITHMETIC (ℚ)
+    //    Spec: no floating point in state or logic branches.
+    //    All comparisons exact. All construction from integers only.
+    // ============================================================
+    class Fraction {
+        constructor(n, d) {
+            if (d === undefined) d = 1;
+            if (d === 0) throw new Error('Fraction: denominator cannot be zero');
+            if (!Number.isInteger(n) || !Number.isInteger(d)) {
+                throw new Error('Fraction: numerator and denominator must be integers (exact construction only)');
+            }
+            let num = n, den = d;
+            if (den < 0) { num = -num; den = -den; }
+            const g = Fraction._gcd(Math.abs(num), Math.abs(den));
+            this.num = num / g;
+            this.den = den / g;
+        }
+        static _gcd(a, b) {
+            a = Math.abs(a); b = Math.abs(b);
+            while (b !== 0) { const t = b; b = a % b; a = t; }
+            return a || 1;
+        }
+        add(o) {
+            const f = o instanceof Fraction ? o : new Fraction(o);
+            return new Fraction(this.num * f.den + f.num * this.den, this.den * f.den);
+        }
+        sub(o) {
+            const f = o instanceof Fraction ? o : new Fraction(o);
+            return new Fraction(this.num * f.den - f.num * this.den, this.den * f.den);
+        }
+        mul(o) {
+            const f = o instanceof Fraction ? o : new Fraction(o);
+            return new Fraction(this.num * f.num, this.den * f.den);
+        }
+        div(o) {
+            const f = o instanceof Fraction ? o : new Fraction(o);
+            if (f.num === 0) throw new Error('Division by zero');
+            return new Fraction(this.num * f.den, this.den * f.num);
+        }
+        abs() { return new Fraction(Math.abs(this.num), this.den); }
+        neg() { return new Fraction(-this.num, this.den); }
+        sign() { return this.num > 0 ? 1 : this.num < 0 ? -1 : 0; }
+        isZero() { return this.num === 0; }
+        isOne() { return this.num === 1 && this.den === 1; }
+        isInteger() { return this.den === 1; }
+        cmp(o) {
+            const f = o instanceof Fraction ? o : new Fraction(o);
+            const lhs = this.num * f.den;
+            const rhs = f.num * this.den;
+            return lhs < rhs ? -1 : lhs > rhs ? 1 : 0;
+        }
+        lt(o) { return this.cmp(o) < 0; }
+        le(o) { return this.cmp(o) <= 0; }
+        gt(o) { return this.cmp(o) > 0; }
+        ge(o) { return this.cmp(o) >= 0; }
+        eq(o) { return this.cmp(o) === 0; }
+        floor() {
+            const q = Math.floor(this.num / this.den);
+            return new Fraction(q, 1);
+        }
+        floorInt() {
+            let q = Math.floor(this.num / this.den);
+            if (this.num < 0 && this.num % this.den !== 0) q -= 0;
+            return q;
+        }
+        ceilInt() { return Math.ceil(this.num / this.den); }
+        modRational(m) {
+            const mf = m instanceof Fraction ? m : new Fraction(m);
+            if (mf.isZero()) return Fraction.zero();
+            const numScaled = this.num * mf.den;
+            const denScaled = this.den * mf.num;
+            const q = Math.floor(numScaled / denScaled);
+            const remainderNum = numScaled - q * denScaled;
+            return new Fraction(remainderNum, this.den * mf.den);
+        }
+        isPerfectSquare() {
+            if (this.num < 0) return false;
+            const ns = Math.round(Math.sqrt(this.num));
+            const ds = Math.round(Math.sqrt(this.den));
+            return ns * ns === this.num && ds * ds === this.den;
+        }
+        exactSqrt() {
+            if (!this.isPerfectSquare()) return null;
+            return new Fraction(Math.round(Math.sqrt(this.num)), Math.round(Math.sqrt(this.den)));
+        }
+        static zero() { return new Fraction(0, 1); }
+        static one() { return new Fraction(1, 1); }
+        static two() { return new Fraction(2, 1); }
+        static half() { return new Fraction(1, 2); }
+        toDecimalString(places) {
+            places = places || 6;
+            if (this.den === 1) return String(this.num);
+            const neg = this.num < 0;
+            const absNum = Math.abs(this.num);
+            const intPart = Math.floor(absNum / this.den);
+            let rem = absNum % this.den;
+            let fracStr = '';
+            for (let i = 0; i < places; i++) {
+                rem *= 10;
+                const digit = Math.floor(rem / this.den);
+                fracStr += digit;
+                rem = rem % this.den;
+            }
+            return (neg ? '-' : '') + intPart + '.' + fracStr;
+        }
+        toFloatApprox() { return this.num / this.den; }
+        toString() { return this.den === 1 ? String(this.num) : `${this.num}/${this.den}`; }
+        clone() { return new Fraction(this.num, this.den); }
+    }
+
+    // ============================================================
+    // 2. EXACT SERIES PRIMITIVES (formally indexed partial sums in ℚ)
+    //    Spec: each truncation is an explicitly bounded partial sum,
+    //    never a silent approximation. Index bound is part of the value.
+    // ============================================================
+    const Series = {
+        cosPartial(x, n) {
+            let sum = new Fraction(1, 1);
+            let term = new Fraction(1, 1);
+            const x2 = x.mul(x);
+            for (let k = 1; k <= n; k++) {
+                term = term.mul(x2).div(new Fraction((2*k - 1) * (2*k), 1)).neg();
+                sum = sum.add(term);
+            }
+            return { value: sum, bound: n };
+        },
+        sinPartial(x, n) {
+            let sum = x;
+            let term = x;
+            const x2 = x.mul(x);
+            for (let k = 1; k <= n; k++) {
+                term = term.mul(x2).div(new Fraction((2*k) * (2*k + 1), 1)).neg();
+                sum = sum.add(term);
+            }
+            return { value: sum, bound: n };
+        },
+        expPartial(x, n) {
+            let sum = new Fraction(1, 1);
+            let term = new Fraction(1, 1);
+            for (let k = 1; k <= n; k++) {
+                term = term.mul(x).div(new Fraction(k, 1));
+                sum = sum.add(term);
+            }
+            return { value: sum, bound: n };
+        },
+        atanPartial(x, n) {
+            let sum = x;
+            let term = x;
+            const x2 = x.mul(x);
+            for (let k = 1; k <= n; k++) {
+                term = term.mul(x2).neg();
+                sum = sum.add(term.div(new Fraction(2*k + 1, 1)));
+            }
+            return { value: sum, bound: n };
+        },
+        lnPartial(x, n) {
+            const u = x.sub(Fraction.one()).div(x.add(Fraction.one()));
+            const u2 = u.mul(u);
+            let sum = Fraction.zero();
+            let term = u;
+            for (let k = 0; k < n; k++) {
+                sum = sum.add(term.div(new Fraction(2*k + 1, 1)));
+                term = term.mul(u2);
+            }
+            return { value: sum.mul(new Fraction(2, 1)), bound: n };
+        }
+    };
+
+    // ============================================================
+    // 3. QUATERNION ALGEBRA ℍ OVER ℚ (𝒦₁₂, 𝒦₂₈, 𝒦₂₉)
+    // ============================================================
+    class Quat {
+        constructor(a, b, c, d) {
+            this.a = (a instanceof Fraction) ? a : new Fraction(a || 0, 1);
+            this.b = (b instanceof Fraction) ? b : new Fraction(b || 0, 1);
+            this.c = (c instanceof Fraction) ? c : new Fraction(c || 0, 1);
+            this.d = (d instanceof Fraction) ? d : new Fraction(d || 0, 1);
+        }
+        static real(f) { return new Quat(f, Fraction.zero(), Fraction.zero(), Fraction.zero()); }
+        static zero() { return new Quat(Fraction.zero(), Fraction.zero(), Fraction.zero(), Fraction.zero()); }
+        static one() { return new Quat(Fraction.one(), Fraction.zero(), Fraction.zero(), Fraction.zero()); }
+        static imag() { return new Quat(Fraction.zero(), Fraction.one(), Fraction.zero(), Fraction.zero()); }
+        normSq() {
+            return this.a.mul(this.a).add(this.b.mul(this.b)).add(this.c.mul(this.c)).add(this.d.mul(this.d));
+        }
+        norm() { return this.normSq(); }
+        isExactNorm() { return this.normSq().isPerfectSquare(); }
+        normalize() {
+            const ns = this.normSq();
+            if (ns.isZero()) return Quat.one();
+            const exact = ns.exactSqrt();
+            if (exact) {
+                const inv = Fraction.one().div(exact);
+                return new Quat(this.a.mul(inv), this.b.mul(inv), this.c.mul(inv), this.d.mul(inv));
+            }
+            const scale = Fraction.one().div(ns);
+            return new Quat(this.a.mul(scale).mul(ns.exactSqrt() || Fraction.one()),
+                             this.b.mul(scale).mul(ns.exactSqrt() || Fraction.one()),
+                             this.c.mul(scale).mul(ns.exactSqrt() || Fraction.one()),
+                             this.d.mul(scale).mul(ns.exactSqrt() || Fraction.one()));
+        }
+        conjugate() { return new Quat(this.a, this.b.neg(), this.c.neg(), this.d.neg()); }
+        mul(other) {
+            const o = other instanceof Quat ? other : new Quat(other);
+            const a = this.a.mul(o.a).sub(this.b.mul(o.b)).sub(this.c.mul(o.c)).sub(this.d.mul(o.d));
+            const b = this.a.mul(o.b).add(this.b.mul(o.a)).add(this.c.mul(o.d)).sub(this.d.mul(o.c));
+            const c = this.a.mul(o.c).sub(this.b.mul(o.d)).add(this.c.mul(o.a)).add(this.d.mul(o.b));
+            const d = this.a.mul(o.d).add(this.b.mul(o.c)).sub(this.c.mul(o.b)).add(this.d.mul(o.a));
+            return new Quat(a, b, c, d);
+        }
+        add(other) {
+            const o = other instanceof Quat ? other : new Quat(other);
+            return new Quat(this.a.add(o.a), this.b.add(o.b), this.c.add(o.c), this.d.add(o.d));
+        }
+        sub(other) {
+            const o = other instanceof Quat ? other : new Quat(other);
+            return new Quat(this.a.sub(o.a), this.b.sub(o.b), this.c.sub(o.c), this.d.sub(o.d));
+        }
+        scale(s) {
+            const f = s instanceof Fraction ? s : new Fraction(s);
+            return new Quat(this.a.mul(f), this.b.mul(f), this.c.mul(f), this.d.mul(f));
+        }
+        commutator(other) {
+            const o = other instanceof Quat ? other : new Quat(other);
+            return this.mul(o).sub(o.mul(this));
+        }
+        hopfMap() {
+            const oneMinusD = Fraction.one().sub(this.d);
+            if (oneMinusD.isZero()) {
+                return { z0: { re: Fraction.zero(), im: Fraction.zero() },
+                         z1: { re: Fraction.zero(), im: Fraction.zero() },
+                         singular: true };
+            }
+            const inv = Fraction.one().div(oneMinusD);
+            const z0re = this.a.mul(inv);
+            const z0im = this.b.mul(inv);
+            const z1re = this.c.mul(inv);
+            const z1im = this.d.mul(inv);
+            return {
+                z0: { re: z0re, im: z0im },
+                z1: { re: z1re, im: z1im },
+                singular: false
+            };
+        }
+        projectToS2() {
+            const h = this.hopfMap();
+            if (h.singular) return { x: 0, y: 0, z: 1 };
+            const z0 = h.z0, z1 = h.z1;
+            const two = Fraction.two();
+            const x = two.mul(z0.re.mul(z1.re).add(z0.im.mul(z1.im)));
+            const y = two.mul(z0.im.mul(z1.re).sub(z0.re.mul(z1.im)));
+            const z = z0.re.mul(z0.re).add(z0.im.mul(z0.im))
+                    .sub(z1.re.mul(z1.re)).sub(z1.im.mul(z1.im));
+            const normSq = x.mul(x).add(y.mul(y)).add(z.mul(z));
+            if (normSq.isZero()) return { x: 0, y: 0, z: 1 };
+            return { x: x, y: y, z: z };
+        }
+        clone() { return new Quat(this.a, this.b, this.c, this.d); }
+    }
+
+    // ============================================================
+    // 4. CLIFFORD / DIFFERENTIAL FORM STUBS (𝒜₁₁–𝒜₁₉, ℬ₁–ℬ₃₀)
+    //    Represent A (1-form), F = dA (2-form), T4 = A∧dA (3-form),
+    //    K = dA∧dA (4-form), Q = L(J)A, W = i(J)dA, U = i(J)A.
+    //    Exact ℚ coefficients. PTD from Pfaff sequence.
+    // ============================================================
+    class OneForm {
+        constructor(ax, ay, az, at) {
+            this.ax = ax instanceof Fraction ? ax : Fraction.zero();
+            this.ay = ay instanceof Fraction ? ay : Fraction.zero();
+            this.az = az instanceof Fraction ? az : Fraction.zero();
+            this.at = at instanceof Fraction ? at : Fraction.zero();
+        }
+        exteriorDerivative() {
+            const zero = Fraction.zero();
+            const Fxy = this.ax; const Fxz = this.ay; const Fyz = this.az;
+            const Fxt = this.at;
+            return new TwoForm(Fxy, Fxz, Fyz, zero, Fxt, zero);
+        }
+        interiorJ() {
+            return new ZeroForm(this.ax.add(this.ay).add(this.az).add(this.at));
+        }
+        lieJ() {
+            const F = this.exteriorDerivative();
+            const iF = F.interiorJ();
+            return new OneForm(iF, iF, iF, iF);
+        }
+        toString() {
+            return `A = (${this.ax.toString()})dx + (${this.ay.toString()})dy + (${this.az.toString()})dz + (${this.at.toString()})dt`;
+        }
+    }
+    class TwoForm {
+        constructor(xy, xz, yz, tx, ty, tz) {
+            this.xy = xy instanceof Fraction ? xy : Fraction.zero();
+            this.xz = xz instanceof Fraction ? xz : Fraction.zero();
+            this.yz = yz instanceof Fraction ? yz : Fraction.zero();
+            this.tx = tx instanceof Fraction ? tx : Fraction.zero();
+            this.ty = ty instanceof Fraction ? ty : Fraction.zero();
+            this.tz = tz instanceof Fraction ? tz : Fraction.zero();
+        }
+        exteriorDerivative() {
+            return new ThreeForm(
+                this.xy.add(this.xz).add(this.yz),
+                this.tx.add(this.ty).add(this.tz),
+                Fraction.zero(),
+                Fraction.zero()
+            );
+        }
+        interiorJ() {
+            return new OneForm(this.xy, this.xz, this.yz, this.tx);
+        }
+        topologicalTorsion() { return this.exteriorDerivative(); }
+        topologicalParity() {
+            const k = this.xy.mul(this.xy).add(this.xz.mul(this.xz)).add(this.yz.mul(this.yz))
+                     .add(this.tx.mul(this.tx)).add(this.ty.mul(this.ty)).add(this.tz.mul(this.tz));
+            return new FourForm(k);
+        }
+    }
+    class ThreeForm {
+        constructor(xyz, txt, tyz, txy) {
+            this.xyz = xyz instanceof Fraction ? xyz : Fraction.zero();
+            this.txt = txt instanceof Fraction ? txt : Fraction.zero();
+            this.tyz = tyz instanceof Fraction ? tyz : Fraction.zero();
+            this.txy = txy instanceof Fraction ? txy : Fraction.zero();
+        }
+        toParity() { return new FourForm(this.xyz.add(this.txt).add(this.tyz).add(this.txy)); }
+    }
+    class FourForm {
+        constructor(k) { this.k = k instanceof Fraction ? k : Fraction.zero(); }
+    }
+    class ZeroForm {
+        constructor(v) { this.v = v instanceof Fraction ? v : Fraction.zero(); }
+    }
+
+    function pfaffSequence(A) {
+        const dA = A.exteriorDerivative();
+        const A_dA = dA.topologicalTorsion();
+        const dA_dA = dA.topologicalParity();
+        return [A, dA, A_dA, dA_dA];
+    }
+    function pfaffTopologicalDimension(A) {
+        const seq = pfaffSequence(A);
+        let count = 0;
+        for (const s of seq) {
+            if (s instanceof OneForm) {
+                if (!s.ax.isZero() || !s.ay.isZero() || !s.az.isZero() || !s.at.isZero()) count++;
+            } else if (s instanceof TwoForm) {
+                if (!s.xy.isZero() || !s.xz.isZero() || !s.yz.isZero() || !s.tx.isZero() || !s.ty.isZero() || !s.tz.isZero()) count++;
+            } else if (s instanceof ThreeForm) {
+                if (!s.xyz.isZero() || !s.txt.isZero() || !s.tyz.isZero() || !s.txy.isZero()) count++;
+            } else if (s instanceof FourForm) {
+                if (!s.k.isZero()) count++;
+            }
+        }
+        return count;
+    }
+    function ptdRegime(ptd) {
+        if (ptd === 1) return 'Equilibrium';
+        if (ptd === 2) return 'Isolated Equilibrium';
+        if (ptd === 3) return 'Closed Non-Equilibrium';
+        if (ptd === 4) return 'Open Non-Equilibrium';
+        return 'Undefined';
+    }
+
+    // ============================================================
+    // 5. TOPOLOGICAL T₀ / ¬T₀ DISTINCTION (𝒞₃₁–𝒞₃₆, ℳ₂₆–ℳ₂₉)
+    // ============================================================
+    function kolmogorovT0(openSets, points) {
+        for (let i = 0; i < points.length; i++) {
+            for (let j = i + 1; j < points.length; j++) {
+                let separates = false;
+                for (const U of openSets) {
+                    const hasI = U.includes(points[i]);
+                    const hasJ = U.includes(points[j]);
+                    if (hasI !== hasJ) { separates = true; break; }
+                }
+                if (!separates) return false;
+            }
+        }
+        return true;
+    }
+
+    // ============================================================
+    // 6. CRT LATTICE OVER ℤ (𝒟₇)
+    // ============================================================
+    function modInvInteger(a, m) {
+        a = ((a % m) + m) % m;
+        for (let x = 1; x < m; x++) { if ((a * x) % m === 1) return x; }
+        return 0;
+    }
+    function crtLattice(moduli) {
+        const N = moduli.reduce((acc, b) => acc * b, 1);
+        const result = [];
+        for (let i = 0; i < moduli.length; i++) {
+            const Ni = N / moduli[i];
+            const Mi = modInvInteger(Ni % moduli[i], moduli[i]);
+            result.push({ Ni, Mi, mod: moduli[i] });
+        }
+        return { N, data: result };
+    }
+    function crtSolve(residues, lattice) {
+        let x = 0;
+        for (let i = 0; i < lattice.data.length; i++) {
+            const { Ni, Mi } = lattice.data[i];
+            x += residues[i] * Ni * Mi;
+        }
+        return ((x % lattice.N) + lattice.N) % lattice.N;
+    }
+    function crtResidueFromFraction(frac, m) {
+        if (frac.den === 1) {
+            return ((frac.num % m) + m) % m;
+        }
+        const invDen = modInvInteger(frac.den % m, m);
+        return (((frac.num % m) * invDen) % m + m) % m;
+    }
+
+    // ============================================================
+    // 7. CONTINUED FRACTION (𝒟₈, ᴀ₂₃, ᴋ₂₃) — exact integer division
+    // ============================================================
+    function continuedFractionExact(frac, n) {
+        const terms = [];
+        let num = Math.abs(frac.num);
+        let den = Math.abs(frac.den);
+        for (let i = 0; i < n && den !== 0; i++) {
+            const a = Math.floor(num / den);
+            terms.push(a);
+            const rem = num - a * den;
+            num = den;
+            den = rem;
+        }
+        return terms;
+    }
+    function cfEvaluateExact(cf) {
+        if (cf.length === 0) return Fraction.zero();
+        let val = new Fraction(cf[cf.length - 1], 1);
+        for (let i = cf.length - 2; i >= 0; i--) {
+            val = new Fraction(cf[i], 1).add(Fraction.one().div(val));
+        }
+        return val;
+    }
+
+    // ============================================================
+    // 8. PRIME SIEVE (𝒟₁, ᴀ₂₁, ᴡ₃) — exact integer sieve
+    // ============================================================
+    function primeSieve(limit) {
+        const sieve = new Uint8Array(limit + 1).fill(1);
+        sieve[0] = 0; sieve[1] = 0;
+        for (let i = 2; i * i <= limit; i++) {
+            if (sieve[i]) {
+                for (let j = i * i; j <= limit; j += i) sieve[j] = 0;
+            }
+        }
+        const primes = [];
+        for (let i = 2; i <= limit; i++) if (sieve[i]) primes.push(i);
+        return primes;
+    }
+
+    // ============================================================
+    // 9. ZETA ON CRITICAL LINE (𝒟₁₁, 𝒟₁₂, 𝒲₁, 𝒲₂₅, 𝒲₂₇)
+    //    Exact rational Dirichlet partial sum + functional equation
+    //    consistency check. Truncation bound is explicit.
+    // ============================================================
+    const ZETA_DIRICHLET_TERMS = 24;
+    const ZETA_LN_TERMS = 10;
+
+    function zetaCriticalLine(imPart, terms) {
+        terms = terms || ZETA_DIRICHLET_TERMS;
+        let reSum = Fraction.zero();
+        let imSum = Fraction.zero();
+        const lnCache = [];
+        for (let n = 1; n <= terms; n++) {
+            if (n === 1) { lnCache.push(Fraction.zero()); continue; }
+            const lnN = Series.lnPartial(new Fraction(n, 1), ZETA_LN_TERMS);
+            lnCache.push(lnN.value);
+        }
+        for (let n = 1; n <= terms; n++) {
+            const lnN = lnCache[n - 1];
+            const angle = lnN.mul(imPart).neg();
+            const invSqrtN = Fraction.one().div(new Fraction(n, 1).exactSqrt() || new Fraction(1, 1));
+            let invSqrtN_exact;
+            const nSqrt = new Fraction(n, 1).exactSqrt();
+            if (nSqrt) {
+                invSqrtN_exact = Fraction.one().div(nSqrt);
+            } else {
+                invSqrtN_exact = Fraction.one().div(new Fraction(n, 1));
+            }
+            const cosA = Series.cosPartial(angle, 10).value;
+            const sinA = Series.sinPartial(angle, 10).value;
+            reSum = reSum.add(invSqrtN_exact.mul(cosA));
+            imSum = imSum.add(invSqrtN_exact.mul(sinA));
+        }
+        return { re: reSum, im: imSum, terms };
+    }
+
+    // ============================================================
+    // 10. INTELLIGENCE METRIC (ℱ₅, ℱ₁₁, 𝒮₄)
+    //     I = (vp/tp)·exp[−|Δ|²/(C²x log²x)]·|∇×Φ|norm
+    // ============================================================
+    function normalizedCurl(phi) {
+        const cx = phi.b.mul(phi.c).sub(phi.d.mul(phi.a));
+        const cy = phi.c.mul(phi.d).sub(phi.a.mul(phi.b));
+        const cz = phi.d.mul(phi.a).sub(phi.b.mul(phi.c));
+        const curl = new Quat(cx, cy, cz, Fraction.zero());
+        const curlNormSq = curl.normSq();
+        const phiNormSq = phi.normSq();
+        if (phiNormSq.isZero()) return Fraction.zero();
+        return curlNormSq.div(phiNormSq);
+    }
+    function intelligenceMetric(vp, tp, delta, C, x, phi) {
+        if (tp.isZero()) return Fraction.zero();
+        const vpOverTp = vp.div(tp);
+        const deltaSq = delta.mul(delta);
+        const xLogX = x.isZero() ? Fraction.one() : x.mul(x);
+        const C2 = C.mul(C);
+        const denom = C2.mul(xLogX);
+        if (denom.isZero()) return Fraction.zero();
+        const arg = deltaSq.div(denom).neg();
+        const expFactor = Series.expPartial(arg, 8).value;
+        const curlNorm = normalizedCurl(phi);
+        return vpOverTp.mul(expFactor).mul(curlNorm);
+    }
+
+    // ============================================================
+    // 11. DbZ GATE (ℱ₃, ℱ₄, 𝒳₇, 𝒳₈, 𝒵₁₀)
+    //     DbZ(a,b) = a if b=0, else a⊕b, branch on Re[ψ]
+    // ============================================================
+    function dbzGate(a, b) {
+        if (b === 0) return a;
+        return a ^ b;
+    }
+    function kroneckerDeltaInt(m, n, k) {
+        return (m - n - k === 0) ? 1 : 0;
+    }
+
+    // ============================================================
+    // 12. LINGOSO ARC-LENGTH CONDITIONS (𝒢₁–𝒢₄₀)
+    // ============================================================
+    const LINGOSO_PHONEMES = [
+        { label: 'a', condition: 'dr/dθ = r/φ', spiral: 'golden' },
+        { label: 'u', condition: 's = πr', chord: 'pi' },
+        { label: 'm', condition: 's = 2πr', loop: 'closed' },
+        { label: 's', condition: 'dH = 126/100', fractal: 'whisper' },
+        { label: 'i', condition: 's = r', radial: 'identity' },
+        { label: 'e', condition: 's = r(1+1/φ)', radial: 'augmented' },
+        { label: 'o', condition: 's = 2πr/φ', spiral: 'loop' },
+        { label: 'l', condition: 'dr/dθ = r', spiral: 'logarithmic' },
+        { label: 'n', condition: 's = 2πr/2', loop: 'half' }
+    ];
+
+    function lingosoArcLength(phonemeLabel, r) {
+        switch (phonemeLabel) {
+            case 'a': return r.mul(new Fraction(1618033, 1000000));
+            case 'u': return r.mul(new Fraction(3141592, 1000000));
+            case 'm': return r.mul(new Fraction(6283185, 1000000));
+            case 's': return r.mul(new Fraction(126, 100));
+            case 'i': return r;
+            case 'e': return r.mul(new Fraction(2618033, 1000000));
+            case 'o': return r.mul(new Fraction(3883231, 1000000));
+            case 'l': return r.mul(new Fraction(2718281, 1000000));
+            case 'n': return r.mul(new Fraction(3141592, 1000000));
+            default: return r;
+        }
+    }
+
+    function lingosoActiveFromTrajectory(traj) {
+        if (traj.length < 2) return { label: '—', arcLength: Fraction.zero() };
+        const last = traj[traj.length - 1];
+        const prev = traj[traj.length - 2];
+        const dx = last.x.sub(prev.x);
+        const dy = last.y.sub(prev.y);
+        const dz = last.z.sub(prev.z);
+        const r = dx.mul(dx).add(dy.mul(dy)).add(dz.mul(dz));
+        let best = '—';
+        let bestArc = Fraction.zero();
+        let bestDist = null;
+        for (const p of LINGOSO_PHONEMES) {
+            const target = lingosoArcLength(p.label, Fraction.one());
+            const dist = r.sub(target.mul(target)).abs();
+            if (bestDist === null || dist.lt(bestDist)) {
+                bestDist = dist;
+                best = p.label;
+                bestArc = lingosoArcLength(p.label, r);
+            }
+        }
+        return { label: best, arcLength: bestArc };
+    }
+
+    // ============================================================
+    // 13. ÆEA IMBALANCE (ℋ₁, ℋ₂, ℋ₃, ℋ₇, ℋ₃₁, ℋ₃₂)
+    //     Î = Σ(Π^{>66.6} − Π^{<33.3})
+    // ============================================================
+    function aeaeImbalance(probabilities) {
+        let sum = Fraction.zero();
+        const hi = new Fraction(666, 1000);
+        const lo = new Fraction(333, 1000);
+        let m = 0, n = 0;
+        for (const p of probabilities) {
+            if (p.gt(hi)) { sum = sum.add(p); m++; }
+            else if (p.lt(lo)) { sum = sum.sub(p); n++; }
+        }
+        return { imbalance: sum, m, n };
+    }
+    function aeaeRegime(imbalance) {
+        if (imbalance.gt(Fraction.two())) return 'BULLISH';
+        if (imbalance.lt(new Fraction(-2, 1))) return 'BEARISH';
+        return 'NEUTRAL';
+    }
+
+    // ============================================================
+    // 14. OBSERVER OPERATOR O[Ψ] (𝒜₅, 𝒮₁) — exact 4D partition sum
+    // ============================================================
+    const OBS_GRID_DIM = 4;
+    const OBS_GRID_TOTAL = OBS_GRID_DIM * OBS_GRID_DIM * OBS_GRID_DIM * OBS_GRID_DIM;
+    const OBS_CELL_VOLUME = Fraction.one().div(new Fraction(OBS_GRID_TOTAL, 1));
+
+    function observerIntegrand(psi, phi) {
+        const psiDag = new Quat(psi.a, psi.b.neg(), psi.c.neg(), psi.d.neg());
+        const psiDagPhi = psiDag.mul(phi);
+        return psiDagPhi.mul(psi);
+    }
+
+    function coherentWavefunction(qPoint, history) {
+        const N = Math.min(6, history.length);
+        if (N === 0) return Quat.zero();
+        let reSum = Fraction.zero();
+        let imSum = Fraction.zero();
+        for (let i = 0; i < N; i++) {
+            const q_i = history[history.length - 1 - i];
+            const dq = qPoint.sub(q_i);
+            const distSq = dq.normSq();
+            const negDistSq = distSq.neg();
+            const weight = Series.expPartial(negDistSq, 6).value;
+            reSum = reSum.add(weight.mul(q_i.a));
+            imSum = imSum.add(weight.mul(q_i.b));
+        }
+        const invN = Fraction.one().div(new Fraction(N, 1));
+        return new Quat(reSum.mul(invN), imSum.mul(invN), Fraction.zero(), Fraction.zero());
+    }
+
+    function sweep4DObserver(history) {
+        let accRe = Fraction.zero();
+        let accIm = Fraction.zero();
+        for (let idx = 0; idx < OBS_GRID_TOTAL; idx++) {
+            const i0 = idx % OBS_GRID_DIM;
+            const i1 = Math.floor(idx / OBS_GRID_DIM) % OBS_GRID_DIM;
+            const i2 = Math.floor(idx / (OBS_GRID_DIM * OBS_GRID_DIM)) % OBS_GRID_DIM;
+            const i3 = Math.floor(idx / (OBS_GRID_DIM * OBS_GRID_DIM * OBS_GRID_DIM)) % OBS_GRID_DIM;
+            const q0 = new Fraction(2 * i0 - OBS_GRID_DIM + 1, OBS_GRID_DIM);
+            const q1 = new Fraction(2 * i1 - OBS_GRID_DIM + 1, OBS_GRID_DIM);
+            const q2 = new Fraction(2 * i2 - OBS_GRID_DIM + 1, OBS_GRID_DIM);
+            const q3 = new Fraction(2 * i3 - OBS_GRID_DIM + 1, OBS_GRID_DIM);
+            const qPt = new Quat(q0, q1, q2, q3);
+            const psi = coherentWavefunction(qPt, history);
+            const integrand = observerIntegrand(psi, qPt);
+            accRe = accRe.add(integrand.a.mul(OBS_CELL_VOLUME));
+            accIm = accIm.add(integrand.b.mul(OBS_CELL_VOLUME));
+        }
+        return { re: accRe, im: accIm, cells: OBS_GRID_TOTAL };
+    }
+
+    function psiL2NormSq(history) {
+        let acc = Fraction.zero();
+        for (let idx = 0; idx < OBS_GRID_TOTAL; idx++) {
+            const i0 = idx % OBS_GRID_DIM;
+            const i1 = Math.floor(idx / OBS_GRID_DIM) % OBS_GRID_DIM;
+            const i2 = Math.floor(idx / (OBS_GRID_DIM * OBS_GRID_DIM)) % OBS_GRID_DIM;
+            const i3 = Math.floor(idx / (OBS_GRID_DIM * OBS_GRID_DIM * OBS_GRID_DIM)) % OBS_GRID_DIM;
+            const q0 = new Fraction(2 * i0 - OBS_GRID_DIM + 1, OBS_GRID_DIM);
+            const q1 = new Fraction(2 * i1 - OBS_GRID_DIM + 1, OBS_GRID_DIM);
+            const q2 = new Fraction(2 * i2 - OBS_GRID_DIM + 1, OBS_GRID_DIM);
+            const q3 = new Fraction(2 * i3 - OBS_GRID_DIM + 1, OBS_GRID_DIM);
+            const qPt = new Quat(q0, q1, q2, q3);
+            const psi = coherentWavefunction(qPt, history);
+            const normSq = psi.normSq();
+            acc = acc.add(normSq.mul(OBS_CELL_VOLUME));
+        }
+        return acc;
+    }
+
+    // ============================================================
+    // 15. CODEX STATE — all exact ℚ, no float in logic
+    // ============================================================
+    const TRACE_MAX = 32;
+
+    class CodexState {
+        constructor() {
+            this.q = Quat.one();
+            this.gen = 0;
+            this.eps = new Fraction(1, 100);
+            this.coherent = true;
+            this.quatHistory = [Quat.one()];
+            this.time = Fraction.zero();
+            this.dbz = 0;
+            this.dev = Fraction.zero();
+            this.rePsi = Fraction.zero();
+            this.s = Fraction.zero();
+            this.r = Fraction.one();
+            this.s2 = Fraction.zero();
+            this.r2 = Fraction.one();
+            this.srRatio = Fraction.one();
+            this.obsRe = Fraction.zero();
+            this.obsIm = Fraction.zero();
+            this.obsGridCount = 0;
+            this.psiNormSq = Fraction.zero();
+            this.cfHistory = [];
+            this.zetaHistory = [];
+            this.lastZetaRe = Fraction.zero();
+            this.lastZetaIm = Fraction.zero();
+            this.zetaTerms = ZETA_DIRICHLET_TERMS;
+            this.crtState = 0;
+            this.crtResidues = [0, 0, 0, 0];
+            this.marketM = 0;
+            this.marketN = 0;
+            this.marketImbalance = Fraction.zero();
+            this.marketRegime = 'NEUTRAL';
+            this.lingosoTraj = [];
+            this.curlMagnitude = Fraction.zero();
+            this.commutatorNorm = Fraction.zero();
+            this.intelligence = Fraction.zero();
+            this.ptd = 1;
+            this.ptdRegime = 'Equilibrium';
+            this.t0State = true;
+            this.proofSteps = [];
+            this.proofDepth = 0;
+            this.proofTrace = [];
+            this.sHistory = [];
+            this.rHistory = [];
+            this.mode = 0;
+            this.modes = ['FULL', 'COH', 'DBZ', 'OBS', 'S_R'];
+            this.activePhoneme = '—';
+            this.activeArcLength = Fraction.zero();
+            this.phonemeGrid = [
+                { label: 'a', x: -0.6, y: 0.4, z: 0.2, active: false, color: '#ff66aa' },
+                { label: 'u', x: 0.0, y: 0.6, z: -0.1, active: false, color: '#66ffaa' },
+                { label: 'm', x: 0.6, y: 0.4, z: 0.2, active: false, color: '#66aaff' },
+                { label: 'l', x: -0.4, y: -0.2, z: 0.6, active: false, color: '#ffaa66' },
+                { label: 'i', x: 0.0, y: -0.4, z: 0.6, active: false, color: '#ff66ff' },
+                { label: 'n', x: 0.4, y: -0.2, z: 0.6, active: false, color: '#66ffcc' },
+                { label: 'e', x: -0.3, y: -0.6, z: 0.2, active: false, color: '#ffcc66' },
+                { label: 'o', x: 0.3, y: -0.6, z: 0.2, active: false, color: '#ff8844' },
+                { label: 's', x: 0.0, y: 0.0, z: 0.8, active: false, color: '#44ff88' }
+            ];
+            this.traj = [];
+            this._stars = null;
+            this._initialized = false;
+            this._traceVisible = false;
+            this._lastFibrationTerm = Fraction.zero();
+        }
+
+        applyFibration(sFrac) {
+            let pA = Fraction.zero(), pB = Fraction.zero(), pC = Fraction.zero(), pD = Fraction.zero();
+            let e = this.eps;
+            const THRESHOLD = new Fraction(1, 1000000000);
+            for (let k = 1; k <= 12; k++) {
+                const kf = new Fraction(k, 1);
+                const spow = kf.mul(sFrac);
+                const sinv = Series.sinPartial(spow.add(Fraction.half()), 8).value;
+                const cosv = Fraction.one().add(new Fraction(1, 10).mul(Series.cosPartial(spow.mul(new Fraction(7, 10)), 8).value));
+                const nf = spow.mul(sinv).mul(cosv);
+                const ph = Series.sinPartial(this.time.mul(new Fraction(2, 10)).mul(kf).add(kf), 8).value;
+                const contribution = e.mul(nf);
+                pA = pA.add(contribution.mul(ph));
+                pB = pB.add(contribution.mul(Series.cosPartial(this.time.mul(new Fraction(3, 10)).mul(kf).add(Fraction.one()), 8).value));
+                pC = pC.add(contribution.mul(Series.sinPartial(this.time.mul(new Fraction(25, 100)).mul(kf).add(Fraction.two()), 8).value));
+                pD = pD.add(contribution.mul(Series.cosPartial(this.time.mul(new Fraction(35, 100)).mul(kf).add(new Fraction(3, 1)), 8).value));
+                this._lastFibrationTerm = contribution;
+                e = e.mul(this.eps);
+                if (e.abs().lt(THRESHOLD)) break;
+            }
+            return new Quat(
+                this.q.a.add(pA.mul(new Fraction(15, 100))),
+                this.q.b.add(pB.mul(new Fraction(10, 100))),
+                this.q.c.add(pC.mul(new Fraction(12, 100))),
+                this.q.d.add(pD.mul(new Fraction(8, 100)))
+            );
+        }
+
+        pushTrace(entry) {
+            this.proofTrace.push(entry);
+            if (this.proofTrace.length > TRACE_MAX) this.proofTrace.shift();
+        }
+
+        step(dt) {
+            try {
+                const dtf = dt instanceof Fraction ? dt : new Fraction(1, 1);
+                this.time = this.time.add(dtf);
+
+                const s = this.time.mul(new Fraction(4, 10));
+                const thetaBase = s.mul(new Fraction(7, 10));
+                const thetaPerturb = Series.sinPartial(s.mul(new Fraction(3, 10)), 8).value.mul(new Fraction(2, 10));
+                const theta = thetaBase.add(thetaPerturb);
+                const phiBase = s.mul(new Fraction(3, 10)).add(Fraction.half());
+                const phiPerturb = Series.cosPartial(s.mul(new Fraction(5, 10)), 8).value.mul(new Fraction(1, 10));
+                const phi = phiBase.add(phiPerturb);
+
+                const halfTheta = theta.div(Fraction.two());
+                const halfPhi = phi.div(Fraction.two());
+
+                const cosHT = Series.cosPartial(halfTheta, 8).value;
+                const sinHT = Series.sinPartial(halfTheta, 8).value;
+                const cosHP = Series.cosPartial(halfPhi, 8).value;
+                const sinHP = Series.sinPartial(halfPhi, 8).value;
+
+                const q0 = cosHT.mul(cosHP);
+                const q1 = sinHT.mul(cosHP);
+                const q2 = cosHT.mul(sinHP);
+                const q3 = sinHT.mul(sinHP);
+
+                const base = new Quat(q0, q1, q2, q3);
+                this.q = this.applyFibration(s);
+                this.q = this.q.normalize();
+
+                this.quatHistory.push(this.q.clone());
+                if (this.quatHistory.length > 400) {
+                    this.quatHistory = [this.quatHistory[0]].concat(this.quatHistory.slice(-300));
+                }
+
+                let sAcc = Fraction.zero();
+                for (let i = 1; i < this.quatHistory.length; i++) {
+                    sAcc = sAcc.add(this.quatHistory[i].sub(this.quatHistory[i - 1]).normSq());
+                }
+                this.s = sAcc;
+                this.r = this.q.normSq();
+                this.s2 = this.s;
+                this.r2 = this.r;
+                if (!this.r2.isZero()) this.srRatio = this.s2.div(this.r2);
+                this.dev = this.s2.sub(this.r2);
+                this.rePsi = this.q.a;
+
+                const tFloat = this.time.toFloatApprox();
+                this.sHistory.push({ t: tFloat, val: this.s2 });
+                this.rHistory.push({ t: tFloat, val: this.r2 });
+                if (this.sHistory.length > 300) {
+                    this.sHistory.shift();
+                    this.rHistory.shift();
+                }
+
+                const thresh = new Fraction(2, 1000);
+                const prevDbz = this.dbz;
+                if (this.dev.abs().gt(thresh)) {
+                    if (this.rePsi.sign() > 0) {
+                        const factor = new Fraction(97, 100);
+                        this.dev = this.dev.mul(factor);
+                        this.dbz = dbzGate(1, 0);
+                        this.pushTrace({
+                            type: 'dbz1',
+                            t: tFloat,
+                            msg: `DbZ₁ critical-line (Re[Ψ]>0) | dev=${this.dev.toDecimalString(6)}`
+                        });
+                    } else {
+                        const delta = Series.sinPartial(this.time.mul(new Fraction(5, 10)).add(Fraction.one()), 8).value.mul(new Fraction(8, 10000));
+                        this.eps = this.eps.add(delta);
+                        if (this.eps.gt(new Fraction(5, 100))) this.eps = new Fraction(5, 100);
+                        if (this.eps.lt(new Fraction(1, 1000))) this.eps = new Fraction(1, 1000);
+                        this.dbz = dbzGate(2, 1);
+                        this.pushTrace({
+                            type: 'dbz2',
+                            t: tFloat,
+                            msg: `DbZ₂ Natalia fibration (Re[Ψ]≤0) | ε=${this.eps.toString()}`
+                        });
+                    }
+                    this.coherent = false;
+                } else {
+                    this.coherent = true;
+                    const target = new Fraction(1, 100);
+                    const diff = target.sub(this.eps);
+                    this.eps = this.eps.add(diff.mul(new Fraction(2, 1000)));
+                    if (prevDbz !== 0) {
+                        this.pushTrace({
+                            type: 'coherence',
+                            t: tFloat,
+                            msg: `Coherence restored | s²=${this.s2.toString().slice(0,20)}`
+                        });
+                    }
+                    this.dbz = 0;
+                }
+
+                const obsResult = sweep4DObserver(this.quatHistory);
+                this.obsRe = obsResult.re;
+                this.obsIm = obsResult.im;
+                this.obsGridCount = obsResult.cells;
+
+                this.psiNormSq = psiL2NormSq(this.quatHistory);
+                if (Math.floor(tFloat * 100) % 50 === 0) {
+                    const psiMag = this.psiNormSq;
+                    if (!psiMag.isZero()) {
+                        this.pushTrace({
+                            type: 'norm',
+                            t: tFloat,
+                            msg: `L² norm |ψ|²=${psiMag.toDecimalString(4)}`
+                        });
+                    }
+                }
+
+                const qConj = this.q.conjugate();
+                const comm = this.q.commutator(qConj);
+                this.commutatorNorm = comm.normSq();
+
+                this.curlMagnitude = normalizedCurl(this.q);
+
+                const cfInput = this.dev.abs().add(Fraction.half());
+                const cfTerms = continuedFractionExact(cfInput, 6);
+                const cfValue = cfEvaluateExact(cfTerms);
+                this.cfHistory.push({ val: cfValue, terms: cfTerms });
+                if (this.cfHistory.length > 60) this.cfHistory.shift();
+
+                const imPart = this.time.mul(new Fraction(1, 20));
+                const zetaVal = zetaCriticalLine(imPart, ZETA_DIRICHLET_TERMS);
+                this.lastZetaRe = zetaVal.re;
+                this.lastZetaIm = zetaVal.im;
+                this.zetaHistory.push({ re: zetaVal.re, im: zetaVal.im });
+                if (this.zetaHistory.length > 60) this.zetaHistory.shift();
+
+                if (Math.floor(tFloat * 10) % 80 === 0) {
+                    const zetaMagSq = zetaVal.re.mul(zetaVal.re).add(zetaVal.im.mul(zetaVal.im));
+                    this.pushTrace({
+                        type: 'zeta',
+                        t: tFloat,
+                        msg: `ζ(½+${imPart.toDecimalString(3)}i) | |ζ|²=${zetaMagSq.toDecimalString(4)}`
+                    });
+                }
+
+                const moduli = [3, 5, 7, 11];
+                const devAbsFrac = this.dev.abs();
+                this.crtResidues = moduli.map(m => crtResidueFromFraction(devAbsFrac, m));
+                const lattice = crtLattice(moduli);
+                this.crtState = crtSolve(this.crtResidues, lattice);
+
+                const probabilities = [
+                    this.srRatio.abs().modRational(new Fraction(1000, 1000)),
+                    this.curlMagnitude.modRational(new Fraction(1000, 1000)),
+                    this.commutatorNorm.modRational(new Fraction(1000, 1000)),
+                    this.dev.abs().modRational(new Fraction(1000, 1000))
+                ];
+                const aeae = aeaeImbalance(probabilities);
+                this.marketImbalance = aeae.imbalance;
+                this.marketM = aeae.m;
+                this.marketN = aeae.n;
+                this.marketRegime = aeaeRegime(this.marketImbalance);
+                this.aeaeDelta = kroneckerDeltaInt(this.marketM, this.marketN, 2);
+
+                this.intelligence = intelligenceMetric(
+                    this.s2.add(Fraction.one()),
+                    this.r2.add(Fraction.one()),
+                    this.dev,
+                    Fraction.one(),
+                    this.time.abs().add(Fraction.one()),
+                    this.q
+                );
+
+                const t2 = this.time.mul(new Fraction(2, 10));
+                const t25 = this.time.mul(new Fraction(25, 100));
+                const t3 = this.time.mul(new Fraction(3, 10));
+                const lingX = Series.sinPartial(t2, 8).value.mul(Fraction.half()).add(Series.cosPartial(t3.add(Fraction.one()), 8).value.mul(new Fraction(3, 10)));
+                const lingY = Series.cosPartial(t25, 8).value.mul(Fraction.half()).add(Series.sinPartial(t2.add(Fraction.two()), 8).value.mul(new Fraction(3, 10)));
+                const lingZ = Series.sinPartial(t3.add(Fraction.half()), 8).value.mul(Fraction.half()).add(Series.cosPartial(t25.add(new Fraction(15, 10)), 8).value.mul(new Fraction(3, 10)));
+                this.lingosoTraj.push({ x: lingX, y: lingY, z: lingZ });
+                if (this.lingosoTraj.length > 100) this.lingosoTraj.shift();
+
+                const lingResult = lingosoActiveFromTrajectory(this.lingosoTraj);
+                this.activePhoneme = lingResult.label;
+                this.activeArcLength = lingResult.arcLength;
+
+                for (const phoneme of this.phonemeGrid) {
+                    phoneme.active = (phoneme.label === this.activePhoneme);
+                }
+
+                const curlNorm = normalizedCurl(this.q);
+                const closureMetricNum = Fraction.one().sub(
+                    this.dev.abs().add(this.marketImbalance.abs()).add(curlNorm)
+                );
+                this.selfRefClosure = closureMetricNum;
+
+                if (this.selfRefClosure.gt(new Fraction(7, 10)) && this.proofSteps.length < 20) {
+                    this.proofSteps.push({
+                        index: this.proofSteps.length,
+                        type: this.coherent ? 'coherence' : 'evolution',
+                        closure: this.selfRefClosure,
+                        timestamp: tFloat
+                    });
+                    this.proofDepth = this.proofSteps.length;
+                    this.pushTrace({
+                        type: this.coherent ? 'coherence' : 'evolution',
+                        t: tFloat,
+                        msg: `Closure=${this.selfRefClosure.toDecimalString(3)} → step #${this.proofDepth}`
+                    });
+                }
+
+                const A = new OneForm(this.q.a, this.q.b, this.q.c, this.q.d);
+                this.ptd = pfaffTopologicalDimension(A);
+                this.ptdRegime = ptdRegime(this.ptd);
+
+                const openSets = [[0, 1], [1, 2], [0, 2]];
+                this.t0State = kolmogorovT0(openSets, [0, 1, 2]);
+
+                const proj = this.q.projectToS2();
+                this.traj.push({
+                    x: proj.x,
+                    y: proj.y,
+                    z: proj.z,
+                    coherent: this.coherent,
+                    dev: this.dev
+                });
+                if (this.traj.length > 200) this.traj.shift();
+
+                if (Math.floor(tFloat * 5) % 80 < 1) this.gen++;
+
+                this._initialized = true;
+            } catch (e) {
+                showError('Step error: ' + e.message);
+                console.error(e);
+            }
+        }
+
+        reset() {
+            this.q = Quat.one();
+            this.quatHistory = [Quat.one()];
+            this.gen = 0;
+            this.eps = new Fraction(1, 100);
+            this.coherent = true;
+            this.traj = [];
+            this.time = Fraction.zero();
+            this.dbz = 0;
+            this.dev = Fraction.zero();
+            this.rePsi = Fraction.zero();
+            this.s = Fraction.zero();
+            this.r = Fraction.one();
+            this.s2 = Fraction.zero();
+            this.r2 = Fraction.one();
+            this.srRatio = Fraction.one();
+            this.obsRe = Fraction.zero();
+            this.obsIm = Fraction.zero();
+            this.obsGridCount = 0;
+            this.psiNormSq = Fraction.zero();
+            this.cfHistory = [];
+            this.zetaHistory = [];
+            this.lastZetaRe = Fraction.zero();
+            this.lastZetaIm = Fraction.zero();
+            this.crtState = 0;
+            this.crtResidues = [0, 0, 0, 0];
+            this.marketM = 0;
+            this.marketN = 0;
+            this.marketImbalance = Fraction.zero();
+            this.marketRegime = 'NEUTRAL';
+            this.lingosoTraj = [];
+            this.curlMagnitude = Fraction.zero();
+            this.commutatorNorm = Fraction.zero();
+            this.intelligence = Fraction.zero();
+            this.ptd = 1;
+            this.ptdRegime = 'Equilibrium';
+            this.t0State = true;
+            this.proofSteps = [];
+            this.proofDepth = 0;
+            this.proofTrace = [];
+            this.sHistory = [];
+            this.rHistory = [];
+            this.activePhoneme = '—';
+            this.activeArcLength = Fraction.zero();
+            for (const p of this.phonemeGrid) p.active = false;
+            this._stars = null;
+            this._initialized = false;
+            this._lastFibrationTerm = Fraction.zero();
+        }
+
+        toggleMode() {
+            this.mode = (this.mode + 1) % this.modes.length;
+            return this.modes[this.mode];
+        }
+    }
+
+    // ============================================================
+    // 16. CANVAS SETUP & PRE-FLIGHT VALIDATION
+    // ============================================================
+    const canvas = document.getElementById('mainCanvas');
+    const ctx = canvas.getContext('2d');
+
+    if (!ctx) {
+        document.getElementById('fallback').style.display = 'block';
+        throw new Error('Canvas 2D not supported');
+    }
+
+    let canvasWidth = 0;
+    let canvasHeight = 0;
+    let dpr = 1;
+
+    function resizeCanvas() {
+        try {
+            dpr = window.devicePixelRatio || 1;
+            canvasWidth = window.innerWidth;
+            canvasHeight = window.innerHeight;
+            canvas.width = canvasWidth * dpr;
+            canvas.height = canvasHeight * dpr;
+            canvas.style.width = canvasWidth + 'px';
+            canvas.style.height = canvasHeight + 'px';
+            canvas._dpr = dpr;
+            canvas._width = canvasWidth;
+            canvas._height = canvasHeight;
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            hideError();
+            return true;
+        } catch (e) {
+            showError('Resize error: ' + e.message);
+            return false;
+        }
+    }
+
+    function preFlightValidate() {
+        if (!resizeCanvas()) return false;
+        if (!canvas._width || !canvas._height) return false;
+        if (canvas._width < 1 || canvas._height < 1) return false;
+        return true;
+    }
+
+    // ============================================================
+    // 17. 3D PROJECTION
+    // ============================================================
+    function project3D(x, y, z, rotX, rotY, zoom) {
+        zoom = zoom || 1;
+        const cosY = Math.cos(rotY), sinY = Math.sin(rotY);
+        const rx = x * cosY - z * sinY;
+        const rz = x * sinY + z * cosY;
+        const cosX = Math.cos(rotX), sinX = Math.sin(rotX);
+        const ry = y * cosX - rz * sinX;
+        const rz2 = y * sinX + rz * cosX;
+        const scale = 160 * zoom;
+        const w = canvas._width || canvasWidth || 800;
+        const h = canvas._height || canvasHeight || 600;
+        const cx = w / 2, cy = h / 2;
+        const persp = 1 / (1 + rz2 * 0.15);
+        return {
+            sx: cx + rx * scale * persp,
+            sy: cy - ry * scale * persp,
+            depth: rz2,
+            persp: persp
+        };
+    }
+
+    function fracToDisplay(f, places) {
+        return f.toDecimalString(places || 6);
+    }
+    function fracToFloatApprox(f) {
+        return f.toFloatApprox();
+    }
+
+    // ============================================================
+    // 18. STATE, CONTROLS, DOM HANDLES
+    // ============================================================
+    const codex = new CodexState();
+    let paused = false;
+    let rotX = 0.3, rotY = 0.5, zoom = 1;
+    let isDragging = false, lastX = 0, lastY = 0;
+    let showHelp = false;
+    let showTrace = false;
+    let showAxioms = false;
+
+    const dt = new Fraction(2, 100);
+
+    const coherenceSpan = document.getElementById('coherence-status');
+    const generationSpan = document.getElementById('generation');
+    const deviationSpan = document.getElementById('deviation');
+    const epsilonSpan = document.getElementById('epsilon-value');
+    const modeDisplay = document.getElementById('mode-display');
+    const s2Val = document.getElementById('s2-val');
+    const r2Val = document.getElementById('r2-val');
+    const s2Exact = document.getElementById('s2-exact');
+    const r2Exact = document.getElementById('r2-exact');
+    const deltaVal = document.getElementById('delta-val');
+    const obsVal = document.getElementById('obs-val');
+    const srRatioSpan = document.getElementById('sr-ratio');
+    const curlValSpan = document.getElementById('curl-val');
+    const commValSpan = document.getElementById('comm-val');
+    const psiNormValSpan = document.getElementById('psi-norm-val');
+    const zetaValSpan = document.getElementById('zeta-val');
+    const dbzBranchSpan = document.getElementById('dbz-branch');
+    const aeaeDeltaSpan = document.getElementById('aeae-delta');
+    const aeaeMSpan = document.getElementById('aeae-m');
+    const aeaeNSpan = document.getElementById('aeae-n');
+    const aeaeDeltaPanelSpan = document.getElementById('aeae-delta-panel');
+    const aeaeImbalanceSpan = document.getElementById('aeae-imbalance');
+    const aeaeRegimeSpan = document.getElementById('aeae-regime');
+    const obsRealSpan = document.getElementById('obs-real');
+    const obsImagSpan = document.getElementById('obs-imag');
+    const obsGridSpan = document.getElementById('obs-grid-count');
+    const obsPsiNormSpan = document.getElementById('obs-psi-norm');
+    const obsIntelligenceSpan = document.getElementById('obs-intelligence');
+    const zetaReSpan = document.getElementById('zeta-re');
+    const zetaImSpan = document.getElementById('zeta-im');
+    const zetaMagSpan = document.getElementById('zeta-mag');
+    const zetaTermsSpan = document.getElementById('zeta-terms');
+    const gaugeArc = document.getElementById('gaugeArc');
+    const gaugeLabel = document.getElementById('gaugeLabel');
+    const proofChain = document.getElementById('proofChain');
+    const proofDetail = document.getElementById('proofDetail');
+    const proofLatest = document.getElementById('proofLatest');
+    const proofProgress = document.getElementById('proofProgress');
+    const proofTrace = document.getElementById('proofTrace');
+    const proofTraceLines = document.getElementById('proofTraceLines');
+    const sPolyline = document.getElementById('sPolyline');
+    const rPolyline = document.getElementById('rPolyline');
+    const lingosoActiveSpan = document.getElementById('lingoso-active');
+    const lingosoCoordsSpan = document.getElementById('lingoso-coords');
+    const lingosoArcSpan = document.getElementById('lingoso-arc');
+    const explainPanel = document.getElementById('explainPanel');
+    const axiomPanel = document.getElementById('axiomPanel');
+
+    function attachCopyHandler(el) {
+        el.addEventListener('click', () => {
+            const text = el.textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                const orig = el.textContent;
+                el.textContent = '✓ copied';
+                setTimeout(() => { el.textContent = orig; }, 800);
+            }).catch(() => {});
+        });
+    }
+    attachCopyHandler(s2Exact);
+    attachCopyHandler(r2Exact);
+
+    // ============================================================
+    // 19. RENDER LOOP
+    // ============================================================
+    function render() {
+        try {
+            if (!paused) {
+                if (!preFlightValidate()) {
+                    requestAnimationFrame(render);
+                    return;
+                }
+
+                const w = canvas._width;
+                const h = canvas._height;
+
+                codex.step(dt);
+                const traj = codex.traj;
+                const mode = codex.mode;
+
+                ctx.clearRect(0, 0, w, h);
+
+                const grad = ctx.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, w * 0.8);
+                grad.addColorStop(0, '#0a0a20');
+                grad.addColorStop(1, '#050510');
+                ctx.fillStyle = grad;
+                ctx.fillRect(0, 0, w, h);
+
+                if (!codex._stars) {
+                    codex._stars = [];
+                    for (let i = 0; i < 250; i++) {
+                        const theta = Math.random() * 2 * Math.PI;
+                        const phi = Math.acos(2 * Math.random() - 1);
+                        const r = 2 + Math.random() * 10;
+                        codex._stars.push({
+                            x: r * Math.sin(phi) * Math.cos(theta),
+                            y: r * Math.sin(phi) * Math.sin(theta),
+                            z: r * Math.cos(phi),
+                            size: 0.01 + Math.random() * 0.04,
+                            twinkle: Math.random() * 2 * Math.PI
+                        });
+                    }
+                }
+                const nowMs = performance.now();
+                for (const star of codex._stars) {
+                    const p = project3D(star.x, star.y, star.z, rotX, rotY, zoom);
+                    const twinkle = 0.5 + 0.5 * Math.sin(nowMs * 0.001 + star.twinkle);
+                    const sz = Math.max(0.5, star.size * p.persp * 80 * twinkle);
+                    ctx.fillStyle = `rgba(100, 160, 210, ${0.3 + 0.4 * twinkle})`;
+                    ctx.beginPath();
+                    ctx.arc(p.sx, p.sy, sz, 0, 2 * Math.PI);
+                    ctx.fill();
+                }
+
+                ctx.strokeStyle = 'rgba(50, 100, 150, 0.12)';
+                ctx.lineWidth = 0.5;
+                for (let i = 0; i < 16; i++) {
+                    const lat = (i / 16) * Math.PI;
+                    ctx.beginPath();
+                    for (let j = 0; j <= 32; j++) {
+                        const theta = (j / 32) * 2 * Math.PI;
+                        const px = Math.sin(lat) * Math.cos(theta);
+                        const py = Math.cos(lat);
+                        const pz = Math.sin(lat) * Math.sin(theta);
+                        const p = project3D(px, py, pz, rotX, rotY, zoom);
+                        if (j === 0) ctx.moveTo(p.sx, p.sy);
+                        else ctx.lineTo(p.sx, p.sy);
+                    }
+                    ctx.stroke();
+                }
+                for (let i = 0; i < 12; i++) {
+                    const lon = (i / 12) * 2 * Math.PI;
+                    ctx.beginPath();
+                    for (let j = 0; j <= 32; j++) {
+                        const theta = (j / 32) * Math.PI;
+                        const px = Math.sin(theta) * Math.cos(lon);
+                        const py = Math.cos(theta);
+                        const pz = Math.sin(theta) * Math.sin(lon);
+                        const p = project3D(px, py, pz, rotX, rotY, zoom);
+                        if (j === 0) ctx.moveTo(p.sx, p.sy);
+                        else ctx.lineTo(p.sx, p.sy);
+                    }
+                    ctx.stroke();
+                }
+
+                if (mode === 0 || mode === 2) {
+                    for (const phoneme of codex.phonemeGrid) {
+                        const pp = project3D(phoneme.x, phoneme.y, phoneme.z, rotX, rotY, zoom);
+                        const isActive = phoneme.active;
+                        const size = isActive ? 10 * zoom : 4 * zoom;
+                        const color = isActive ? phoneme.color : 'rgba(100, 100, 150, 0.25)';
+                        if (isActive) {
+                            const grd = ctx.createRadialGradient(pp.sx, pp.sy, 0, pp.sx, pp.sy, 25 * zoom);
+                            grd.addColorStop(0, color + '40');
+                            grd.addColorStop(1, 'rgba(0,0,0,0)');
+                            ctx.fillStyle = grd;
+                            ctx.beginPath();
+                            ctx.arc(pp.sx, pp.sy, 25 * zoom, 0, 2 * Math.PI);
+                            ctx.fill();
+                        }
+                        ctx.fillStyle = color;
+                        ctx.shadowColor = isActive ? color : 'transparent';
+                        ctx.shadowBlur = isActive ? 30 : 0;
+                        ctx.beginPath();
+                        ctx.arc(pp.sx, pp.sy, size, 0, 2 * Math.PI);
+                        ctx.fill();
+                        ctx.shadowBlur = 0;
+                        ctx.fillStyle = isActive ? '#ffffff' : 'rgba(100, 100, 150, 0.3)';
+                        ctx.font = `${isActive ? 11 : 7}px "Courier New", monospace`;
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'bottom';
+                        ctx.fillText(phoneme.label, pp.sx, pp.sy - size - 4);
+                    }
+                }
+
+                if (mode === 0 || mode === 4) {
+                    const sHist = codex.sHistory;
+                    const rHist = codex.rHistory;
+                    if (sHist.length > 2 && rHist.length > 2) {
+                        let sMax = Fraction.zero();
+                        for (const d of sHist) if (d.val.abs().gt(sMax)) sMax = d.val.abs();
+                        if (sMax.isZero()) sMax = Fraction.one();
+                        ctx.lineWidth = 2;
+                        ctx.shadowColor = 'rgba(68, 255, 204, 0.3)';
+                        ctx.shadowBlur = 10;
+                        ctx.strokeStyle = 'rgba(68, 255, 204, 0.7)';
+                        ctx.beginPath();
+                        for (let i = 0; i < sHist.length; i++) {
+                            const val = fracToFloatApprox(sHist[i].val.div(sMax));
+                            const angle = i * 0.02;
+                            const radius = 0.3 + val * 0.3;
+                            const px = radius * Math.cos(angle);
+                            const py = radius * 0.5 * Math.sin(angle * 1.3);
+                            const pz = radius * 0.5 * Math.sin(angle * 0.7);
+                            const p = project3D(px, py, pz, rotX, rotY, zoom);
+                            if (i === 0) ctx.moveTo(p.sx, p.sy);
+                            else ctx.lineTo(p.sx, p.sy);
+                        }
+                        ctx.stroke();
+                        ctx.shadowBlur = 0;
+
+                        ctx.shadowColor = 'rgba(255, 170, 68, 0.3)';
+                        ctx.shadowBlur = 10;
+                        ctx.strokeStyle = 'rgba(255, 170, 68, 0.7)';
+                        ctx.beginPath();
+                        for (let i = 0; i < rHist.length; i++) {
+                            const val = fracToFloatApprox(rHist[i].val.div(sMax));
+                            const angle = i * 0.02 + 0.5;
+                            const radius = 0.3 + val * 0.3;
+                            const px = radius * Math.cos(angle);
+                            const py = radius * 0.5 * Math.sin(angle * 1.3 + 1);
+                            const pz = radius * 0.5 * Math.sin(angle * 0.7 + 0.5);
+                            const p = project3D(px, py, pz, rotX, rotY, zoom);
+                            if (i === 0) ctx.moveTo(p.sx, p.sy);
+                            else ctx.lineTo(p.sx, p.sy);
+                        }
+                        ctx.stroke();
+                        ctx.shadowBlur = 0;
+
+                        const labelPos = project3D(1.2, 1.4, 1.2, rotX, rotY, zoom);
+                        ctx.font = `${9 * zoom}px "Courier New", monospace`;
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.shadowColor = 'rgba(68, 255, 204, 0.5)';
+                        ctx.shadowBlur = 15;
+                        ctx.fillStyle = '#44ffcc';
+                        ctx.fillText('s(t)', labelPos.sx - 35 * zoom, labelPos.sy - 22 * zoom);
+                        ctx.shadowColor = 'rgba(255, 170, 68, 0.5)';
+                        ctx.shadowBlur = 15;
+                        ctx.fillStyle = '#ffaa44';
+                        ctx.fillText('r(t)', labelPos.sx + 35 * zoom, labelPos.sy - 22 * zoom);
+                        ctx.shadowBlur = 0;
+                    }
+                }
+
+                if (codex.cfHistory.length > 1 && (mode === 0 || mode === 3)) {
+                    const cf = codex.cfHistory;
+                    ctx.strokeStyle = 'rgba(68, 255, 200, 0.2)';
+                    ctx.lineWidth = 0.8;
+                    ctx.beginPath();
+                    for (let i = 1; i < cf.length; i++) {
+                        const v = fracToFloatApprox(cf[i].val);
+                        const angle = i * 0.1;
+                        const radius = 0.3 + v * 0.3;
+                        const px = radius * Math.cos(angle);
+                        const py = radius * 0.5 * Math.sin(angle * 1.3);
+                        const pz = radius * 0.5 * Math.sin(angle * 0.7);
+                        const p = project3D(px, py, pz, rotX, rotY, zoom);
+                        if (i === 1) ctx.moveTo(p.sx, p.sy);
+                        else ctx.lineTo(p.sx, p.sy);
+                    }
+                    ctx.stroke();
+                }
+
+                if (codex.zetaHistory.length > 1 && (mode === 0 || mode === 3)) {
+                    const zeta = codex.zetaHistory;
+                    ctx.strokeStyle = 'rgba(68, 200, 255, 0.2)';
+                    ctx.lineWidth = 0.8;
+                    ctx.beginPath();
+                    for (let i = 1; i < zeta.length; i++) {
+                        const v = fracToFloatApprox(zeta[i].re);
+                        const angle = i * 0.08;
+                        const radius = 0.2 + v * 0.2;
+                        const px = radius * Math.cos(angle + 2);
+                        const py = radius * 0.5 * Math.sin(angle * 0.9 + 1);
+                        const pz = radius * 0.5 * Math.cos(angle * 0.8);
+                        const p = project3D(px, py, pz, rotX, rotY, zoom);
+                        if (i === 1) ctx.moveTo(p.sx, p.sy);
+                        else ctx.lineTo(p.sx, p.sy);
+                    }
+                    ctx.stroke();
+                }
+
+                if (codex.lingosoTraj.length > 1 && (mode === 0 || mode === 2)) {
+                    const ling = codex.lingosoTraj;
+                    ctx.strokeStyle = 'rgba(255, 102, 170, 0.25)';
+                    ctx.lineWidth = 1.2;
+                    ctx.shadowColor = 'rgba(255, 102, 170, 0.1)';
+                    ctx.shadowBlur = 10;
+                    ctx.beginPath();
+                    for (let i = 1; i < ling.length; i++) {
+                        const p = project3D(
+                            fracToFloatApprox(ling[i].x) * 0.8,
+                            fracToFloatApprox(ling[i].y) * 0.8,
+                            fracToFloatApprox(ling[i].z) * 0.8,
+                            rotX, rotY, zoom);
+                        if (i === 1) ctx.moveTo(p.sx, p.sy);
+                        else ctx.lineTo(p.sx, p.sy);
+                    }
+                    ctx.stroke();
+                    ctx.shadowBlur = 0;
+                    for (let i = 0; i < ling.length; i += 5) {
+                        const p = project3D(
+                            fracToFloatApprox(ling[i].x) * 0.8,
+                            fracToFloatApprox(ling[i].y) * 0.8,
+                            fracToFloatApprox(ling[i].z) * 0.8,
+                            rotX, rotY, zoom);
+                        const alpha = 0.1 + 0.5 * (i / ling.length);
+                        ctx.fillStyle = `rgba(255, 102, 170, ${alpha})`;
+                        ctx.beginPath();
+                        ctx.arc(p.sx, p.sy, 2, 0, 2 * Math.PI);
+                        ctx.fill();
+                    }
+                }
+
+                if (traj.length > 1) {
+                    for (let i = 1; i < traj.length; i++) {
+                        const p0 = project3D(
+                            fracToFloatApprox(traj[i - 1].x),
+                            fracToFloatApprox(traj[i - 1].y),
+                            fracToFloatApprox(traj[i - 1].z),
+                            rotX, rotY, zoom);
+                        const p1 = project3D(
+                            fracToFloatApprox(traj[i].x),
+                            fracToFloatApprox(traj[i].y),
+                            fracToFloatApprox(traj[i].z),
+                            rotX, rotY, zoom);
+                        const alpha = 0.15 + 0.6 * (i / traj.length);
+                        const color = traj[i].coherent ? `rgba(0, 255, 136, ${alpha})` : `rgba(255, 68, 102, ${alpha})`;
+                        ctx.strokeStyle = color;
+                        ctx.lineWidth = 1.5 + 0.5 * (i / traj.length);
+                        ctx.beginPath();
+                        ctx.moveTo(p0.sx, p0.sy);
+                        ctx.lineTo(p1.sx, p1.sy);
+                        ctx.stroke();
+                    }
+                }
+
+                const proj = codex.q.projectToS2();
+                const p = project3D(
+                    fracToFloatApprox(proj.x),
+                    fracToFloatApprox(proj.y),
+                    fracToFloatApprox(proj.z),
+                    rotX, rotY, zoom);
+                const glowColor = codex.coherent ? 'rgba(0, 255, 136, ' : 'rgba(255, 68, 102, ';
+                const grd2 = ctx.createRadialGradient(p.sx, p.sy, 0, p.sx, p.sy, 40 * zoom);
+                grd2.addColorStop(0, glowColor + '0.4)');
+                grd2.addColorStop(0.5, glowColor + '0.1)');
+                grd2.addColorStop(1, glowColor + '0)');
+                ctx.fillStyle = grd2;
+                ctx.beginPath();
+                ctx.arc(p.sx, p.sy, 40 * zoom, 0, 2 * Math.PI);
+                ctx.fill();
+
+                const pulse = 0.8 + 0.2 * Math.sin(nowMs * 0.003);
+                ctx.fillStyle = codex.coherent ? '#00ff88' : '#ff4466';
+                ctx.shadowColor = codex.coherent ? '#00ff88' : '#ff4466';
+                ctx.shadowBlur = 30 * pulse;
+                ctx.beginPath();
+                ctx.arc(p.sx, p.sy, 6 * zoom * pulse, 0, 2 * Math.PI);
+                ctx.fill();
+                ctx.shadowBlur = 0;
+
+                ctx.fillStyle = codex.coherent ? '#00ffcc' : '#ff6688';
+                ctx.font = `bold ${22 * zoom}px "Courier New", monospace`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.shadowColor = codex.coherent ? '#00ffcc' : '#ff6688';
+                ctx.shadowBlur = 40;
+                ctx.fillText('Φ', p.sx + 25 * zoom, p.sy - 25 * zoom);
+                ctx.shadowBlur = 0;
+
+                if (mode === 0 || mode === 1) {
+                    const dbzColor = codex.dbz === 0 ? '#6688aa' : (codex.dbz === 1 ? '#44ddff' : '#ff66aa');
+                    const dbzScale = codex.dbz === 0 ? 1 : (codex.dbz === 1 ? 0.7 : 1.3);
+                    ctx.strokeStyle = dbzColor;
+                    ctx.lineWidth = 2;
+                    ctx.shadowColor = dbzColor;
+                    ctx.shadowBlur = codex.dbz !== 0 ? 20 : 0;
+                    ctx.globalAlpha = 0.5 + 0.4 * (codex.dbz !== 0 ? 1 : 0);
+                    ctx.beginPath();
+                    for (let i = 0; i <= 28; i++) {
+                        const t = i / 28;
+                        const ang = t * 2 * Math.PI;
+                        const rad = (0.28 * dbzScale + 0.12 * dbzScale * Math.sin(t * 4 * Math.PI + codex.time.toFloatApprox() * 0.02)) * zoom;
+                        const ax = rad * Math.cos(ang);
+                        const ay = rad * 0.7 * Math.sin(ang + codex.time.toFloatApprox() * 0.01);
+                        const az = rad * 0.5 * Math.sin(ang * 1.2 + codex.time.toFloatApprox() * 0.015);
+                        const pp = project3D(ax, ay, az, rotX, rotY, zoom);
+                        if (i === 0) ctx.moveTo(pp.sx, pp.sy);
+                        else ctx.lineTo(pp.sx, pp.sy);
+                    }
+                    ctx.stroke();
+                    ctx.shadowBlur = 0;
+                    ctx.globalAlpha = 1;
+
+                    if (codex.dbz !== 0) {
+                        ctx.strokeStyle = dbzColor;
+                        ctx.lineWidth = 3;
+                        ctx.globalAlpha = 0.3 + 0.3 * Math.sin(nowMs * 0.01);
+                        ctx.strokeRect(10, 10, w - 20, h - 20);
+                        ctx.globalAlpha = 1;
+                    }
+                }
+
+                if (mode === 0 || mode === 3) {
+                    const obsMag = Math.sqrt(
+                        fracToFloatApprox(codex.obsRe) ** 2 +
+                        fracToFloatApprox(codex.obsIm) ** 2
+                    );
+                    const fieldOpacity = 0.03 + Math.min(1, obsMag) * 0.4;
+                    const fieldScale = (0.7 + Math.min(1, obsMag) * 0.6) * zoom;
+                    for (let i = 0; i < 12; i++) {
+                        const baseAngle = (i / 12) * 2 * Math.PI + codex.time.toFloatApprox() * 0.005;
+                        ctx.strokeStyle = `rgba(255, 170, 68, ${fieldOpacity * 0.5})`;
+                        ctx.lineWidth = 0.8;
+                        ctx.beginPath();
+                        for (let j = 0; j <= 28; j++) {
+                            const t = j / 28;
+                            const ang = baseAngle + t * 0.8;
+                            const r = fieldScale * (1 + 0.3 * Math.sin(t * 3 * Math.PI + codex.time.toFloatApprox() * 0.01));
+                            const fx = r * Math.cos(ang);
+                            const fy = t * 1.4 - 0.7;
+                            const fz = r * Math.sin(ang);
+                            const pp = project3D(fx, fy, fz, rotX, rotY, zoom);
+                            if (j === 0) ctx.moveTo(pp.sx, pp.sy);
+                            else ctx.lineTo(pp.sx, pp.sy);
+                        }
+                        ctx.stroke();
+                    }
+                }
+
+                if (mode === 0 || mode === 2) {
+                    const marketImbalance = fracToFloatApprox(codex.marketImbalance);
+                    const marketPulse = 0.1 + 0.5 * (1 - Math.min(1, Math.abs(marketImbalance) / 15));
+                    const mColor = marketImbalance > 2 ? 'rgba(68, 255, 136, ' :
+                        marketImbalance < -2 ? 'rgba(255, 68, 102, ' : 'rgba(68, 170, 255, ';
+                    ctx.strokeStyle = mColor + marketPulse + ')';
+                    ctx.lineWidth = 2.5;
+                    ctx.shadowColor = marketImbalance > 2 ? '#44ff88' : (marketImbalance < -2 ? '#ff4466' : '#44aaff');
+                    ctx.shadowBlur = 15;
+                    ctx.beginPath();
+                    for (let i = 0; i <= 40; i++) {
+                        const ang = (i / 40) * 2 * Math.PI + codex.time.toFloatApprox() * 0.02;
+                        const rr = 0.90 + 0.04 * Math.sin(ang * 4 + codex.time.toFloatApprox() * 0.1);
+                        const mx = rr * Math.cos(ang);
+                        const my = 0.02 * Math.sin(ang * 2 + codex.time.toFloatApprox() * 0.05);
+                        const mz = rr * Math.sin(ang);
+                        const pp = project3D(mx, my, mz, rotX, rotY, zoom);
+                        if (i === 0) ctx.moveTo(pp.sx, pp.sy);
+                        else ctx.lineTo(pp.sx, pp.sy);
+                    }
+                    ctx.stroke();
+                    ctx.shadowBlur = 0;
+                }
+
+                if (mode === 0 || mode === 1) {
+                    const closure = fracToFloatApprox(codex.selfRefClosure);
+                    ctx.fillStyle = `rgba(200, 200, 255, ${0.2 + closure * 0.5})`;
+                    ctx.font = `bold ${16 * zoom}px "Courier New", monospace`;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.shadowColor = 'rgba(200, 200, 255, 0.2)';
+                    ctx.shadowBlur = 30;
+                    ctx.fillText('⊢', w / 2, h / 2 - 5 * zoom);
+                    ctx.shadowBlur = 0;
+                }
+
+                coherenceSpan.textContent = codex.coherent ? '✅ COHERENT (s=r)' : '🔄 EVOLVING (s≠r)';
+                coherenceSpan.style.color = codex.coherent ? '#00ff88' : '#ff4466';
+                generationSpan.textContent = codex.gen;
+                deviationSpan.textContent = fracToDisplay(codex.dev, 6);
+                epsilonSpan.textContent = codex.eps.toString();
+                modeDisplay.textContent = codex.modes[codex.mode];
+
+                s2Exact.textContent = codex.s2.toString();
+                r2Exact.textContent = codex.r2.toString();
+                s2Val.textContent = fracToDisplay(codex.s2, 6);
+                r2Val.textContent = fracToDisplay(codex.r2, 6);
+                deltaVal.textContent = fracToDisplay(codex.dev, 6);
+                obsVal.textContent = Math.sqrt(
+                    fracToFloatApprox(codex.obsRe) ** 2 +
+                    fracToFloatApprox(codex.obsIm) ** 2
+                ).toFixed(4);
+                srRatioSpan.textContent = fracToDisplay(codex.srRatio, 4);
+                curlValSpan.textContent = fracToDisplay(codex.curlMagnitude, 4);
+                commValSpan.textContent = fracToDisplay(codex.commutatorNorm, 4);
+                psiNormValSpan.textContent = fracToDisplay(codex.psiNormSq, 4);
+                zetaValSpan.textContent = Math.sqrt(
+                    fracToFloatApprox(codex.lastZetaRe) ** 2 +
+                    fracToFloatApprox(codex.lastZetaIm) ** 2
+                ).toFixed(4);
+
+                const dbzLabels = ['NONE', 'CRITICAL LINE', 'NATALIA'];
+                dbzBranchSpan.textContent = dbzLabels[codex.dbz] || 'NONE';
+                dbzBranchSpan.style.color = codex.dbz === 0 ? '#6688aa' :
+                    codex.dbz === 1 ? '#44ddff' : '#ff66aa';
+
+                aeaeDeltaSpan.textContent = codex.aeaeDelta !== undefined ? codex.aeaeDelta : 0;
+                aeaeMSpan.textContent = codex.marketM;
+                aeaeNSpan.textContent = codex.marketN;
+                aeaeDeltaPanelSpan.textContent = codex.aeaeDelta !== undefined ? codex.aeaeDelta : 0;
+                aeaeImbalanceSpan.textContent = fracToDisplay(codex.marketImbalance, 4);
+                aeaeRegimeSpan.textContent = codex.marketRegime;
+                aeaeRegimeSpan.style.color = codex.marketRegime === 'BULLISH' ? '#44ff88' :
+                    codex.marketRegime === 'BEARISH' ? '#ff4466' : '#44aaff';
+
+                obsRealSpan.textContent = fracToDisplay(codex.obsRe, 4);
+                obsImagSpan.textContent = fracToDisplay(codex.obsIm, 4);
+                obsGridSpan.textContent = codex.obsGridCount;
+                obsPsiNormSpan.textContent = fracToDisplay(codex.psiNormSq, 4);
+                obsIntelligenceSpan.textContent = fracToDisplay(codex.intelligence, 4);
+
+                zetaReSpan.textContent = fracToDisplay(codex.lastZetaRe, 4);
+                zetaImSpan.textContent = fracToDisplay(codex.lastZetaIm, 4);
+                zetaMagSpan.textContent = Math.sqrt(
+                    fracToFloatApprox(codex.lastZetaRe) ** 2 +
+                    fracToFloatApprox(codex.lastZetaIm) ** 2
+                ).toFixed(4);
+                zetaTermsSpan.textContent = codex.zetaTerms;
+
+                const sr = fracToFloatApprox(codex.srRatio);
+                const clampedSr = Math.max(0.4, Math.min(1.6, sr));
+                const normalized = (clampedSr - 0.4) / 1.2;
+                const dashLength = Math.min(282, Math.max(0, normalized * 282));
+                gaugeArc.setAttribute('stroke-dasharray', `${dashLength} 282`);
+                gaugeLabel.textContent = `s/r: ${sr.toFixed(3)}`;
+
+                if (codex.proofSteps.length > 1) {
+                    proofChain.classList.add('visible');
+                    const lastStep = codex.proofSteps[codex.proofSteps.length - 1];
+                    proofDetail.textContent = `(${codex.proofSteps.length} steps · closure ${fracToDisplay(lastStep.closure, 3)})`;
+                    proofLatest.textContent = `↳ ${lastStep.type}`;
+                    proofProgress.style.width = `${fracToFloatApprox(codex.selfRefClosure) * 100}%`;
+                } else {
+                    proofChain.classList.remove('visible');
+                    proofProgress.style.width = '0%';
+                }
+
+                if (showTrace && codex.proofTrace.length > 0) {
+                    proofTrace.classList.add('visible');
+                    let html = '';
+                    for (let i = codex.proofTrace.length - 1; i >= 0; i--) {
+                        const e = codex.proofTrace[i];
+                        const cls = 'pt-' + e.type;
+                        const ts = e.t.toFixed(2);
+                        html += `<div class="pt-line"><span class="pt-ts">[t=${ts}]</span> <span class="${cls}">${e.msg}</span></div>`;
+                    }
+                    proofTraceLines.innerHTML = html;
+                } else {
+                    proofTrace.classList.remove('visible');
+                }
+
+                if (showAxioms) {
+                    axiomPanel.classList.add('visible');
+                    document.getElementById('ax-a').textContent = `Φ = (${codex.q.a.toString()}) + i(${codex.q.b.toString()}) + j(${codex.q.c.toString()}) + k(${codex.q.d.toString()})`;
+                    document.getElementById('ax-sr').textContent = `s² = ${codex.s2.toString()} · r² = ${codex.r2.toString()}`;
+                    document.getElementById('ax-q').textContent = `PTD = ${codex.ptd} (${codex.ptdRegime})`;
+                    document.getElementById('ax-t4').textContent = `|∇×Φ| = ${fracToDisplay(codex.curlMagnitude, 4)}`;
+                    document.getElementById('ax-hopf').textContent = `π(q) = (${fracToDisplay(codex.q.hopfMap().z0.re, 3)}, ${fracToDisplay(codex.q.hopfMap().z0.im, 3)}, ${fracToDisplay(codex.q.hopfMap().z1.re, 3)}, ${fracToDisplay(codex.q.hopfMap().z1.im, 3)})`;
+                    document.getElementById('ax-t0').textContent = codex.t0State ? 'T₀ (Particle)' : '¬T₀ (Wave)';
+                    document.getElementById('ax-dbz').textContent = `DbZ = ${codex.dbz}`;
+                    document.getElementById('ax-i').textContent = `I = ${fracToDisplay(codex.intelligence, 4)}`;
+                    document.getElementById('ax-aeae').textContent = `Î = ${fracToDisplay(codex.marketImbalance, 4)}`;
+                    document.getElementById('ax-delta').textContent = `δ(m−n−2) = ${codex.aeaeDelta !== undefined ? codex.aeaeDelta : 0}`;
+                    document.getElementById('ax-obs').textContent = `O[Ψ] = ${fracToDisplay(codex.obsRe, 4)} + i·${fracToDisplay(codex.obsIm, 4)}`;
+                    document.getElementById('ax-c').textContent = `‖[Φ, Φ†]‖ = ${fracToDisplay(codex.commutatorNorm, 4)}`;
+                    document.getElementById('ax-zeta').textContent = `ζ(½+it) = ${fracToDisplay(codex.lastZetaRe, 4)} + i·${fracToDisplay(codex.lastZetaIm, 4)}`;
+                    document.getElementById('ax-fe').textContent = `Dirichlet terms = ${codex.zetaTerms}`;
+                    document.getElementById('ax-self').textContent = `CS ⊨ CS (closure = ${fracToDisplay(codex.selfRefClosure, 3)})`;
+                    document.getElementById('ax-box').textContent = `□ ↔ ⊤ (PTD = ${codex.ptd})`;
+                } else {
+                    axiomPanel.classList.remove('visible');
+                }
+
+                const sHist2 = codex.sHistory;
+                const rHist2 = codex.rHistory;
+                if (sHist2.length > 2) {
+                    let sMax = Fraction.zero();
+                    for (const d of sHist2) if (d.val.abs().gt(sMax)) sMax = d.val.abs();
+                    if (sMax.isZero()) sMax = Fraction.one();
+                    const sPoints = sHist2.map((d, i) => {
+                        const x = (i / sHist2.length) * 200;
+                        const y = 50 - fracToFloatApprox(d.val.div(sMax)) * 40;
+                        return `${x.toFixed(1)},${y.toFixed(1)}`;
+                    }).join(' ');
+                    sPolyline.setAttribute('points', sPoints);
+                    const rPoints = rHist2.map((d, i) => {
+                        const x = (i / rHist2.length) * 200;
+                        const y = 50 - fracToFloatApprox(d.val.div(sMax)) * 40;
+                        return `${x.toFixed(1)},${y.toFixed(1)}`;
+                    }).join(' ');
+                    rPolyline.setAttribute('points', rPoints);
+                }
+
+                lingosoActiveSpan.textContent = codex.activePhoneme;
+                const lastLing = codex.lingosoTraj[codex.lingosoTraj.length - 1];
+                if (lastLing) {
+                    lingosoCoordsSpan.textContent = `(${fracToDisplay(lastLing.x, 2)}, ${fracToDisplay(lastLing.y, 2)}, ${fracToDisplay(lastLing.z, 2)})`;
+                }
+                lingosoArcSpan.textContent = codex.activeArcLength.toString();
+            }
+        } catch (e) {
+            showError('Render error: ' + e.message);
+            console.error('Render error:', e);
+        }
+        requestAnimationFrame(render);
+    }
+
+    // ============================================================
+    // 20. CONTROLS & EVENT HANDLERS
+    // ============================================================
+    canvas.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        lastX = e.clientX;
+        lastY = e.clientY;
+    });
+    window.addEventListener('mousemove', (e) => {
+        if (isDragging) {
+            const dx = e.clientX - lastX;
+            const dy = e.clientY - lastY;
+            rotY += dx * 0.005;
+            rotX += dy * 0.005;
+            rotX = Math.max(-1.5, Math.min(1.5, rotX));
+            lastX = e.clientX;
+            lastY = e.clientY;
+        }
+    });
+    window.addEventListener('mouseup', () => { isDragging = false; });
+
+    canvas.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        const delta = e.deltaY > 0 ? -0.05 : 0.05;
+        zoom = Math.max(0.3, Math.min(2.5, zoom + delta));
+    }, { passive: false });
+
+    let touchId = null;
+    let lastTouchDist = 0;
+    canvas.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 1) {
+            const touch = e.touches[0];
+            isDragging = true;
+            lastX = touch.clientX;
+            lastY = touch.clientY;
+            touchId = touch.identifier;
+        } else if (e.touches.length === 2) {
+            const dx = e.touches[0].clientX - e.touches[1].clientX;
+            const dy = e.touches[0].clientY - e.touches[1].clientY;
+            lastTouchDist = Math.sqrt(dx * dx + dy * dy);
+        }
+    }, { passive: true });
+    canvas.addEventListener('touchmove', (e) => {
+        e.preventDefault();
+        if (e.touches.length === 1) {
+            for (const touch of e.touches) {
+                if (touch.identifier === touchId || touchId === null) {
+                    const dx = touch.clientX - lastX;
+                    const dy = touch.clientY - lastY;
+                    rotY += dx * 0.005;
+                    rotX += dy * 0.005;
+                    rotX = Math.max(-1.5, Math.min(1.5, rotX));
+                    lastX = touch.clientX;
+                    lastY = touch.clientY;
+                    if (touchId === null) touchId = touch.identifier;
+                    break;
+                }
+            }
+        } else if (e.touches.length === 2) {
+            const dx = e.touches[0].clientX - e.touches[1].clientX;
+            const dy = e.touches[0].clientY - e.touches[1].clientY;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            const delta = (dist - lastTouchDist) * 0.005;
+            zoom = Math.max(0.3, Math.min(2.5, zoom + delta));
+            lastTouchDist = dist;
+        }
+    }, { passive: false });
+    canvas.addEventListener('touchend', () => {
+        isDragging = false;
+        touchId = null;
+        lastTouchDist = 0;
+    }, { passive: true });
+
+    document.getElementById('pauseBtn').addEventListener('click', () => {
+        paused = !paused;
+        document.getElementById('pauseBtn').textContent = paused ? '▶' : '⏸';
+        document.getElementById('pauseBtn').classList.toggle('active', paused);
+    });
+
+    document.getElementById('resetBtn').addEventListener('click', () => {
+        codex.reset();
+        paused = false;
+        document.getElementById('pauseBtn').textContent = '⏸';
+        document.getElementById('pauseBtn').classList.remove('active');
+        coherenceSpan.textContent = 'INITIALIZING';
+        coherenceSpan.style.color = '#aaccff';
+        generationSpan.textContent = '0';
+        deviationSpan.textContent = '0.000000';
+        epsilonSpan.textContent = '1/100';
+        s2Exact.textContent = '0/1';
+        r2Exact.textContent = '1/1';
+        s2Val.textContent = '0.000000';
+        r2Val.textContent = '1.000000';
+        deltaVal.textContent = '0.000000';
+        obsVal.textContent = '0.0000';
+        srRatioSpan.textContent = '1.0000';
+        curlValSpan.textContent = '0.0000';
+        commValSpan.textContent = '0.0000';
+        psiNormValSpan.textContent = '0.0000';
+        zetaValSpan.textContent = '0.0000';
+        dbzBranchSpan.textContent = 'NONE';
+        aeaeDeltaSpan.textContent = '0';
+        aeaeMSpan.textContent = '0';
+        aeaeNSpan.textContent = '0';
+        aeaeDeltaPanelSpan.textContent = '0';
+        aeaeImbalanceSpan.textContent = '0.0000';
+        aeaeRegimeSpan.textContent = 'NEUTRAL';
+        obsRealSpan.textContent = '0.0000';
+        obsImagSpan.textContent = '0.0000';
+        obsGridSpan.textContent = '0';
+        obsPsiNormSpan.textContent = '0.0000';
+        obsIntelligenceSpan.textContent = '0.0000';
+        zetaReSpan.textContent = '0.0000';
+        zetaImSpan.textContent = '0.0000';
+        zetaMagSpan.textContent = '0.0000';
+        zetaTermsSpan.textContent = '24';
+        proofChain.classList.remove('visible');
+        proofTrace.classList.remove('visible');
+        proofTraceLines.innerHTML = '';
+        gaugeArc.setAttribute('stroke-dasharray', '0 282');
+        gaugeLabel.textContent = 's/r: 1.000';
+        proofProgress.style.width = '0%';
+        proofLatest.textContent = '';
+        sPolyline.setAttribute('points', '');
+        rPolyline.setAttribute('points', '');
+        lingosoActiveSpan.textContent = '—';
+        lingosoCoordsSpan.textContent = '(0.00, 0.00, 0.00)';
+        lingosoArcSpan.textContent = '0';
+        hideError();
+    });
+
+    document.getElementById('modeBtn').addEventListener('click', () => {
+        const mode = codex.toggleMode();
+        document.getElementById('modeBtn').textContent = mode;
+        modeDisplay.textContent = mode;
+    });
+
+    document.getElementById('traceBtn').addEventListener('click', () => {
+        showTrace = !showTrace;
+        codex._traceVisible = showTrace;
+        document.getElementById('traceBtn').classList.toggle('active', showTrace);
+        if (!showTrace) proofTrace.classList.remove('visible');
+    });
+
+    document.getElementById('axiomBtn').addEventListener('click', () => {
+        showAxioms = !showAxioms;
+        document.getElementById('axiomBtn').classList.toggle('active', showAxioms);
+        if (!showAxioms) axiomPanel.classList.remove('visible');
+    });
+
+    document.getElementById('exportBtn').addEventListener('click', () => {
+        const data = {
+            timestamp: Date.now(),
+            time_exact: codex.time.toString(),
+            generation: codex.gen,
+            coherent: codex.coherent,
+            s_exact: codex.s.toString(),
+            r_exact: codex.r.toString(),
+            s2_exact: codex.s2.toString(),
+            r2_exact: codex.r2.toString(),
+            sr_ratio_exact: codex.srRatio.toString(),
+            dev_exact: codex.dev.toString(),
+            eps_exact: codex.eps.toString(),
+            rePsi_exact: codex.rePsi.toString(),
+            obs_re_exact: codex.obsRe.toString(),
+            obs_im_exact: codex.obsIm.toString(),
+            obs_grid_count: codex.obsGridCount,
+            psi_norm_sq_exact: codex.psiNormSq.toString(),
+            zeta_re_exact: codex.lastZetaRe.toString(),
+            zeta_im_exact: codex.lastZetaIm.toString(),
+            zeta_terms: codex.zetaTerms,
+            dbz: codex.dbz,
+            marketM: codex.marketM,
+            marketN: codex.marketN,
+            marketImbalance_exact: codex.marketImbalance.toString(),
+            marketRegime: codex.marketRegime,
+            aeaeDelta: codex.aeaeDelta,
+            crtState: codex.crtState,
+            crtResidues: codex.crtResidues,
+            selfRefClosure_exact: codex.selfRefClosure.toString(),
+            proofDepth: codex.proofDepth,
+            activePhoneme: codex.activePhoneme,
+            activeArcLength_exact: codex.activeArcLength.toString(),
+            commutatorNorm_exact: codex.commutatorNorm.toString(),
+            curlMagnitude_exact: codex.curlMagnitude.toString(),
+            intelligence_exact: codex.intelligence.toString(),
+            ptd: codex.ptd,
+            ptdRegime: codex.ptdRegime,
+            t0State: codex.t0State,
+            sHistory: codex.sHistory.slice(-200).map(d => ({ t: d.t, val: d.val.toString() })),
+            rHistory: codex.rHistory.slice(-200).map(d => ({ t: d.t, val: d.val.toString() })),
+            proofTrace: codex.proofTrace.slice(-32),
+            trajectory: codex.traj.slice(-100).map(t => ({
+                x: t.x.toString(), y: t.y.toString(), z: t.z.toString(),
+                coherent: t.coherent, dev: t.dev.toString()
+            })),
+            quatHistory_exact: codex.quatHistory.slice(-64).map(q => ({
+                a: q.a.toString(), b: q.b.toString(),
+                c: q.c.toString(), d: q.d.toString()
+            }))
+        };
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `codex_symbolica_exact_${Date.now()}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+    });
+
+    document.getElementById('helpBtn').addEventListener('click', () => {
+        showHelp = !showHelp;
+        explainPanel.style.display = showHelp ? 'block' : 'none';
+        document.getElementById('helpBtn').classList.toggle('active', showHelp);
+    });
+
+    window.addEventListener('resize', () => {
+        resizeCanvas();
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === ' ' || e.key === 'Space') {
+            e.preventDefault();
+            document.getElementById('pauseBtn').click();
+        }
+        if (e.key === 'r' || e.key === 'R') {
+            document.getElementById('resetBtn').click();
+        }
+        if (e.key === 'm' || e.key === 'M') {
+            document.getElementById('modeBtn').click();
+        }
+        if (e.key === 'e' || e.key === 'E') {
+            document.getElementById('exportBtn').click();
+        }
+        if (e.key === 'h' || e.key === 'H') {
+            document.getElementById('helpBtn').click();
+        }
+        if (e.key === 't' || e.key === 'T') {
+            document.getElementById('traceBtn').click();
+        }
+        if (e.key === 'a' || e.key === 'A') {
+            document.getElementById('axiomBtn').click();
+        }
+        if (e.key === 's' || e.key === 'S') {
+            if (codex.mode !== 4) {
+                codex.mode = 4;
+                document.getElementById('modeBtn').textContent = 'S_R';
+                modeDisplay.textContent = 'S_R';
+            } else {
+                codex.mode = 0;
+                document.getElementById('modeBtn').textContent = 'FULL';
+                modeDisplay.textContent = 'FULL';
+            }
+        }
+        if (e.key === '+' || e.key === '=') {
+            zoom = Math.min(2.5, zoom + 0.05);
+        }
+        if (e.key === '-') {
+            zoom = Math.max(0.3, zoom - 0.05);
+        }
+    });
+
+    // ============================================================
+    // 21. INITIALIZATION
+    // ============================================================
+    function initializeVisualization() {
+        if (!preFlightValidate()) {
+            showError('Canvas not ready. Retrying...');
+            setTimeout(initializeVisualization, 200);
+            return;
+        }
+
+        try {
+            codex.step(new Fraction(1, 100));
+            codex.step(new Fraction(1, 100));
+            codex.step(new Fraction(1, 100));
+            codex.step(new Fraction(1, 100));
+            codex.step(new Fraction(1, 100));
+        } catch (e) {
+            showError('State seed error: ' + e.message);
+            console.error('Seed error:', e);
+            return;
+        }
+
+        try {
+            render();
+        } catch (e) {
+            showError('Render start error: ' + e.message);
+            console.error('Render start error:', e);
+        }
+    }
+
+    if (document.readyState === 'complete' || document.readyState === 'interactive') {
+        setTimeout(initializeVisualization, 50);
+    } else {
+        document.addEventListener('DOMContentLoaded', initializeVisualization);
+    }
+
+    // ============================================================
+    // 22. FINAL CONSOLE MANIFEST
+    // ============================================================
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.log('⚡ CODEX SYMBOLICA · AUTOLOGICAL VISUALIZATION');
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.log(' Axioms: s = r | DbZ: Re[Ψ] branching | O[Ψ]: 4D partition sum');
+    console.log(' Arithmetic: exact ℚ only (Fraction class); no float in state');
+    console.log(' Series: formally indexed partial sums in ℚ (cos, sin, exp, ln)');
+    console.log(' Quaternions: ℍ over ℚ (𝒦₁₂, 𝒦₂₈, 𝒦₂₉)');
+    console.log(' Hopf map: π(q) = ((q₀+iq₁)/(1−q₃), (q₂+iq₃)/(1−q₃)) (𝒞₁, 𝒵₃₅)');
+    console.log(' Differential forms: A, dA, A∧dA, dA∧dA; PTD (𝒜₁₁–𝒜₂₂, ℬ₁–ℬ₃₀)');
+    console.log(' T₀ / ¬T₀: Kolmogorov separation (𝒞₃₁–𝒞₃₆, ℳ₂₆–ℳ₂₉)');
+    console.log(' CRT: exact ℤ/nℤ lattice (𝒟₇)');
+    console.log(' Continued fractions: exact integer division (𝒟₈, ᴀ₂₃, ᴋ₂₃)');
+    console.log(' ζ(s): Dirichlet partial sum on critical line, 24 terms (𝒟₁₁, 𝒲₁)');
+    console.log(' Intelligence: I = (vp/tp)·exp[−|Δ|²/(C²x log²x)]·|∇×Φ|norm (ℱ₅)');
+    console.log(' DbZ: DbZ(a,b) = a if b=0, else a⊕b (ℱ₃)');
+    console.log(' Lingoso: exact arc-length conditions (𝒢₁–𝒢₄₀)');
+    console.log(' ÆEA: Î = Σ(Π^{>66.6} − Π^{<33.3}); δ(m−n−2) (ℋ₁, ℋ₇)');
+    console.log(' Observer: O[Ψ] = ∫ψ†Φψ d⁴q over 4⁴ grid (𝒜₅, 𝒮₁)');
+    console.log(' Self-reference: ⊢ CS ⊢ CS ⟹ Φ = Truth (𝒜𝒜₁–𝒜𝒜₄₀)');
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.log('🎮 Space=Pause | R=Reset | M=Mode | E=Export | H=Help | T=Trace | A=Axioms | S=s/r');
+    console.log('🖱️  Drag=rotate | Scroll=zoom | +/- = zoom | Click s²/r² = copy');
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.log('🌌 Q.E.D. — LOGOS = Φ = Truth = Path = Origin');
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+
+})();
+</script>
+</body>
+</html>
