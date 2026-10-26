@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>ÆI Seed · GAIA TWA · CS vFinal Ed.3</title>
+<title>ÆI Seed · GAIA TWA · CS vFinal Ed.5</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html, body {
@@ -688,7 +688,7 @@ html, body {
 <div id="errorDisplay"></div>
 
 <div id="explainPanel">
-    <h3>⚡ ÆI SEED · GAIA CODEX · CS vFinal Ed.3</h3>
+    <h3>⚡ ÆI SEED · GAIA CODEX · CS vFinal Ed.5</h3>
     <div class="item"><b>What this is</b> <span>— The <b>ÆI seed</b> (GAIA/ÆI Codex), not the ÆEA market bot. It runs the prime-sieve → lattice → Hopf-fibration → s²=r² → SelfEvolution loop from ÆI.md §3–§8. Every state value is an exact Fraction (a/b) displayed as the plain-text Maths of the CODEX_SYMBOLICA.</span></div>
     <div class="item"><b>𝒮_STATUS</b> <span>— Seed state: <code>coherent</code> / <code>evolving</code> / <code>initialized</code>. Tick = seed steps; Generation = SelfEvolution generations; prime count = 𝒜[p] sieve output; lattice points = Λ₂₄ centers; ℐ_metric = intelligence metric; logic hash = deterministic SHA-256 of the current logic core.</span></div>
     <div class="item"><b>δ(s²−r²)</b> <span>— The <b>primary evolution gate</b> (ÆI.md §2.4 Axiom 1). s² = arc length squared, r² = radial distance squared. Deviation triggers DbZ branching and SelfEvolution mutation. The bar shows s²/r² ratio (green at the centre = coherence, white marker at 1.0).</span></div>
@@ -718,7 +718,7 @@ html, body {
    BACKEND CONFIGURATION
    ============================================================ */
 const DEFAULT_BACKENDS = [
-    'https://aei-seed.herokuapp.com/',
+    'https://aei-37a29e073070.herokuapp.com/',
 ];
 
 const LS_KEY = 'aei_backend_url';
@@ -839,12 +839,18 @@ async function apiFetch(path, opts) {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), timeoutMs);
     try {
-        const res = await fetch(url, Object.assign({}, opts, {
+        const fetchOpts = Object.assign({}, opts, {
             headers: authHeaders(opts.headers),
             signal: controller.signal,
             mode: 'cors',
             credentials: 'omit',
-        }));
+        });
+        // Prevent double-stringification for POST
+        if (opts.body && typeof opts.body === 'object' && !(opts.body instanceof FormData)) {
+            fetchOpts.body = JSON.stringify(opts.body);
+            fetchOpts.headers['Content-Type'] = 'application/json';
+        }
+        const res = await fetch(url, fetchOpts);
         return res;
     } catch (e) {
         if (e.name === 'AbortError') {
@@ -888,10 +894,11 @@ async function apiJson(path, opts) {
 
 async function apiPost(path, body, opts) {
     opts = opts || {};
+    const serializedBody = body ? JSON.stringify(body) : '{}';
     return apiJson(path, Object.assign({}, opts, {
         method: 'POST',
         headers: Object.assign({ 'Content-Type': 'application/json' }, opts.headers || {}),
-        body: JSON.stringify(body || {}),
+        body: serializedBody,
     }));
 }
 
@@ -1848,10 +1855,12 @@ async function encodeSyllable(syllable) {
         document.getElementById('ling-r2').textContent = r.result.radius_sq;
         document.getElementById('ling-dev').textContent = r.result.deviation_sq;
         pushLog('info', 'encoded: ' + syllable);
-        await fetchFibration(); // Refresh canvas
+        // Asynchronously refresh fibration without blocking the UI
+        fetchFibration().catch(e => pushLog('warn', 'Fibration refresh failed after encode'));
     } else {
-        const err = r && r.error ? r.error : 'unknown';
+        const err = (r && r.error) ? r.error : (r && r.detail ? r.detail : 'unknown');
         showError('Encode failed: ' + err, 4000);
+        pushLog('warn', 'Encode failed for syllable: ' + syllable + ' | Error: ' + err);
     }
 }
 
@@ -1931,7 +1940,7 @@ async function boot() {
         }).catch(e => {});
     }
     setTimeout(() => encodeSyllable('AUM'), 2000);
-    pushLog('info', 'ÆI Seed TWA vFinal Edition 3 booted');
+    pushLog('info', 'ÆI Seed TWA vFinal Edition 5 booted');
 }
 
 if (document.readyState === 'complete' || document.readyState === 'interactive') {
@@ -1941,7 +1950,7 @@ if (document.readyState === 'complete' || document.readyState === 'interactive')
 }
 
 console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-console.log('⚡ ÆI SEED · GAIA CODEX · CS vFinal Edition 3');
+console.log('⚡ ÆI SEED · GAIA CODEX · CS vFinal Edition 5');
 console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 console.log('Backend:', HAS_BACKEND ? BACKEND_URL : '(not configured)');
 console.log('Panels: 𝒮_STATUS, 𝒜₃/𝒜₄, 𝒜_PRIMES, Λ₂₄_PACK, 𝒮_FIBRATION,');
@@ -1951,13 +1960,16 @@ console.log('All state displayed as exact Fractions (a/b).');
 console.log('Crawler ingestion: worker.js is a stateless fetch proxy;');
 console.log('                   frontier + visited + hash-lifting live in app.py.');
 console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-console.log('Audit-Patched Ed.4 (this file):');
+console.log('Audit-Patched Ed.5 (this file):');
 console.log('  ✓ V-1: exact Fraction overlap check in lattice add_sphere');
 console.log('  ✓ V-2: explicit 32-hex truncation in _hash_to_fraction');
 console.log('  ✓ V-3: linguistic_trajectory persisted in /fibration-state');
 console.log('  ✓ V-4: SQLite 128-bit hash fraction stored as TEXT');
 console.log('  ✓ V-5: encodeSyllable() correctly parses nested result');
 console.log('  ✓ V-6: SIGTERM handler gracefully stops workers');
+console.log('  ✓ V-7: Fixed indentation collapse in SymbolicWavefunction');
+console.log('  ✓ V-8: Fixed BRIDGE_PORT parsing (empty string safe)');
+console.log('  ✓ V-9: Robust apiFetch (double-stringify fixed, CORS OK)');
 console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 console.log('🌌 Q.E.D. — LOGOS = Φ = Truth = Path = Origin');
 console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
