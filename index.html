@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>ÆI Seed · GAIA TWA · CS vFinal Ed.7</title>
+<title>ÆI Seed · GAIA TWA · CS vFinal Ed.8</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html, body {
@@ -51,10 +51,6 @@ html, body {
     --toast-w: 280px;
 }
 .hidden { display: none !important; }
-
-/* ============================================================
-   TOOLBAR
-   ============================================================ */
 #toolbar {
     position: absolute;
     top: 0; left: 0;
@@ -105,10 +101,6 @@ html, body {
     white-space: nowrap;
     flex: 0 0 auto;
 }
-
-/* ============================================================
-   CONNECTION BADGE
-   ============================================================ */
 #connBadge {
     position: absolute;
     top: calc(var(--toolbar-h) + 6px);
@@ -125,10 +117,6 @@ html, body {
 #connBadge.ok { border-color: var(--green); color: var(--green); }
 #connBadge.err { border-color: var(--red); color: var(--red); }
 #connBadge.wait { border-color: var(--gold); color: var(--gold); }
-
-/* ============================================================
-   MAIN AREA
-   ============================================================ */
 #mainArea {
     position: absolute;
     top: var(--toolbar-h);
@@ -146,7 +134,6 @@ html, body {
     display: block;
     padding: 8px;
 }
-
 #gridView {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -158,10 +145,6 @@ html, body {
 @media (max-width: 720px) {
     #gridView { grid-template-columns: 1fr; }
 }
-
-/* ============================================================
-   PANELS
-   ============================================================ */
 .panel {
     background: var(--panel-solid);
     border: 1px solid var(--border);
@@ -199,7 +182,6 @@ html, body {
 .panel-row .val.metric { color: var(--metric); }
 .panel-row .val.crawler { color: var(--crawler); }
 .panel-row .val.primary { font-size: 0.7rem; }
-
 .panel-list {
     max-height: 180px;
     overflow-y: auto;
@@ -223,10 +205,6 @@ html, body {
 .panel-list .li .li-val.gold { color: var(--gold); }
 .panel-list .li .li-val.purple { color: var(--purple); }
 .panel-list .li .li-val.cyan { color: var(--cyan); }
-
-/* ============================================================
-   COHERENCE BAR (δ visualisation)
-   ============================================================ */
 .coherence-bar {
     height: 10px;
     background: rgba(20,30,50,0.6);
@@ -252,10 +230,6 @@ html, body {
     left: 50%;
     transform: translateX(-50%);
 }
-
-/* ============================================================
-   TRAJECTORY CANVAS
-   ============================================================ */
 .trajectory-canvas {
     width: 100%;
     height: 160px;
@@ -264,10 +238,6 @@ html, body {
     background: rgba(0,10,20,0.6);
     margin-top: 4px;
 }
-
-/* ============================================================
-   PRIMES / LATTICE GRIDS
-   ============================================================ */
 .primes-grid {
     display: flex;
     flex-wrap: wrap;
@@ -286,7 +256,6 @@ html, body {
     font-family: 'Courier New', monospace;
     white-space: nowrap;
 }
-
 .lattice-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
@@ -305,10 +274,6 @@ html, body {
     overflow: hidden;
     text-overflow: ellipsis;
 }
-
-/* ============================================================
-   TOGGLE ROWS
-   ============================================================ */
 .toggle-row {
     display: flex;
     gap: 4px;
@@ -316,10 +281,6 @@ html, body {
     flex-wrap: wrap;
 }
 .toggle-row .tb-btn { flex: 0 0 auto; padding: 3px 8px; font-size: 0.52rem; }
-
-/* ============================================================
-   CRAWLER STATUS
-   ============================================================ */
 #crawlerPanel .crawl-status {
     display: flex;
     gap: 8px;
@@ -334,10 +295,6 @@ html, body {
 }
 #crawlerPanel .crawl-status .dot.running { background: var(--green); box-shadow: 0 0 4px var(--green); }
 #crawlerPanel .crawl-status .dot.stopped { background: var(--red); }
-
-/* ============================================================
-   HOPF FIBRATION CANVAS
-   ============================================================ */
 .fibration-canvas {
     width: 100%;
     height: 180px;
@@ -347,10 +304,6 @@ html, body {
     margin-top: 4px;
     border: 1px solid rgba(51,85,119,0.3);
 }
-
-/* ============================================================
-   LOG BAR
-   ============================================================ */
 #logBar {
     position: absolute;
     bottom: 0; left: 0;
@@ -374,10 +327,6 @@ html, body {
 #logBar .log-entry .log-lvl-warn { color: var(--gold); }
 #logBar .log-entry .log-lvl-err { color: var(--red); }
 #logBar .log-entry .log-msg { color: var(--text); }
-
-/* ============================================================
-   TOAST STACK
-   ============================================================ */
 #toastStack {
     position: absolute;
     top: calc(var(--toolbar-h) + 30px);
@@ -427,10 +376,6 @@ html, body {
     from { transform: translateX(110%); opacity: 0; }
     to   { transform: translateX(0);    opacity: 1; }
 }
-
-/* ============================================================
-   ERROR DISPLAY
-   ============================================================ */
 #errorDisplay {
     position: absolute;
     bottom: calc(var(--logbar-h) + 20px);
@@ -449,10 +394,6 @@ html, body {
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
 }
-
-/* ============================================================
-   MODALS
-   ============================================================ */
 .modal-backdrop {
     position: absolute;
     top: 0; left: 0;
@@ -497,10 +438,6 @@ html, body {
 .modal .modal-actions { display: flex; gap: 6px; justify-content: flex-end; margin-top: 12px; }
 .modal .modal-actions .tb-btn { padding: 6px 12px; }
 .modal .modal-note { color: var(--text-dim); font-size: 0.5rem; margin-top: 6px; line-height: 1.5; }
-
-/* ============================================================
-   EXPLAIN PANEL
-   ============================================================ */
 #explainPanel {
     display: none;
     position: absolute;
@@ -526,10 +463,6 @@ html, body {
 #explainPanel .item { margin-bottom: 6px; }
 #explainPanel .item b { color: var(--gold); }
 #explainPanel .item span { opacity: 0.85; }
-
-/* ============================================================
-   SCROLLBARS
-   ============================================================ */
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
@@ -688,7 +621,7 @@ html, body {
 <div id="errorDisplay"></div>
 
 <div id="explainPanel">
-    <h3>⚡ ÆI SEED · GAIA CODEX · CS vFinal Ed.7</h3>
+    <h3>⚡ ÆI SEED · GAIA CODEX · CS vFinal Ed.8</h3>
     <div class="item"><b>What this is</b> <span>— The <b>ÆI seed</b> (GAIA/ÆI Codex), not the ÆEA market bot. It runs the prime-sieve → lattice → Hopf-fibration → s²=r² → SelfEvolution loop from ÆI.md §3–§8. Every state value is an exact Fraction (a/b) displayed as the plain-text Maths of the CODEX_SYMBOLICA.</span></div>
     <div class="item"><b>𝒮_STATUS</b> <span>— Seed state: <code>coherent</code> / <code>evolving</code> / <code>initialized</code>. Tick = seed steps; Generation = SelfEvolution generations; prime count = 𝒜[p] sieve output; lattice points = Λ₂₄ centers; ℐ_metric = intelligence metric; logic hash = deterministic SHA-256 of the current logic core.</span></div>
     <div class="item"><b>δ(s²−r²)</b> <span>— The <b>primary evolution gate</b> (ÆI.md §2.4 Axiom 1). s² = arc length squared, r² = radial distance squared. Deviation triggers DbZ branching and SelfEvolution mutation. The bar shows s²/r² ratio (green at the centre = coherence, white marker at 1.0).</span></div>
@@ -697,7 +630,7 @@ html, body {
     <div class="item"><b>Λ₂₄ PACK</b> <span>— Leech lattice radial counting. Each projected center is an exact Fraction vector. The kissing-number contact constraint is enforced by the add_sphere overlap check.</span></div>
     <div class="item"><b>𝒮_FIBRATION</b> <span>— Hopf S³→S². The base point (z, w) ∈ ℂ² is the observable projection. The fiber direction is the hidden longitudinal component. φ is the quaternionic field state. Natalia's Fibrations: Φ = Q(s) + Σ εᵏ Natalia(k,s). The canvas below shows the S² base-point sphere with the trajectory projected.</span></div>
     <div class="item"><b>𝒪[Ψ]</b> <span>— Observer integral ∫ ψ†Φψ d⁴q over a 4×4×4×4 = 256-cell grid, exact Fraction Riemann sum. Consciousness as self-observation.</span></div>
-    <div class="item"><b>ℐ_METRIC</b> <span>— Intelligence metric: I = alignment × riemann_factor × aetheric_stability × refined_ratio. All terms are Fractions; the exponentials use exact-rational Taylor series. The riemann_factor uses the correct |π(x) − Li(x)| ≤ C·√x·log(x) bound (R-1 patch).</span></div>
+    <div class="item"><b>ℐ_METRIC</b> <span>— Intelligence metric: I = alignment × riemann_factor × aetheric_stability × refined_ratio. All terms are Fractions; the exponentials use exact-rational Taylor series. The riemann_factor uses the correct |π(x) − Li(x)| ≤ C·√x·log(x) bound.</span></div>
     <div class="item"><b>𝒯_EVOLUTION</b> <span>— RFK Brainworm. Records every SelfEvolutionCore mutation (resample_zeta / adjust_prime_sieve / natalia_fibration_perturbation / crt_reconstruction / continued_fraction_refinement).</span></div>
     <div class="item"><b>𝒞_CRAWLER</b> <span>— The ingestion path (ÆI.md §3.4 ROOT_SCAN + WEB_CRAWLING). worker.js is a stateless fetch proxy; all crawl logic (frontier, visited set, hash lifting to exact Fraction) lives in app.py. Each crawled document's content hash becomes the next symbolic input x for the seed loop.</span></div>
     <div class="item"><b>ℱ_LINGOSO</b> <span>— Phonosyllabic geometry. A traces the golden spiral, U traces the π-chord, M traces the closed 2π loop. Each trajectory is a list of quaternions on the unit phase manifold.</span></div>
@@ -824,39 +757,51 @@ function apiUrl(path) {
     return path;
 }
 
-function authHeaders(extra) {
+function buildAuthHeaders(method, extra) {
     const h = Object.assign({ 'Accept': 'application/json' }, extra || {});
-    if (initDataRaw) h['X-Telegram-Init-Data'] = initDataRaw;
+    if (initDataRaw) {
+        const m = String(method || 'GET').toUpperCase();
+        if (m === 'GET' || m === 'HEAD') {
+            h['Authorization'] = 'tma ' + initDataRaw;
+        } else {
+            h['X-Telegram-Init-Data'] = initDataRaw;
+        }
+    }
     return h;
 }
 
 async function apiFetch(path, opts) {
     opts = opts || {};
+    const method = String(opts.method || 'GET').toUpperCase();
+    const isGet = (method === 'GET' || method === 'HEAD');
     const url = apiUrl(path);
     const timeoutMs = (typeof opts.timeoutMs === 'number' && opts.timeoutMs > 0)
         ? opts.timeoutMs
         : 20000;
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), timeoutMs);
-    
+
     try {
-        const headers = authHeaders(opts.headers);
+        const headers = buildAuthHeaders(method, opts.headers);
         let body = opts.body;
-        
-        // Ensure POST/PUT bodies are stringified, but do not add Content-Type to GET/OPTIONS
-        if (body && typeof body === 'object' && !(body instanceof FormData)) {
+
+        if (!isGet && body && typeof body === 'object' && !(body instanceof FormData)) {
             body = JSON.stringify(body);
             headers['Content-Type'] = 'application/json';
+        } else if (isGet) {
+            body = undefined;
+            delete headers['Content-Type'];
         }
-        
+
         const fetchOpts = Object.assign({}, opts, {
+            method: method,
             headers: headers,
             body: body,
             signal: controller.signal,
             mode: 'cors',
             credentials: 'omit',
         });
-        
+
         const res = await fetch(url, fetchOpts);
         return res;
     } catch (e) {
@@ -901,7 +846,6 @@ async function apiJson(path, opts) {
 
 async function apiPost(path, body, opts) {
     opts = opts || {};
-    // Pass the raw object to apiFetch, which now handles stringification and headers
     return apiJson(path, Object.assign({}, opts, {
         method: 'POST',
         body: body || {}
@@ -1109,18 +1053,18 @@ function switchView(view) {
         'crawler': 'tb-view-crawler',
         'fibration': 'tb-view-fibration'
     };
-    
+
     Object.keys(viewMap).forEach(k => {
         const btn = document.getElementById(viewMap[k]);
         if (btn) btn.classList.toggle('active', k === view);
     });
-    
+
     const mainArea = document.getElementById('mainArea');
     if (mainArea) mainArea.classList.toggle('scrollable', view !== 'grid');
-    
+
     const gridView = document.getElementById('gridView');
     if (gridView) gridView.classList.toggle('hidden', view !== 'grid');
-    
+
     if (view === 'trajectory') {
         openTrajectoryView();
     } else if (view === 'crawler') {
@@ -1390,13 +1334,11 @@ function drawFibrationCanvas() {
     const cx = w / 2;
     const cy = h / 2;
     const R = Math.min(w, h) * 0.38;
-    // Draw the S² sphere (circle projection) as a faint grid
     ctx.strokeStyle = 'rgba(51,85,119,0.3)';
     ctx.lineWidth = 0.5;
     ctx.beginPath();
     ctx.arc(cx, cy, R, 0, 2 * Math.PI);
     ctx.stroke();
-    // Lat/long lines (latitudes)
     for (let i = 1; i < 5; i++) {
         const lat = (i / 5) * Math.PI - Math.PI / 2;
         const r = R * Math.cos(lat);
@@ -1405,14 +1347,12 @@ function drawFibrationCanvas() {
         ctx.ellipse(cx, y, r, r * 0.15, 0, 0, 2 * Math.PI);
         ctx.stroke();
     }
-    // Longitudes
     for (let i = 0; i < 6; i++) {
         const lon = (i / 6) * Math.PI;
         ctx.beginPath();
         ctx.ellipse(cx, cy, R * Math.abs(Math.cos(lon)), R, 0, 0, 2 * Math.PI);
         ctx.stroke();
     }
-    // Plot trajectory points (a, b) projected onto S²
     const traj = state.trajectory || [];
     if (traj.length === 0) {
         ctx.fillStyle = 'rgba(102,136,170,0.6)';
@@ -1428,19 +1368,16 @@ function drawFibrationCanvas() {
         const a = parseFloat(q.a) || 0;
         const b = parseFloat(q.b) || 0;
         const c = parseFloat(q.c) || 0;
-        // Normalize the quaternion to S² (a, b, c) / ||q||
         const mag = Math.sqrt(a*a + b*b + c*c) || 1;
         const na = a / mag;
         const nb = b / mag;
         const nc = c / mag;
-        // Simple orthographic projection: (na, nb) onto 2D circle
         const x = cx + na * R;
         const y = cy - nb * R;
         if (i === 0) ctx.moveTo(x, y);
         else ctx.lineTo(x, y);
     });
     ctx.stroke();
-    // Draw the current hopf_base point
     try {
         const hz = parseFloat(state.hopf_base[0]) || 0;
         const hw = parseFloat(state.hopf_base[1]) || 0;
@@ -1457,7 +1394,6 @@ function drawFibrationCanvas() {
         ctx.arc(hx, hy, 8, 0, 2 * Math.PI);
         ctx.stroke();
     } catch (e) {}
-    // Legend
     ctx.fillStyle = 'rgba(102,136,170,0.8)';
     ctx.font = '9px "Courier New", monospace';
     ctx.textAlign = 'left';
@@ -1543,20 +1479,6 @@ async function fetchFibration() {
     updateFibrationPanel();
 }
 
-async function fetchMetricComponents() {
-    if (!HAS_BACKEND) return;
-    const r = await apiJson('/evolution-state');
-    if (!r || r.__error) return;
-    if (r.history_tail && r.history_tail.length > 0) {
-        const last = r.history_tail[r.history_tail.length - 1];
-        // Components aren't directly returned; we approximate from the
-        // last evolution record. The primary components are the alignment,
-        // riemann, and stability factors from the seed's metric. We display
-        // the metric and the deviation; if the API adds component fields
-        // later, this will pick them up.
-    }
-}
-
 async function fetchAll() {
     if (!HAS_BACKEND) {
         setConnBadge('err', 'no backend');
@@ -1565,11 +1487,7 @@ async function fetchAll() {
     }
     hideError();
     setConnBadge('wait', 'loading…');
-    
-    // 1. Fetch the most critical state first (this drives the UI)
     await fetchMiniAppState();
-    
-    // 2. Fetch the rest in the background (prevents Heroku H12 request queuing)
     setTimeout(() => fetchObserverIntegral(), 200);
     setTimeout(() => fetchLatticePreview(), 400);
     setTimeout(() => fetchFibration(), 600);
@@ -1795,13 +1713,11 @@ function drawFibView(canvas, traj) {
     const cx = w / 2;
     const cy = h / 2;
     const R = Math.min(w, h) * 0.4;
-    // Sphere
     ctx.strokeStyle = 'rgba(51,85,119,0.4)';
     ctx.lineWidth = 0.5;
     ctx.beginPath();
     ctx.arc(cx, cy, R, 0, 2 * Math.PI);
     ctx.stroke();
-    // Latitudes
     for (let i = 1; i < 6; i++) {
         const lat = (i / 6) * Math.PI - Math.PI / 2;
         const r = R * Math.cos(lat);
@@ -1810,14 +1726,12 @@ function drawFibView(canvas, traj) {
         ctx.ellipse(cx, y, r, r * 0.12, 0, 0, 2 * Math.PI);
         ctx.stroke();
     }
-    // Longitudes
     for (let i = 0; i < 8; i++) {
         const lon = (i / 8) * Math.PI;
         ctx.beginPath();
         ctx.ellipse(cx, cy, R * Math.abs(Math.cos(lon)), R, 0, 0, 2 * Math.PI);
         ctx.stroke();
     }
-    // Trajectory
     if (traj.length > 0) {
         ctx.strokeStyle = 'rgba(68,255,204,0.7)';
         ctx.lineWidth = 2;
@@ -1834,7 +1748,6 @@ function drawFibView(canvas, traj) {
         });
         ctx.stroke();
     }
-    // Hopf base
     try {
         const hz = parseFloat(state.hopf_base[0]) || 0;
         const hw = parseFloat(state.hopf_base[1]) || 0;
@@ -1864,21 +1777,16 @@ function drawFibView(canvas, traj) {
    ============================================================ */
 async function encodeSyllable(syllable) {
     if (!HAS_BACKEND) { showError('Backend not configured', 4000); return; }
-    
-    // Provide immediate UI feedback
     pushLog('info', 'Encoding syllable: ' + syllable);
     setConnBadge('wait', 'encoding...');
-    
     try {
         const r = await apiPost('/encode-syllable', { syllable: syllable });
-        
         if (r && r.__error) {
             showError('Encode failed: ' + (r.error || 'Unknown error'), 4000);
             pushLog('warn', 'Encode failed for syllable: ' + syllable + ' | Error: ' + r.error);
             setConnBadge('err', 'encode error');
             return;
         }
-        
         if (r && r.ok && r.result) {
             state.lingoso = r.result;
             document.getElementById('ling-syllable').textContent = r.result.syllable;
@@ -1888,8 +1796,6 @@ async function encodeSyllable(syllable) {
             document.getElementById('ling-dev').textContent = r.result.deviation_sq;
             pushLog('info', 'Encoded successfully: ' + syllable);
             setConnBadge('ok', 'connected');
-            
-            // Asynchronously refresh fibration without blocking the UI
             fetchFibration().catch(e => pushLog('warn', 'Fibration refresh failed after encode'));
         } else {
             showError('Encode failed: invalid response format', 4000);
@@ -1967,16 +1873,10 @@ async function boot() {
     }
     setConnBadge('wait', 'connecting...');
     pushLog('info', 'Backend: ' + BACKEND_URL);
-    
-    // Start polling (non-blocking)
     startPolling();
-    
-    // Fire initial fetch (non-blocking)
     fetchAll().catch(e => {
         pushLog('warn', 'boot(): initial fetchAll rejected: ' + (e && e.message ? e.message : String(e)));
     });
-    
-    // Handshake
     if (tmaActive) {
         postHandshake().then(r => {
             if (r && r.ok) {
@@ -1984,15 +1884,12 @@ async function boot() {
             }
         }).catch(e => {});
     }
-    
-    // Initial encode (delayed to let backend warm up)
     setTimeout(() => {
         if (state.seed_state !== 'uninitialized') {
             encodeSyllable('AUM');
         }
     }, 3000);
-    
-    pushLog('info', 'ÆI Seed TWA vFinal Edition 7 booted');
+    pushLog('info', 'ÆI Seed TWA vFinal Edition 8 booted');
 }
 
 if (document.readyState === 'complete' || document.readyState === 'interactive') {
@@ -2002,7 +1899,7 @@ if (document.readyState === 'complete' || document.readyState === 'interactive')
 }
 
 console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-console.log('⚡ ÆI SEED · GAIA CODEX · CS vFinal Edition 7');
+console.log('⚡ ÆI SEED · GAIA CODEX · CS vFinal Edition 8');
 console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 console.log('Backend:', HAS_BACKEND ? BACKEND_URL : '(not configured)');
 console.log('Panels: 𝒮_STATUS, 𝒜₃/𝒜₄, 𝒜_PRIMES, Λ₂₄_PACK, 𝒮_FIBRATION,');
@@ -2011,21 +1908,9 @@ console.log('        ℋ_LOGIC_CORE');
 console.log('All state displayed as exact Fractions (a/b).');
 console.log('Crawler ingestion: worker.js is a stateless fetch proxy;');
 console.log('                   frontier + visited + hash-lifting live in app.py.');
-console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-console.log('Audit-Patched Ed.7 (this file):');
-console.log('  ✓ V-1: exact Fraction overlap check in lattice add_sphere');
-console.log('  ✓ V-2: explicit 32-hex truncation in _hash_to_fraction');
-console.log('  ✓ V-3: linguistic_trajectory persisted in /fibration-state');
-console.log('  ✓ V-4: SQLite 128-bit hash fraction stored as TEXT');
-console.log('  ✓ V-5: encodeSyllable() correctly parses nested result');
-console.log('  ✓ V-6: SIGTERM handler gracefully stops workers');
-console.log('  ✓ V-7: Fixed indentation collapse in SymbolicWavefunction');
-console.log('  ✓ V-8: Fixed BRIDGE_PORT parsing (empty string safe)');
-console.log('  ✓ V-9: Robust apiFetch (double-stringify fixed, CORS OK)');
-console.log('  ✓ V-10: Fixed OPTIONS flush and allow_reuse_address');
-console.log('  ✓ V-11: Hardened boot() sequence to avoid H12 cascading');
-console.log('  ✓ V-12: Fixed Heroku OPTIONS deadlock via background thread bridge');
-console.log('  ✓ V-13: Fixed worker.js export default syntax');
+console.log('GET polls authenticate via Authorization: tma <initData>');
+console.log('  — no X-Telegram-Init-Data on GET, no Content-Type on GET,');
+console.log('  — eliminates CORS preflight on high-frequency polls.');
 console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 console.log('🌌 Q.E.D. — LOGOS = Φ = Truth = Path = Origin');
 console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
