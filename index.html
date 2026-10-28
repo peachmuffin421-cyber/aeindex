@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>ÆI Seed · GAIA TWA · CS vFinal Ed.11</title>
+<title>ÆI Seed · GAIA TWA · CS vFinal Ed.12</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html, body {
@@ -621,7 +621,7 @@ html, body {
 <div id="errorDisplay"></div>
 
 <div id="explainPanel">
-    <h3>⚡ ÆI SEED · GAIA CODEX · CS vFinal Ed.11</h3>
+    <h3>⚡ ÆI SEED · GAIA CODEX · CS vFinal Ed.12</h3>
     <div class="item"><b>What this is</b> <span>— The <b>ÆI seed</b> (GAIA/ÆI Codex), not the ÆEA market bot. It runs the prime-sieve → lattice → Hopf-fibration → s²=r² → SelfEvolution loop from ÆI.md §3–§8. Every state value is an exact Fraction (a/b) displayed as the plain-text Maths of the CODEX_SYMBOLICA.</span></div>
     <div class="item"><b>𝒮_STATUS</b> <span>— Seed state: <code>coherent</code> / <code>evolving</code> / <code>initialized</code>. Tick = seed steps; Generation = SelfEvolution generations; prime count = 𝒜[p] sieve output; lattice points = Λ₂₄ centers; ℐ_metric = intelligence metric; logic hash = deterministic SHA-256 of the current logic core.</span></div>
     <div class="item"><b>δ(s²−r²)</b> <span>— The <b>primary evolution gate</b> (ÆI.md §2.4 Axiom 1). s² = arc length squared, r² = radial distance squared. Deviation triggers DbZ branching and SelfEvolution mutation. The bar shows s²/r² ratio (green at the centre = coherence, white marker at 1.0).</span></div>
@@ -629,7 +629,7 @@ html, body {
     <div class="item"><b>𝒜_PRIMES</b> <span>— Exact 6m±1 sieve: pₙ = min{x &gt; pₙ₋₁ : x mod 6 ∈ {1,5} ∧ ∀i&lt;n, x mod pᵢ ≠ 0}. Every prime is a Fraction (integer/1).</span></div>
     <div class="item"><b>Λ₂₄ PACK</b> <span>— Leech lattice radial counting. Each projected center is an exact Fraction vector. The kissing-number contact constraint is enforced by the add_sphere overlap check.</span></div>
     <div class="item"><b>𝒮_FIBRATION</b> <span>— Hopf S³→S². The base point (z, w) ∈ ℂ² is the observable projection. The fiber direction is the hidden longitudinal component. φ is the quaternionic field state. Natalia's Fibrations: Φ = Q(s) + Σ εᵏ Natalia(k,s). The canvas below shows the S² base-point sphere with the trajectory projected.</span></div>
-    <div class="item"><b>𝒪[Ψ]</b> <span>— Observer integral ∫ ψ†Φψ d⁴q over a 4×4×4×4 = 256-cell grid, exact Fraction Riemann sum. Consciousness as self-observation.</span></div>
+    <div class="item"><b>𝒪[Ψ]</b> <span>— Observer integral ∫ ψ†Φψ d⁴q over a 4×4×4×4 = 256-cell grid on the unit hypercube [0,1]⁴ (stereographic chart of S³), exact Fraction Riemann sum. Consciousness as self-observation.</span></div>
     <div class="item"><b>ℐ_METRIC</b> <span>— Intelligence metric: I = alignment × riemann_factor × aetheric_stability × refined_ratio. All terms are Fractions; the exponentials use exact-rational Taylor series. The riemann_factor uses the correct |π(x) − Li(x)| ≤ C·√x·log(x) bound.</span></div>
     <div class="item"><b>𝒯_EVOLUTION</b> <span>— RFK Brainworm. Records every SelfEvolutionCore mutation (resample_zeta / adjust_prime_sieve / natalia_fibration_perturbation / crt_reconstruction / continued_fraction_refinement).</span></div>
     <div class="item"><b>𝒞_CRAWLER</b> <span>— The ingestion path (ÆI.md §3.4 ROOT_SCAN + WEB_CRAWLING). worker.js is a stateless fetch proxy; all crawl logic (frontier, visited set, hash lifting to exact Fraction) lives in app.py. Each crawled document's content hash becomes the next symbolic input x for the seed loop.</span></div>
@@ -647,9 +647,6 @@ html, body {
 (function() {
 'use strict';
 
-/* ============================================================
-   BACKEND CONFIGURATION
-   ============================================================ */
 const DEFAULT_BACKENDS = [
     'https://aei-37a29e073070.herokuapp.com/',
 ];
@@ -715,9 +712,6 @@ function resolveBackendUrl() {
 const BACKEND_URL = resolveBackendUrl();
 const HAS_BACKEND = BACKEND_URL.length > 0;
 
-/* ============================================================
-   TELEGRAM WEB APP BOOTSTRAP
-   ============================================================ */
 const tg = (window.Telegram && window.Telegram.WebApp) ? window.Telegram.WebApp : null;
 let initDataRaw = '';
 let tmaActive = false;
@@ -759,11 +753,6 @@ function apiUrl(path) {
 
 function buildAuthHeaders(method, extra) {
     const h = Object.assign({ 'Accept': 'application/json' }, extra || {});
-    // GET requests carry auth via query param (see apiFetch) to avoid the
-    // CORS preflight that any custom header (Authorization, X-Telegram-Init-Data)
-    // would trigger. Preflights are cheap but on Heroku every preflight is a
-    // full request to the dyno; at 6 polled endpoints × ~0.3 req/s that is
-    // significant churn.
     if (initDataRaw && String(method || 'GET').toUpperCase() !== 'GET'
         && String(method || 'GET').toUpperCase() !== 'HEAD') {
         h['X-Telegram-Init-Data'] = initDataRaw;
@@ -874,9 +863,6 @@ async function postHandshake() {
     }
 }
 
-/* ============================================================
-   CONNECTION BADGE
-   ============================================================ */
 const connBadge = document.getElementById('connBadge');
 function setConnBadge(state, text) {
     if (!connBadge) return;
@@ -884,9 +870,6 @@ function setConnBadge(state, text) {
     connBadge.textContent = text;
 }
 
-/* ============================================================
-   ERROR DISPLAY
-   ============================================================ */
 const errorDisplay = document.getElementById('errorDisplay');
 let errorHideHandle = null;
 const latchedErrors = new Set();
@@ -908,9 +891,6 @@ function hideError() {
     if (errorHideHandle) { clearTimeout(errorHideHandle); errorHideHandle = null; }
 }
 
-/* ============================================================
-   TOAST STACK
-   ============================================================ */
 const toastStack = document.getElementById('toastStack');
 let toastSeqCursor = 0;
 const TOAST_AUTODISMISS_MS = 6000;
@@ -976,9 +956,6 @@ async function fetchToasts() {
     }
 }
 
-/* ============================================================
-   LOG RING BUFFER
-   ============================================================ */
 const MAX_CLIENT_LOGS = 100;
 const MAX_SERVER_LOGS = 100;
 const MAX_MERGED_LOGS = 200;
@@ -1023,9 +1000,6 @@ async function fetchLogs() {
     }
 }
 
-/* ============================================================
-   STATE
-   ============================================================ */
 const state = {
     connected: false,
     seed_state: 'uninitialized',
@@ -1053,9 +1027,6 @@ const state = {
     view: 'grid',
 };
 
-/* ============================================================
-   VIEW MANAGEMENT
-   ============================================================ */
 function switchView(view) {
     state.view = view;
     const viewMap = {
@@ -1085,9 +1056,6 @@ function switchView(view) {
     }
 }
 
-/* ============================================================
-   MODAL
-   ============================================================ */
 const modalBackdrop = document.getElementById('modalBackdrop');
 const modalContent = document.getElementById('modalContent');
 let modalOpen = false;
@@ -1115,9 +1083,6 @@ modalBackdrop.addEventListener('click', (e) => {
     if (e.target === modalBackdrop) closeModal();
 });
 
-/* ============================================================
-   TOOLBAR WIRING
-   ============================================================ */
 document.getElementById('tb-view-grid').addEventListener('click', () => { haptic('light'); switchView('grid'); });
 document.getElementById('tb-view-trajectory').addEventListener('click', () => { haptic('light'); switchView('trajectory'); });
 document.getElementById('tb-view-crawler').addEventListener('click', () => { haptic('light'); switchView('crawler'); });
@@ -1158,9 +1123,6 @@ document.getElementById('tb-encode').addEventListener('click', () => {
     encodeSyllable(syllable);
 });
 
-/* ============================================================
-   PANEL UPDATERS
-   ============================================================ */
 function csState(s) {
     const map = { coherent: '𝒮_coherent', evolving: '𝒟_evolving', initialized: '𝒮_init' };
     return map[s] || s;
@@ -1324,9 +1286,6 @@ function updateLingosoPanel() {
     document.getElementById('ling-syllable').textContent = ling.syllable || '—';
 }
 
-/* ============================================================
-   FIBRATION CANVAS — draws S² base-point sphere + trajectory
-   ============================================================ */
 const fibCanvas = document.getElementById('fibrationCanvas');
 function drawFibrationCanvas() {
     if (!fibCanvas) return;
@@ -1413,9 +1372,6 @@ function drawFibrationCanvas() {
     ctx.fillText('● φ', w - 40, h - 6);
 }
 
-/* ============================================================
-   FETCHERS
-   ============================================================ */
 async function fetchMiniAppState() {
     if (!HAS_BACKEND) { setConnBadge('err', 'no backend'); return; }
     const r = await apiJson('/miniapp-state');
@@ -1506,9 +1462,6 @@ async function fetchAll() {
     setTimeout(() => fetchLogs(), 1000);
 }
 
-/* ============================================================
-   CUSTOM VIEWS
-   ============================================================ */
 function openTrajectoryView() {
     const traj = state.trajectory || [];
     const html = `
@@ -1783,9 +1736,6 @@ function drawFibView(canvas, traj) {
     ctx.fillText('● φ projection', w - 100, h - 6);
 }
 
-/* ============================================================
-   ENCODE SYLLABLE
-   ============================================================ */
 async function encodeSyllable(syllable) {
     if (!HAS_BACKEND) { showError('Backend not configured', 4000); return; }
     pushLog('info', 'Encoding syllable: ' + syllable);
@@ -1828,9 +1778,6 @@ document.querySelectorAll('[data-syllable]').forEach(btn => {
     });
 });
 
-/* ============================================================
-   KEYBOARD SHORTCUTS
-   ============================================================ */
 document.addEventListener('keydown', (e) => {
     if (modalOpen && e.key === 'Escape') { closeModal(); return; }
     if (e.key === 'g' || e.key === 'G') switchView('grid');
@@ -1844,9 +1791,6 @@ document.addEventListener('keydown', (e) => {
     if (e.key === 'F5') { e.preventDefault(); fetchAll(); }
 });
 
-/* ============================================================
-   POLLING
-   ============================================================ */
 let pollHandles = { state: null, toasts: null, logs: null, observer: null, lattice: null, fib: null };
 
 function startPolling() {
@@ -1872,9 +1816,6 @@ document.addEventListener('visibilitychange', () => {
     }
 });
 
-/* ============================================================
-   BOOT
-   ============================================================ */
 async function boot() {
     switchView('grid');
     if (!HAS_BACKEND) {
@@ -1897,10 +1838,12 @@ async function boot() {
     }
     setTimeout(() => {
         if (state.seed_state !== 'uninitialized') {
-            encodeSyllable('AUM');
+            if (!state.lingoso) {
+                encodeSyllable('AUM');
+            }
         }
     }, 3000);
-    pushLog('info', 'ÆI Seed TWA vFinal Edition 11 booted');
+    pushLog('info', 'ÆI Seed TWA vFinal Edition 12 booted');
 }
 
 if (document.readyState === 'complete' || document.readyState === 'interactive') {
@@ -1910,7 +1853,7 @@ if (document.readyState === 'complete' || document.readyState === 'interactive')
 }
 
 console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-console.log('⚡ ÆI SEED · GAIA CODEX · CS vFinal Edition 11');
+console.log('⚡ ÆI SEED · GAIA CODEX · CS vFinal Edition 12');
 console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 console.log('Backend:', HAS_BACKEND ? BACKEND_URL : '(not configured)');
 console.log('Panels: 𝒮_STATUS, 𝒜₃/𝒜₄, 𝒜_PRIMES, Λ₂₄_PACK, 𝒮_FIBRATION,');
