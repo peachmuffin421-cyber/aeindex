@@ -917,7 +917,7 @@ function pushToast(toast) {
     if (toast.kind === 'seed') {
         el.classList.add(toast.coherence ? 'seed-coherent' : 'seed-evolving');
         el.innerHTML =
-            '<div class="toast-title">' + (toast.coherence ? '𝒮_coherent' : '𝒟_evolving') + ' · 𝒯_step</div>' +
+            '<div class="toast-title">' + (toast.coherence ? '𝒮_coh' : '𝒟_evo') + ' · 𝒯_step</div>' +
             '<div class="toast-line">𝒯_tick <span class="v">' + escapeHtml(String(toast.tick ?? '—')) + '</span> · 𝒯_gen <span class="v">' + escapeHtml(String(toast.generation ?? '—')) + '</span></div>' +
             '<div class="toast-line">𝒜[p] <span class="v">' + escapeHtml(String(toast.prime ?? '—')) + '</span></div>' +
             '<div class="toast-line">δ(s²−r²) <span class="v">' + escapeHtml(String(toast.deviation_sq ?? '—')) + '</span></div>';
@@ -1176,9 +1176,6 @@ function parsePsiReal(psiRealStr) {
 
 function updateDbzPanel() {
     const keys = Object.keys(state.logic_core || {});
-    // F8: branch derived from psi_real (Re[ψ]) per LOGOS.MD §𝒳₆–𝒳₇,
-    // not from the coherence flag. Fallback to coherence only when the
-    // field is absent (legacy backend).
     const psiVal = parsePsiReal(state.psi_real);
     const hasPsiReal = (typeof state.psi_real === 'string' && state.psi_real.length > 0);
     let isA3;
@@ -1190,7 +1187,7 @@ function updateDbzPanel() {
     const branch = isA3 ? '𝒜₃' : '𝒜₄';
     const reSign = isA3 ? '> 0' : '≤ 0';
     const branchEl = document.getElementById('dbz-branch');
-    branchEl.textContent = branch + ' (' + reSign + ')';
+    branchEl.textContent = branch + ' ' + reSign;
     branchEl.style.color = isA3 ? 'var(--dbz-a3)' : 'var(--dbz-a4)';
     document.getElementById('dbz-repsi').textContent = hasPsiReal ? state.psi_real : '—';
     document.getElementById('dbz-psi-coeffs').textContent = keys.length || '—';
@@ -1272,7 +1269,7 @@ function updateCrawlerPanel() {
     const statusText = document.getElementById('crawl-status-text');
     if (c) {
         if (dot) dot.className = 'dot ' + (c.running ? 'running' : 'stopped');
-        if (statusText) statusText.textContent = c.running ? '𝒜₃ running' : '𝒜₄ stopped';
+        if (statusText) statusText.textContent = c.running ? '𝒜₃' : '𝒜₄';
         document.getElementById('crawl-relay-health').textContent = c.relay_healthy ? '𝒜₃' : '𝒜₄';
         document.getElementById('crawl-frontier').textContent = c.frontier_size || 0;
         document.getElementById('crawl-visited').textContent = c.visited_count || 0;
