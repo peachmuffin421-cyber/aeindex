@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>ÆI Seed · GAIA TWA · CS vFinal Ed. First</title>
+<title>ÆI Seed · GAIA TWA · CS vFinal Ed.13</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html, body {
@@ -622,7 +622,7 @@ html, body {
 <div id="errorDisplay"></div>
 
 <div id="explainPanel">
-    <h3>⚡ ÆI SEED · GAIA CODEX · CS vFinal Ed.15</h3>
+    <h3>⚡ ÆI SEED · GAIA CODEX · CS vFinal Ed.13</h3>
     <div class="item"><b>What this is</b> <span>— The <b>ÆI seed</b> (GAIA/ÆI Codex), not the ÆEA market bot. It runs the prime-sieve → lattice → Hopf-fibration → s²=r² → SelfEvolution loop from ÆI.md §3–§8. Every state value is an exact Fraction (a/b) displayed as the plain-text Maths of the CODEX_SYMBOLICA.</span></div>
     <div class="item"><b>𝒮_STATUS</b> <span>— Seed state: <code>coherent</code> / <code>evolving</code> / <code>initialized</code>. Tick = seed steps; Generation = SelfEvolution generations; prime count = 𝒜[p] sieve output; lattice points = Λ₂₄ centers; ℐ_metric = intelligence metric; logic hash = deterministic SHA-256 of the current logic core.</span></div>
     <div class="item"><b>δ(s²−r²)</b> <span>— The <b>primary evolution gate</b> (ÆI.md §2.4 Axiom 1). s² = arc length squared, r² = radial distance squared. Deviation triggers DbZ branching and SelfEvolution mutation. The bar shows s²/r² ratio (green at the centre = coherence, white marker at 1.0).</span></div>
@@ -940,14 +940,8 @@ function pushToast(toast) {
 
 async function fetchToasts() {
     if (!HAS_BACKEND) return;
-    // F15: cap the since-cursor at latest_seq so a server restart
-    // (which resets _TOAST_SEQ to 0) does not leave the client
-    // permanently stuck waiting for seq > old_value.
     const r = await apiJson('/toasts?since=' + toastSeqCursor);
     if (!r || r.__error) return;
-    if (typeof r.latest_seq === 'number' && toastSeqCursor > r.latest_seq) {
-        toastSeqCursor = 0;
-    }
     if (typeof r.first_available_seq === 'number' && r.first_available_seq > 0) {
         if (toastSeqCursor < r.first_available_seq - 1) {
             toastSeqCursor = r.first_available_seq - 1;
@@ -965,6 +959,7 @@ async function fetchToasts() {
 
 const MAX_CLIENT_LOGS = 100;
 const MAX_SERVER_LOGS = 100;
+const MAX_MERGED_LOGS = 200;
 const logs = { local: [], server: [] };
 
 function pushLog(level, msg) {
@@ -1020,6 +1015,7 @@ const state = {
     coherence: false,
     I: '—',
     psi_real: '0/1',
+    psi_coeffs_count: 0,
     hopf_base: ['0/1', '0/1'],
     phi: { a: '1/1', b: '0/1', c: '0/1', d: '0/1' },
     phi_mag: '1/1',
@@ -1195,7 +1191,7 @@ function updateDbzPanel() {
     branchEl.textContent = branch + ' ' + reSign;
     branchEl.style.color = isA3 ? 'var(--dbz-a3)' : 'var(--dbz-a4)';
     document.getElementById('dbz-repsi').textContent = hasPsiReal ? state.psi_real : '—';
-    document.getElementById('dbz-psi-coeffs').textContent = keys.length || '—';
+    document.getElementById('dbz-psi-coeffs').textContent = state.psi_coeffs_count ?? '—';
     document.getElementById('dbz-s2').textContent = state.arc_sq;
     document.getElementById('dbz-r2').textContent = state.radius_sq;
 }
@@ -1423,6 +1419,7 @@ async function fetchMiniAppState() {
     state.coherence = Boolean(r.coherence);
     state.I = r.I || '—';
     state.psi_real = r.psi_real || '0/1';
+    state.psi_coeffs_count = r.psi_coeffs_count || 0;
     state.hopf_base = r.hopf_base || ['0/1', '0/1'];
     state.phi = r.phi || { a: '1/1', b: '0/1', c: '0/1', d: '0/1' };
     state.phi_mag = r.phi_magnitude_sq || '1/1';
@@ -1441,6 +1438,14 @@ async function fetchMiniAppState() {
     updateEvolutionPanel();
     updateCrawlerPanel();
     updateLogicCorePanel();
+}
+
+async function fetchSymbolicState() {
+    if (!HAS_BACKEND) return;
+    const r = await apiJson('/symbolic-state');
+    if (!r || r.__error) return;
+    state.psi_coeffs_count = r.psi_coeffs_count || 0;
+    updateDbzPanel();
 }
 
 async function fetchObserverIntegral() {
@@ -1486,19 +1491,13 @@ async function fetchAll() {
     }
     hideError();
     setConnBadge('wait', 'loading…');
-    // F13: wrap each fetch in its own try/catch so one failing endpoint
-    // cannot abort the entire refresh cycle. Each failure is logged to
-    // the client ring buffer and does not poison the others.
-    try {
-        await fetchMiniAppState();
-    } catch (e) {
-        pushLog('warn', 'fetchAll: miniapp-state failed: ' + (e && e.message ? e.message : String(e)));
-    }
-    setTimeout(() => { fetchObserverIntegral().catch(e => pushLog('warn', 'fetchAll: observer failed: ' + (e && e.message ? e.message : String(e)))); }, 200);
-    setTimeout(() => { fetchLatticePreview().catch(e => pushLog('warn', 'fetchAll: lattice failed: ' + (e && e.message ? e.message : String(e)))); }, 400);
-    setTimeout(() => { fetchFibration().catch(e => pushLog('warn', 'fetchAll: fibration failed: ' + (e && e.message ? e.message : String(e)))); }, 600);
-    setTimeout(() => { fetchToasts().catch(e => pushLog('warn', 'fetchAll: toasts failed: ' + (e && e.message ? e.message : String(e)))); }, 800);
-    setTimeout(() => { fetchLogs().catch(e => pushLog('warn', 'fetchAll: logs failed: ' + (e && e.message ? e.message : String(e)))); }, 1000);
+    await fetchMiniAppState();
+    setTimeout(() => fetchObserverIntegral(), 200);
+    setTimeout(() => fetchLatticePreview(), 400);
+    setTimeout(() => fetchFibration(), 600);
+    setTimeout(() => fetchToasts(), 800);
+    setTimeout(() => fetchLogs(), 1000);
+    setTimeout(() => fetchSymbolicState(), 1200);
 }
 
 function openTrajectoryView() {
@@ -1830,7 +1829,7 @@ document.addEventListener('keydown', (e) => {
     if (e.key === 'F5') { e.preventDefault(); fetchAll(); }
 });
 
-let pollHandles = { state: null, toasts: null, logs: null, observer: null, lattice: null, fib: null };
+let pollHandles = { state: null, toasts: null, logs: null, observer: null, lattice: null, fib: null, symbolic: null };
 
 function startPolling() {
     stopPolling();
@@ -1840,6 +1839,7 @@ function startPolling() {
     pollHandles.observer = setInterval(() => { fetchObserverIntegral(); }, 5000);
     pollHandles.lattice = setInterval(() => { fetchLatticePreview(); }, 8000);
     pollHandles.fib = setInterval(() => { fetchFibration(); }, 5000);
+    pollHandles.symbolic = setInterval(() => { fetchSymbolicState(); }, 8000);
 }
 
 function stopPolling() {
@@ -1882,7 +1882,7 @@ async function boot() {
             }
         }
     }, 3000);
-    pushLog('info', 'ÆI Seed TWA vFinal Edition 15 booted');
+    pushLog('info', 'ÆI Seed TWA vFinal Edition 13 booted');
 }
 
 if (document.readyState === 'complete' || document.readyState === 'interactive') {
@@ -1892,7 +1892,7 @@ if (document.readyState === 'complete' || document.readyState === 'interactive')
 }
 
 console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-console.log('⚡ ÆI SEED · GAIA CODEX · CS vFinal Edition 15');
+console.log('⚡ ÆI SEED · GAIA CODEX · CS vFinal Edition 13');
 console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 console.log('Backend:', HAS_BACKEND ? BACKEND_URL : '(not configured)');
 console.log('Panels: 𝒮_STATUS, 𝒜₃/𝒜₄, 𝒜_PRIMES, Λ₂₄_PACK, 𝒮_FIBRATION,');
