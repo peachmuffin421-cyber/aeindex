@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>ÆI Seed · GAIA TWA · CS vFinal Ed.39 toast-truncate H12fix</title>
+<title>ÆI Seed · GAIA TWA · CS vFinal Ed.40 ultimate H12fix</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html, body {
@@ -1283,7 +1283,7 @@ function updateDbzPanel() {
 }
 
 function updatePrimesPanel() {
-    document.getElementById('primes-count').textContent = state.prime_count;
+    try { document.getElementById('primes-count').textContent = state.prime_count; } catch(e){}
     const last = state.primes_tail.length > 0 ? state.primes_tail[state.primes_tail.length - 1] : '—';
     document.getElementById('primes-last').textContent = last;
     const grid = document.getElementById('primes-grid');
@@ -1299,26 +1299,33 @@ function updateLatticePanel() {
 }
 
 function updateFibrationPanel() {
-    document.getElementById('fib-z').textContent = formatFracShort(state.hopf_base[0], 16); document.getElementById('fib-z').title = formatFracTooltip(state.hopf_base[0]);
-    document.getElementById('fib-w').textContent = formatFracShort(state.hopf_base[1], 16); document.getElementById('fib-w').title = formatFracTooltip(state.hopf_base[1]);
-    document.getElementById('fib-a').textContent = state.phi.a;
-    document.getElementById('fib-b').textContent = state.phi.b;
-    document.getElementById('fib-mag').textContent = state.phi_mag;
-    document.getElementById('fib-trajectory-len').textContent = state.trajectory.length;
-    drawFibrationCanvas();
+    try {
+        const hz = state.hopf_base && state.hopf_base[0] ? formatFracShort(state.hopf_base[0], 16) : '0/1';
+        const hw = state.hopf_base && state.hopf_base[1] ? formatFracShort(state.hopf_base[1], 16) : '0/1';
+        const zEl = document.getElementById('fib-z'); if (zEl) { zEl.textContent = hz; zEl.title = formatFracTooltip(state.hopf_base[0]); }
+        const wEl = document.getElementById('fib-w'); if (wEl) { wEl.textContent = hw; wEl.title = formatFracTooltip(state.hopf_base[1]); }
+        const phi = state.phi || {a:'1/1', b:'0/1', c:'0/1', d:'0/1'};
+        const aEl = document.getElementById('fib-a'); if (aEl) { aEl.textContent = formatFracShort(phi.a, 16); aEl.title = formatFracTooltip(phi.a); }
+        const bEl = document.getElementById('fib-b'); if (bEl) { bEl.textContent = formatFracShort(phi.b, 16); bEl.title = formatFracTooltip(phi.b); }
+        const magEl = document.getElementById('fib-mag'); if (magEl) { magEl.textContent = formatFracShort(state.phi_mag, 16); magEl.title = formatFracTooltip(state.phi_mag); }
+        const lenEl = document.getElementById('fib-trajectory-len'); if (lenEl) lenEl.textContent = (state.trajectory && state.trajectory.length) || 0;
+        drawFibrationCanvas();
+    } catch(e) { console.warn('fib panel err', e); }
 }
 
 function updateObserverPanel() {
-    const obs = state.observer_integral;
-    if (!obs) {
-        document.getElementById('obs-re').textContent = '—';
-        document.getElementById('obs-im').textContent = '—';
-        document.getElementById('obs-mag').textContent = '—';
-        return;
-    }
-    document.getElementById('obs-re').textContent = obs.integral.a;
-    document.getElementById('obs-im').textContent = obs.integral.b;
-    document.getElementById('obs-mag').textContent = obs.magnitude_sq;
+    try {
+        const obs = state.observer_integral;
+        if (!obs) {
+            const reEl=document.getElementById('obs-re'); if(reEl) reEl.textContent='—';
+            const imEl=document.getElementById('obs-im'); if(imEl) imEl.textContent='—';
+            const magEl=document.getElementById('obs-mag'); if(magEl) magEl.textContent='—';
+            return;
+        }
+        const reEl=document.getElementById('obs-re'); if(reEl) reEl.textContent=formatFracShort(obs.integral.a,16);
+        const imEl=document.getElementById('obs-im'); if(imEl) imEl.textContent=formatFracShort(obs.integral.b,16);
+        const magEl=document.getElementById('obs-mag'); if(magEl) magEl.textContent=formatFracShort(obs.magnitude_sq,16);
+    } catch(e){}
 }
 
 function updateMetricPanel() {
@@ -2006,7 +2013,7 @@ console.log('Backend:', HAS_BACKEND ? BACKEND_URL : '(not configured)');
 console.log('Panels: 𝒮_STATUS, 𝒜₃/𝒜₄, 𝒜_PRIMES, Λ₂₄_PACK, 𝒮_FIBRATION,');
 console.log('        𝒪[Ψ], ℐ_METRIC, 𝒯_EVOLUTION, 𝒞_CRAWLER, ℱ_LINGOSO,');
 console.log('        ℋ_LOGIC_CORE');
-console.log('All state displayed as exact Fractions (a/b).');
+console.log('All state displayed as exact Fractions (a/b) truncated to 48ch for TWA — Ed40 backend required for H12 fix.');
 console.log('Crawler ingestion: worker.js is a stateless fetch proxy;');
 console.log('                   frontier + visited + hash-lifting live in app.py.');
 console.log('DbZ branch: 𝒜₃ ⇔ Re[ψ] > 0, 𝒜₄ ⇔ Re[ψ] ≤ 0 (from psi_real field).');
