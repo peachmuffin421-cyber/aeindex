@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>ÆI Seed · GAIA TWA · CS vFinal Ed.13</title>
+<title>ÆI Seed · GAIA TWA · CS vFinal Ed.38 H12fix</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html, body {
@@ -906,6 +906,54 @@ function dismissToast(el) {
 function escapeHtml(s) {
     return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
+function formatFracShort(s, maxLen) {
+    if (s === null || s === undefined) return '—';
+    const str = String(s);
+    if (!str) return '—';
+    maxLen = maxLen || 32;
+    // If contains … already truncated from backend, keep as is
+    if (str.indexOf('…') !== -1) return str;
+    if (str.length <= maxLen) return str;
+    // For fractions a/b, truncate both sides but keep structure
+    if (str.indexOf('/') !== -1) {
+        const parts = str.split('/');
+        const a = parts[0];
+        const b = parts.slice(1).join('/');
+        // Keep first 12 + … + last 4 for each if huge
+        if (a.length > 14 || b.length > 14) {
+            const aShort = a.length > 14 ? a.slice(0, 10) + '…' + a.slice(-3) : a;
+            const bShort = b.length > 14 ? b.slice(0, 10) + '…' + b.slice(-3) : b;
+            // Also show approx float for tooltip via title attribute elsewhere
+            return aShort + '/' + bShort + '…(' + str.length + 'ch)';
+        }
+    }
+    return str.slice(0, maxLen) + '…(' + str.length + 'ch)';
+}
+function formatFracTooltip(s) {
+    // Full value for title attribute
+    try { return String(s); } catch(e){ return ''; }
+}
+function safeFracRatio(arcStr, radStr) {
+    // Returns ratio for coherence bar without overflow
+    try {
+        if (!arcStr || !radStr) return 0;
+        if (arcStr === radStr) return 1;
+        // If either contains … truncated, use coherence bool fallback
+        if (String(arcStr).indexOf('…') !== -1 || String(radStr).indexOf('…') !== -1) return null;
+        const aParts = String(arcStr).split('/');
+        const rParts = String(radStr).split('/');
+        const aNumStr = aParts[0] || '0';
+        const rNumStr = rParts[0] || '1';
+        // If numbers huge (>15 digits), avoid Number()
+        if (aNumStr.replace('-','').length > 15 || rNumStr.replace('-','').length > 15) {
+            return null;
+        }
+        const n = Number(aNumStr);
+        const rn = Number(rNumStr);
+        if (!isFinite(n) || !isFinite(rn) || rn === 0) return null;
+        return Math.min(1, Math.max(0, n / rn));
+    } catch(e){ return null; }
+}
 
 function pushToast(toast) {
     if (!toastStack) return;
@@ -916,11 +964,12 @@ function pushToast(toast) {
     el.className = 'toast';
     if (toast.kind === 'seed') {
         el.classList.add(toast.coherence ? 'seed-coherent' : 'seed-evolving');
+        const devShort = formatFracShort(toast.deviation_sq, 24);
         el.innerHTML =
             '<div class="toast-title">' + (toast.coherence ? '𝒮_coh' : '𝒟_evo') + ' · 𝒯_step</div>' +
             '<div class="toast-line">𝒯_tick <span class="v">' + escapeHtml(String(toast.tick ?? '—')) + '</span> · 𝒯_gen <span class="v">' + escapeHtml(String(toast.generation ?? '—')) + '</span></div>' +
-            '<div class="toast-line">𝒜[p] <span class="v">' + escapeHtml(String(toast.prime ?? '—')) + '</span></div>' +
-            '<div class="toast-line">δ(s²−r²) <span class="v">' + escapeHtml(String(toast.deviation_sq ?? '—')) + '</span></div>';
+            '<div class="toast-line">𝒜[p] <span class="v">' + escapeHtml(formatFracShort(toast.prime, 16)) + '</span></div>' +
+            '<div class="toast-line" title="' + escapeHtml(formatFracTooltip(toast.deviation_sq)) + '">δ(s²−r²) <span class="v">' + escapeHtml(devShort) + '</span></div>';
     } else if (toast.kind === 'crawl') {
         el.classList.add('crawl');
         el.innerHTML =
@@ -1027,6 +1076,7 @@ const state = {
     observer_integral: null,
     lingoso: null,
     last_logic_hash: '',
+    stale: false,
     view: 'grid',
 };
 
@@ -1137,27 +1187,32 @@ function updateStatusPanel() {
     document.getElementById('status-gen').textContent = state.generation;
     document.getElementById('status-prime-count').textContent = state.prime_count;
     document.getElementById('status-lattice-count').textContent = state.lattice_points;
-    document.getElementById('status-dev').textContent = state.deviation_sq;
-    document.getElementById('status-I').textContent = state.I;
+    const devEl = document.getElementById('status-dev');
+    if (devEl) {
+        devEl.textContent = formatFracShort(state.deviation_sq, 20);
+        devEl.title = formatFracTooltip(state.deviation_sq);
+    }
+    const iEl = document.getElementById('status-I');
+    if (iEl) {
+        iEl.textContent = formatFracShort(state.I, 16);
+        iEl.title = formatFracTooltip(state.I);
+    }
     const psiEl = document.getElementById('status-psi-real');
-    if (psiEl) psiEl.textContent = state.psi_real || '—';
+    if (psiEl) {
+        psiEl.textContent = formatFracShort(state.psi_real, 16);
+        psiEl.title = formatFracTooltip(state.psi_real);
+    }
     document.getElementById('status-logic-hash').textContent = (state.last_logic_hash || '—').substring(0, 16);
     const bar = document.getElementById('status-coherence-bar');
     if (bar) {
-        let ratio = 0;
-        try {
-            const [n, d] = state.arc_sq.split('/').map(Number);
-            const [rn, rd] = state.radius_sq.split('/').map(Number);
-            const num = n * rd;
-            const den = rn * d;
-            if (den !== 0) {
-                ratio = Math.min(1, Math.max(0, num / den));
-            }
-        } catch (e) {}
+        let ratio = safeFracRatio(state.arc_sq, state.radius_sq);
+        if (ratio === null) {
+            ratio = state.coherence ? 1 : 0.02;
+        }
         bar.style.width = (ratio * 100).toFixed(1) + '%';
     }
     const sub = document.getElementById('status-sub');
-    if (sub) sub.textContent = state.coherence ? 's² = r²' : 's² ≠ r²';
+    if (sub) sub.textContent = state.coherence ? 's² = r²' : 's² ≠ r²' + (state.stale ? ' (stale)' : '');
 }
 
 function parsePsiReal(psiRealStr) {
@@ -1190,10 +1245,22 @@ function updateDbzPanel() {
     const branchEl = document.getElementById('dbz-branch');
     branchEl.textContent = branch + ' ' + reSign;
     branchEl.style.color = isA3 ? 'var(--dbz-a3)' : 'var(--dbz-a4)';
-    document.getElementById('dbz-repsi').textContent = hasPsiReal ? state.psi_real : '—';
+    const repsiEl = document.getElementById('dbz-repsi');
+    if (repsiEl) {
+        repsiEl.textContent = hasPsiReal ? formatFracShort(state.psi_real, 16) : '—';
+        repsiEl.title = formatFracTooltip(state.psi_real);
+    }
     document.getElementById('dbz-psi-coeffs').textContent = state.psi_coeffs_count ?? '—';
-    document.getElementById('dbz-s2').textContent = state.arc_sq;
-    document.getElementById('dbz-r2').textContent = state.radius_sq;
+    const s2El = document.getElementById('dbz-s2');
+    const r2El = document.getElementById('dbz-r2');
+    if (s2El) {
+        s2El.textContent = formatFracShort(state.arc_sq, 20);
+        s2El.title = formatFracTooltip(state.arc_sq);
+    }
+    if (r2El) {
+        r2El.textContent = formatFracShort(state.radius_sq, 20);
+        r2El.title = formatFracTooltip(state.radius_sq);
+    }
 }
 
 function updatePrimesPanel() {
@@ -1213,8 +1280,8 @@ function updateLatticePanel() {
 }
 
 function updateFibrationPanel() {
-    document.getElementById('fib-z').textContent = state.hopf_base[0];
-    document.getElementById('fib-w').textContent = state.hopf_base[1];
+    document.getElementById('fib-z').textContent = formatFracShort(state.hopf_base[0], 16); document.getElementById('fib-z').title = formatFracTooltip(state.hopf_base[0]);
+    document.getElementById('fib-w').textContent = formatFracShort(state.hopf_base[1], 16); document.getElementById('fib-w').title = formatFracTooltip(state.hopf_base[1]);
     document.getElementById('fib-a').textContent = state.phi.a;
     document.getElementById('fib-b').textContent = state.phi.b;
     document.getElementById('fib-mag').textContent = state.phi_mag;
@@ -1236,7 +1303,7 @@ function updateObserverPanel() {
 }
 
 function updateMetricPanel() {
-    document.getElementById('metric-I').textContent = state.I;
+    const mI = document.getElementById('metric-I'); if (mI) { mI.textContent = formatFracShort(state.I, 16); mI.title = formatFracTooltip(state.I); }
 }
 
 function updateEvolutionPanel() {
@@ -1402,33 +1469,54 @@ function drawFibrationCanvas() {
 async function fetchMiniAppState() {
     if (!HAS_BACKEND) { setConnBadge('err', 'no backend'); return; }
     const r = await apiJson('/miniapp-state');
-    if (!r || r.__error) {
+    if (!r) {
+        setConnBadge('wait', 'no data');
+        return;
+    }
+    if (r.__error) {
+        // Ed38: handle H12 / 503 seed_busy as loading, not error
+        if (r.__status === 503 && r.__body && r.__body.error === 'seed_busy') {
+            setConnBadge('wait', 'seed busy…');
+            // If we have cached state, keep showing it
+            if (state.tick > 0) return;
+        }
+        // If backend returned error but we have previous state, don't blank UI
+        if (state.tick > 0) {
+            setConnBadge('wait', 'retrying…');
+            return;
+        }
         setConnBadge('err', 'state error');
         return;
     }
-    setConnBadge('ok', 'connected');
-    state.seed_state = r.state || 'uninitialized';
-    state.tick = r.tick || 0;
-    state.generation = r.generation || 0;
-    state.primes_tail = r.primes_tail || [];
-    state.prime_count = r.prime_count || 0;
-    state.lattice_points = r.lattice_points || 0;
-    state.arc_sq = r.arc_sq || '0/1';
-    state.radius_sq = r.radius_sq || '1/1';
-    state.deviation_sq = r.deviation_sq || '0/1';
-    state.coherence = Boolean(r.coherence);
-    state.I = r.I || '—';
-    state.psi_real = r.psi_real || '0/1';
-    state.psi_coeffs_count = r.psi_coeffs_count || 0;
-    state.hopf_base = r.hopf_base || ['0/1', '0/1'];
-    state.phi = r.phi || { a: '1/1', b: '0/1', c: '0/1', d: '0/1' };
-    state.phi_mag = r.phi_magnitude_sq || '1/1';
-    state.trajectory = r.trajectory || [];
-    state.evolution = r.evolution;
-    state.logic_core = r.logic_core || {};
-    state.history_tail = r.history_tail || [];
+    // Stale flag from Ed38 cached snapshot
+    if (r.stale) {
+        setConnBadge('wait', 'stale ' + (r.tick || ''));
+    } else {
+        setConnBadge('ok', 'connected');
+    }
+    state.seed_state = r.state || state.seed_state || 'uninitialized';
+    state.tick = r.tick || state.tick || 0;
+    state.generation = r.generation || state.generation || 0;
+    state.primes_tail = r.primes_tail || state.primes_tail || [];
+    state.prime_count = r.prime_count || state.prime_count || 0;
+    state.lattice_points = r.lattice_points || state.lattice_points || 0;
+    state.arc_sq = r.arc_sq || state.arc_sq || '0/1';
+    state.radius_sq = r.radius_sq || state.radius_sq || '1/1';
+    state.deviation_sq = r.deviation_sq || state.deviation_sq || '0/1';
+    state.coherence = (typeof r.coherence === 'boolean') ? r.coherence : state.coherence;
+    state.I = r.I || state.I || '—';
+    state.psi_real = r.psi_real || state.psi_real || '0/1';
+    state.psi_coeffs_count = r.psi_coeffs_count || state.psi_coeffs_count || 0;
+    state.hopf_base = r.hopf_base || state.hopf_base || ['0/1', '0/1'];
+    state.phi = r.phi || state.phi || { a: '1/1', b: '0/1', c: '0/1', d: '0/1' };
+    state.phi_mag = r.phi_magnitude_sq || state.phi_mag || '1/1';
+    state.trajectory = r.trajectory || state.trajectory || [];
+    state.evolution = r.evolution || state.evolution;
+    state.logic_core = r.logic_core || state.logic_core || {};
+    state.history_tail = r.history_tail || state.history_tail || [];
     state.crawler = r.crawler || state.crawler;
-    state.last_logic_hash = r.last_logic_hash || '';
+    state.last_logic_hash = r.last_logic_hash || state.last_logic_hash || '';
+    state.stale = Boolean(r.stale);
     updateStatusPanel();
     updateDbzPanel();
     updatePrimesPanel();
