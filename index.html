@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>ÆI Seed · GAIA TWA · CS vFinal Ed.38 H12fix</title>
+<title>ÆI Seed · GAIA TWA · CS vFinal Ed.39 toast-truncate H12fix</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html, body {
@@ -467,6 +467,17 @@ html, body {
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--border-bright); }
+
+.toast .v { 
+    word-break: break-all; 
+    max-width: 180px; 
+    display: inline-block; 
+    vertical-align: bottom; 
+    overflow: hidden; 
+    text-overflow: ellipsis; 
+    white-space: nowrap;
+}
+
 </style>
 </head>
 <body>
@@ -964,7 +975,7 @@ function pushToast(toast) {
     el.className = 'toast';
     if (toast.kind === 'seed') {
         el.classList.add(toast.coherence ? 'seed-coherent' : 'seed-evolving');
-        const devShort = formatFracShort(toast.deviation_sq, 24);
+        const devShort = formatFracShort(toast.deviation_sq, 18); // Ed39 even shorter
         el.innerHTML =
             '<div class="toast-title">' + (toast.coherence ? '𝒮_coh' : '𝒟_evo') + ' · 𝒯_step</div>' +
             '<div class="toast-line">𝒯_tick <span class="v">' + escapeHtml(String(toast.tick ?? '—')) + '</span> · 𝒯_gen <span class="v">' + escapeHtml(String(toast.generation ?? '—')) + '</span></div>' +
@@ -997,6 +1008,14 @@ async function fetchToasts() {
         }
     }
     if (Array.isArray(r.toasts)) {
+        // Ed39: defense - truncate any huge fields in raw toasts before push
+        r.toasts = r.toasts.map(t => {
+            try {
+                if (t.deviation_sq && String(t.deviation_sq).length > 60) t.deviation_sq = String(t.deviation_sq).slice(0,24) + '…(' + String(t.deviation_sq).length + 'ch)';
+                if (t.prime && String(t.prime).length > 40) t.prime = String(t.prime).slice(0,16) + '…';
+            } catch(e){}
+            return t;
+        });
         for (const t of r.toasts) {
             pushToast(t);
             if (typeof t.seq === 'number' && t.seq > toastSeqCursor) {
@@ -1483,6 +1502,7 @@ async function fetchMiniAppState() {
         // If backend returned error but we have previous state, don't blank UI
         if (state.tick > 0) {
             setConnBadge('wait', 'retrying…');
+            setTimeout(() => fetchMiniAppState(), 800);
             return;
         }
         setConnBadge('err', 'state error');
