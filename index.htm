@@ -383,8 +383,8 @@
 
     <div id="backendBadge" style="position:absolute;top:20px;left:50%;transform:translateX(-50%);z-index:20;background:rgba(5,5,16,0.92);border:1px solid #00ffcc;border-radius:4px;padding:2px 8px;font-size:0.55rem;color:#00ffcc;pointer-events:none;">● backend: checking...</div>
     <div style="position:absolute;top:60px;left:50%;transform:translateX(-50%);z-index:20;display:flex;gap:6px;">
-      <a href="./index.html?backend=https://aei-37a29e073070.herokuapp.com/" style="background:rgba(20,30,50,0.9);border:1px solid #4488aa;color:#aaccff;padding:4px 10px;border-radius:4px;font-size:0.6rem;text-decoration:none;">← ÆI SEED TWA</a>
-      <a href="./index.htm?backend=https://aei-37a29e073070.herokuapp.com/" style="background:rgba(20,30,50,0.9);border:1px solid #ffaa44;color:#ffaa44;padding:4px 10px;border-radius:4px;font-size:0.6rem;text-decoration:none;">CODEX SYMBOLICA</a>
+      <a href="./index.html" style="background:rgba(20,30,50,0.9);border:1px solid #4488aa;color:#aaccff;padding:4px 10px;border-radius:4px;font-size:0.6rem;text-decoration:none;">← ÆI SEED TWA</a>
+      <a href="./index.htm" style="background:rgba(20,30,50,0.9);border:1px solid #ffaa44;color:#ffaa44;padding:4px 10px;border-radius:4px;font-size:0.6rem;text-decoration:none;">CODEX SYMBOLICA</a>
     </div>
 
 
@@ -573,7 +573,9 @@
     'use strict';
 
 // ==== ÆI BACKEND BRIDGE (GitHub Pages ↔ Heroku ↔ Telegram Bot) ====
-const DEFAULT_BACKENDS = ['https://aei-37a29e073070.herokuapp.com/'];
+const _AEI_B64 = "aHR0cHM6Ly9hZWktMzdhMjllMDczMDcwLmhlcm9rdWFwcC5jb20v";
+function _aeiDecode(s){ try{ return atob(s); }catch(e){ return ""; } }
+const DEFAULT_BACKENDS = [_aeiDecode(_AEI_B64)];
 const LS_KEY = 'aei_backend_url';
 function normalizeBackend(u){ if(!u) return ''; let s=String(u).trim(); if(/%3A%2F%2F/i.test(s)){ try{s=decodeURIComponent(s)}catch(e){} } if(!/^https?:\/\//i.test(s)) return ''; return s.replace(/\/+$/, '') + '/'; }
 function readQsBackend(){ try{ const qs=new URLSearchParams(window.location.search); return qs.get('backend'); }catch(e){ return null; } }
@@ -2678,7 +2680,7 @@ window.__AEI_BACKEND = {url: BACKEND_URL, has: HAS_BACKEND, get: apiGet, post: a
 
     
     // update badge text
-    setInterval(()=>{ const el=document.getElementById('backendBadge'); if(!el) return; if(!window.__AEI_BACKEND || !window.__AEI_BACKEND.has){ el.textContent='● backend: standalone'; el.style.borderColor='#6688aa'; el.style.color='#6688aa'; return; } const url=window.__AEI_BACKEND.url; el.textContent='● backend: ' + url.replace('https://','').slice(0,32); el.style.borderColor='#00ff88'; }, 1000);
+    setInterval(()=>{ const el=document.getElementById('backendBadge'); if(!el) return; if(!window.__AEI_BACKEND || !window.__AEI_BACKEND.has){ el.textContent='● standalone'; el.style.borderColor='#6688aa'; el.style.color='#6688aa'; return; } const url=window.__AEI_BACKEND.url; el.textContent='● connected'; el.style.borderColor='#00ff88'; }, 1000);
     // feed visualization clicks back to bot
     const _origEncode = window.encodeSyllable; // may not exist
     window.feedBackendStep = async function(){ if(window.__AEI_BACKEND && window.__AEI_BACKEND.has){ await window.__AEI_BACKEND.post('/step', {x:'1/100'}); } };

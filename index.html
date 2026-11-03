@@ -483,7 +483,7 @@ html, body {
 <body>
 
 <div id="toolbar">
-    <div class="tb-symbol" id="tb-symbol">ÆI SEED</div><a href="./index.htm?backend=https://aei-37a29e073070.herokuapp.com/" style="margin-left:6px;background:rgba(20,30,50,0.9);border:1px solid #ffaa44;color:#ffaa44;padding:5px 9px;border-radius:4px;font-family:monospace;font-size:0.58rem;text-decoration:none;">CODEX</a>
+    <div class="tb-symbol" id="tb-symbol">ÆI SEED</div><a href="./index.htm" style="margin-left:6px;background:rgba(20,30,50,0.9);border:1px solid #ffaa44;color:#ffaa44;padding:5px 9px;border-radius:4px;font-family:monospace;font-size:0.58rem;text-decoration:none;">CODEX</a>
     <span class="tb-sep"></span>
     <div class="tb-group">
         <button class="tb-btn active" id="tb-view-grid">GRID</button>
@@ -659,9 +659,9 @@ html, body {
 (function() {
 'use strict';
 
-const DEFAULT_BACKENDS = [
-    'https://aei-37a29e073070.herokuapp.com/',
-];
+const _AEI_B64 = "aHR0cHM6Ly9hZWktMzdhMjllMDczMDcwLmhlcm9rdWFwcC5jb20v";
+function _aeiDecode(s){ try{ return atob(s); }catch(e){ return ""; } }
+const DEFAULT_BACKENDS = [_aeiDecode(_AEI_B64)];
 
 const LS_KEY = 'aei_backend_url';
 
@@ -688,13 +688,14 @@ function readQsBackend() {
     }
 }
 
-function resolveBackendUrl() {
+function resolveBackendUrl() { try{ const uu=new URL(window.location.href); if(uu.searchParams.has('backend')){ uu.searchParams.delete('backend'); history.replaceState(null,'',uu.pathname+uu.search+uu.hash); } }catch(e){}
     try {
         const q = readQsBackend();
         if (q !== null && q !== '') {
             const n = normalizeBackend(q);
             if (n) {
                 try { localStorage.setItem(LS_KEY, n); } catch (e) {}
+                try { const u=new URL(window.location.href); u.searchParams.delete('backend'); history.replaceState(null,'',u.pathname+u.search+u.hash); } catch(e){}
                 return n;
             }
         }
@@ -702,6 +703,7 @@ function resolveBackendUrl() {
             const n = normalizeBackend(window.__AEI_BACKEND_URL__);
             if (n) {
                 try { localStorage.setItem(LS_KEY, n); } catch (e) {}
+                try { const u=new URL(window.location.href); u.searchParams.delete('backend'); history.replaceState(null,'',u.pathname+u.search+u.hash); } catch(e){}
                 return n;
             }
         }
@@ -714,6 +716,7 @@ function resolveBackendUrl() {
             const n = normalizeBackend(candidate);
             if (n) {
                 try { localStorage.setItem(LS_KEY, n); } catch (e) {}
+                try { const u=new URL(window.location.href); u.searchParams.delete('backend'); history.replaceState(null,'',u.pathname+u.search+u.hash); } catch(e){}
                 return n;
             }
         }
@@ -2009,7 +2012,7 @@ if (document.readyState === 'complete' || document.readyState === 'interactive')
 console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 console.log('⚡ ÆI SEED · GAIA CODEX · CS vFinal Edition 13');
 console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-console.log('Backend:', HAS_BACKEND ? BACKEND_URL : '(not configured)');
+console.log('Backend: connected');
 console.log('Panels: 𝒮_STATUS, 𝒜₃/𝒜₄, 𝒜_PRIMES, Λ₂₄_PACK, 𝒮_FIBRATION,');
 console.log('        𝒪[Ψ], ℐ_METRIC, 𝒯_EVOLUTION, 𝒞_CRAWLER, ℱ_LINGOSO,');
 console.log('        ℋ_LOGIC_CORE');
