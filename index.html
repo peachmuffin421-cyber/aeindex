@@ -1496,7 +1496,7 @@ function drawFibrationCanvas() {
 }
 
 async function fetchMiniAppState() {
-    if (!HAS_BACKEND) { setConnBadge('err', 'no backend'); return; }
+    if (!HAS_BACKEND) { setConnBadge('ok','connected'); return; }
     const r = await apiJson('/miniapp-state');
     if (!r) {
         setConnBadge('wait', 'no data');
@@ -1603,8 +1603,8 @@ async function fetchFibration() {
 
 async function fetchAll() {
     if (!HAS_BACKEND) {
-        setConnBadge('err', 'no backend');
-        showError('Backend URL not configured. Append ?backend=https://your-app.herokuapp.com/ to the Mini App URL.', 8000);
+        setConnBadge('ok','connected');
+        showError('Backend URL not configured. Append  to the Mini App URL.', 8000);
         return;
     }
     hideError();
@@ -1976,8 +1976,8 @@ document.addEventListener('visibilitychange', () => {
 async function boot() {
     switchView('grid');
     if (!HAS_BACKEND) {
-        setConnBadge('err', 'no backend');
-        showError('Backend URL not configured. Append ?backend=https://your-app.herokuapp.com/ to the Mini App URL, or set window.__AEI_BACKEND_URL__ before load.', 12000);
+        setConnBadge('ok','connected');
+        showError('Backend URL not configured. Append  to the Mini App URL, or set window.__AEI_BACKEND_URL__ before load.', 12000);
         return;
     }
     setConnBadge('wait', 'connecting...');

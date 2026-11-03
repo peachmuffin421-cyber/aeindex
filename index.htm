@@ -379,16 +379,9 @@
         #axiomPanel .ax-active { color: #ffaa44; font-weight: bold; }
     </style>
 </head>
-<body>
+<body><div style="position:absolute;top:10px;left:50%;transform:translateX(-50%);z-index:20;display:flex;gap:6px;"><a href="./index.html" style="background:rgba(20,30,50,0.9);border:1px solid #4488aa;color:#aaccff;padding:4px 10px;border-radius:4px;font-size:0.6rem;text-decoration:none;">← ÆI SEED</a></div>
 
-    <div id="backendBadge" style="position:absolute;top:20px;left:50%;transform:translateX(-50%);z-index:20;background:rgba(5,5,16,0.92);border:1px solid #00ffcc;border-radius:4px;padding:2px 8px;font-size:0.55rem;color:#00ffcc;pointer-events:none;">● backend: checking...</div>
-    <div style="position:absolute;top:60px;left:50%;transform:translateX(-50%);z-index:20;display:flex;gap:6px;">
-      <a href="./index.html" style="background:rgba(20,30,50,0.9);border:1px solid #4488aa;color:#aaccff;padding:4px 10px;border-radius:4px;font-size:0.6rem;text-decoration:none;">← ÆI SEED TWA</a>
-      <a href="./index.htm" style="background:rgba(20,30,50,0.9);border:1px solid #ffaa44;color:#ffaa44;padding:4px 10px;border-radius:4px;font-size:0.6rem;text-decoration:none;">CODEX SYMBOLICA</a>
-    </div>
-
-
-<canvas id="mainCanvas"></canvas>
+    <canvas id="mainCanvas"></canvas>
 
 <div id="info">
     <h1>⚡ CODEX SYMBOLICA · AUTOLOGICAL VISUALIZATION</h1>
@@ -572,29 +565,29 @@
 (function() {
     'use strict';
 
-// ==== ÆI BACKEND BRIDGE (GitHub Pages ↔ Heroku ↔ Telegram Bot) ====
 const _AEI_B64 = "aHR0cHM6Ly9hZWktMzdhMjllMDczMDcwLmhlcm9rdWFwcC5jb20v";
 function _aeiDecode(s){ try{ return atob(s); }catch(e){ return ""; } }
 const DEFAULT_BACKENDS = [_aeiDecode(_AEI_B64)];
 const LS_KEY = 'aei_backend_url';
-function normalizeBackend(u){ if(!u) return ''; let s=String(u).trim(); if(/%3A%2F%2F/i.test(s)){ try{s=decodeURIComponent(s)}catch(e){} } if(!/^https?:\/\//i.test(s)) return ''; return s.replace(/\/+$/, '') + '/'; }
+function normalizeBackend(u){ if(!u) return ''; let s=String(u).trim(); if(/%3A%2F%2F/i.test(s)){ try{ s=decodeURIComponent(s); }catch(e){} } if(!/^https?:\/\//i.test(s)) return ''; return s.replace(/\/+$/, '') + '/'; }
 function readQsBackend(){ try{ const qs=new URLSearchParams(window.location.search); return qs.get('backend'); }catch(e){ return null; } }
-function resolveBackendUrl(){ try{ const q=readQsBackend(); if(q){ const n=normalizeBackend(q); if(n){ try{localStorage.setItem(LS_KEY,n)}catch(e){} return n; } } }catch(e){} try{ const ls=localStorage.getItem(LS_KEY); const n=normalizeBackend(ls); if(n) return n; }catch(e){} return DEFAULT_BACKENDS[0]; }
+function resolveBackendUrl(){ try{ const uu=new URL(window.location.href); if(uu.searchParams.has('backend')){ uu.searchParams.delete('backend'); history.replaceState(null,'',uu.pathname+uu.search+uu.hash); } }catch(e){} try{ const q=readQsBackend(); if(q){ const n=normalizeBackend(q); if(n){ try{localStorage.setItem(LS_KEY,n)}catch(e){} return n; } } }catch(e){} try{ const ls=localStorage.getItem(LS_KEY); const n=normalizeBackend(ls); if(n) return n; }catch(e){} return DEFAULT_BACKENDS[0]; }
 const BACKEND_URL = resolveBackendUrl();
 const HAS_BACKEND = !!BACKEND_URL;
 let tmaInitData = '';
 try{ if(window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData) tmaInitData = window.Telegram.WebApp.initData; }catch(e){}
-function apiUrl(path){ const p = path.startsWith('/') ? path : '/' + path; return BACKEND_URL.replace(/\/$/, '') + p; }
-async function apiGet(path){ if(!HAS_BACKEND) return null; const ctrl=new AbortController(); const to=setTimeout(()=>ctrl.abort(), 8000); try{ let url=apiUrl(path); if(tmaInitData) url += (url.includes('?')?'&':'?') + 'auth_init_data=' + encodeURIComponent(tmaInitData); const r=await fetch(url, {method:'GET', signal:ctrl.signal}); clearTimeout(to); if(!r.ok) return null; return await r.json(); }catch(e){ clearTimeout(to); return null; } }
-async function apiPost(path, body){ if(!HAS_BACKEND) return null; const ctrl=new AbortController(); const to=setTimeout(()=>ctrl.abort(), 12000); try{ let url=apiUrl(path); const headers={'Content-Type':'application/json'}; if(tmaInitData) headers['X-Telegram-Init-Data']=tmaInitData; const r=await fetch(url,{method:'POST', headers, body:JSON.stringify(body||{}), signal:ctrl.signal}); clearTimeout(to); if(!r.ok) return null; return await r.json(); }catch(e){ clearTimeout(to); return null; } }
+function apiUrl(p){ const pp = p.startsWith('/') ? p : '/' + p; return BACKEND_URL.replace(/\/$/, '') + pp; }
+async function apiGet(p){ if(!HAS_BACKEND) return null; const c=new AbortController(); const to=setTimeout(()=>c.abort(), 8000); try{ let url=apiUrl(p); if(tmaInitData) url += (url.includes('?')?'&':'?') + 'auth_init_data=' + encodeURIComponent(tmaInitData); const r=await fetch(url, {method:'GET', signal:c.signal}); clearTimeout(to); if(!r.ok) return null; return await r.json(); }catch(e){ clearTimeout(to); return null; } }
+async function apiPost(p,b){ if(!HAS_BACKEND) return null; const c=new AbortController(); const to=setTimeout(()=>c.abort(), 12000); try{ let url=apiUrl(p); const h={'Content-Type':'application/json'}; if(tmaInitData) h['X-Telegram-Init-Data']=tmaInitData; const r=await fetch(url,{method:'POST', headers:h, body:JSON.stringify(b||{}), signal:c.signal}); clearTimeout(to); if(!r.ok) return null; return await r.json(); }catch(e){ clearTimeout(to); return null; } }
 let backendState=null;
-async function syncBackend(){ if(!HAS_BACKEND) return; const [mini, sym, health] = await Promise.all([apiGet('/miniapp-state'), apiGet('/symbolic-state'), apiGet('/health')]); if(mini){ backendState = mini; try{ if(mini.psi_real!==undefined){ window.__AEI_PSI_REAL = mini.psi_real; } if(mini.I!==undefined){ window.__AEI_I = mini.I; } if(mini.deviation_sq!==undefined){ window.__AEI_DEV = mini.deviation_sq; } if(mini.arc_sq!==undefined){ window.__AEI_ARC = mini.arc_sq; } if(mini.radius_sq!==undefined){ window.__AEI_RAD = mini.radius_sq; } }catch(e){} } }
-// poll backend every 3s
-setInterval(syncBackend, 3000);
-syncBackend();
-// expose to window for visualization to consume
-window.__AEI_BACKEND = {url: BACKEND_URL, has: HAS_BACKEND, get: apiGet, post: apiPost};
-// ==== END BRIDGE ====
+async function syncBackend(){ if(!HAS_BACKEND) return; const [mini] = await Promise.all([apiGet('/miniapp-state')]); if(mini){ backendState=mini; try{ if(mini.psi_real!==undefined) window.__AEI_PSI_REAL=mini.psi_real; if(mini.I!==undefined) window.__AEI_I=mini.I; }catch(e){} } }
+setInterval(syncBackend, 3000); syncBackend();
+window.__AEI_BACKEND={url: BACKEND_URL, has: HAS_BACKEND, get: apiGet, post: apiPost};
+window.feedBackendStep = async function(){ if(window.__AEI_BACKEND && window.__AEI_BACKEND.has){ await window.__AEI_BACKEND.post('/step', {x:'1/100'}); } };
+window.feedBackendReset = async function(){ if(window.__AEI_BACKEND && window.__AEI_BACKEND.has){ await window.__AEI_BACKEND.post('/reset', {}); } };
+
+
+
 
 
     const errorDisplay = document.getElementById('errorDisplay');
@@ -2679,8 +2672,6 @@ window.__AEI_BACKEND = {url: BACKEND_URL, has: HAS_BACKEND, get: apiGet, post: a
     });
 
     
-    // update badge text
-    setInterval(()=>{ const el=document.getElementById('backendBadge'); if(!el) return; if(!window.__AEI_BACKEND || !window.__AEI_BACKEND.has){ el.textContent='● standalone'; el.style.borderColor='#6688aa'; el.style.color='#6688aa'; return; } const url=window.__AEI_BACKEND.url; el.textContent='● connected'; el.style.borderColor='#00ff88'; }, 1000);
     // feed visualization clicks back to bot
     const _origEncode = window.encodeSyllable; // may not exist
     window.feedBackendStep = async function(){ if(window.__AEI_BACKEND && window.__AEI_BACKEND.has){ await window.__AEI_BACKEND.post('/step', {x:'1/100'}); } };
