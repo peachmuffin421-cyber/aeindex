@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>ÆI Seed · GAIA TWA · Final · First</title>
+<title>ÆI Seed · GAIA TWA</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html, body {
@@ -479,8 +479,6 @@ html, body {
 }
 
 </style>
-<!-- Version: Final | Edition: First -->
-<!-- Version: Final | Edition: First -->
 </head>
 <body>
 
@@ -635,7 +633,7 @@ html, body {
 <div id="errorDisplay"></div>
 
 <div id="explainPanel">
-    <h3>⚡ ÆI SEED · GAIA CODEX · CS Final First13</h3>
+    <h3>⚡ ÆI SEED · GAIA CODEX · CS vFinal Ed.13</h3>
     <div class="item"><b>What this is</b> <span>— The <b>ÆI seed</b> (GAIA/ÆI Codex), not the ÆEA market bot. It runs the prime-sieve → lattice → Hopf-fibration → s²=r² → SelfEvolution loop from ÆI.md §3–§8. Every state value is an exact Fraction (a/b) displayed as the plain-text Maths of the CODEX_SYMBOLICA.</span></div>
     <div class="item"><b>𝒮_STATUS</b> <span>— Seed state: <code>coherent</code> / <code>evolving</code> / <code>initialized</code>. Tick = seed steps; Generation = SelfEvolution generations; prime count = 𝒜[p] sieve output; lattice points = Λ₂₄ centers; ℐ_metric = intelligence metric; logic hash = deterministic SHA-256 of the current logic core.</span></div>
     <div class="item"><b>δ(s²−r²)</b> <span>— The <b>primary evolution gate</b> (ÆI.md §2.4 Axiom 1). s² = arc length squared, r² = radial distance squared. Deviation triggers DbZ branching and SelfEvolution mutation. The bar shows s²/r² ratio (green at the centre = coherence, white marker at 1.0).</span></div>
@@ -1499,28 +1497,50 @@ function drawFibrationCanvas() {
 
 async function fetchMiniAppState() {
     if (!HAS_BACKEND) { setConnBadge('ok','connected'); return; }
-    const r = await apiJson('/miniapp-state');
+    let r = await apiJson('/miniapp-state');
     if (!r) {
         setConnBadge('wait', 'no data');
+        pushLog('warn','miniapp-state empty response');
         return;
     }
     if (r.__error) {
-        // : handle H12 / 503 seed_busy as loading, not error
+        // If 401, try public health to diagnose and show auth issue
+        if (r.__status === 401) {
+            const health = await apiJson('/health');
+            if (health && !health.__error) {
+                setConnBadge('err', 'auth required');
+                showError('Backend requires Telegram auth. Open inside Telegram or set REQUIRE_AUTH=0 on Heroku. Health: tick='+ (health.seed_tick||0), 8000);
+                pushLog('warn','401 on miniapp-state, health OK: ' + JSON.stringify(health).slice(0,120));
+            } else {
+                setConnBadge('err', 'backend down');
+                showError('Backend unreachable or crashed: ' + (r.error||'401'), 6000);
+            }
+            // Still try to render placeholder if we have cached
+            if (state.tick > 0) return;
+            // Try fetching without auth as fallback for debugging
+            try {
+                const fallbackUrl = apiUrl('/miniapp-state');
+                const res = await fetch(fallbackUrl, {mode:'cors'});
+                const txt = await res.text();
+                pushLog('info','fallback fetch status='+res.status+' body='+txt.slice(0,200));
+            } catch(e){ pushLog('error','fallback fetch failed: '+e); }
+            return;
+        }
+        // handle H12 / 503 seed_busy as loading, not error
         if (r.__status === 503 && r.__body && r.__body.error === 'seed_busy') {
             setConnBadge('wait', 'seed busy…');
-            // If we have cached state, keep showing it
             if (state.tick > 0) return;
         }
-        // If backend returned error but we have previous state, don't blank UI
         if (state.tick > 0) {
             setConnBadge('wait', 'retrying…');
             setTimeout(() => fetchMiniAppState(), 800);
             return;
         }
-        setConnBadge('err', 'state error');
+        setConnBadge('err', 'state error ' + (r.__status||''));
+        showError('State error: ' + (r.error||'unknown') + ' status=' + (r.__status||''), 5000);
         return;
     }
-    // Stale flag from  cached snapshot
+    // Stale flag from cached snapshot
     if (r.stale) {
         setConnBadge('wait', 'stale ' + (r.tick || ''));
     } else {
