@@ -688,39 +688,83 @@ function readQsBackend() {
     }
 }
 
-function resolveBackendUrl() { try{ const uu=new URL(window.location.href); if(uu.searchParams.has('backend')){ uu.searchParams.delete('backend'); history.replaceState(null,'',uu.pathname+uu.search+uu.hash); } }catch(e){}
-    try {
-        const q = readQsBackend();
-        if (q !== null && q !== '') {
-            const n = normalizeBackend(q);
-            if (n) {
-                try { localStorage.setItem(LS_KEY, n); } catch (e) {}
-                try { const u=new URL(window.location.href); u.searchParams.delete('backend'); history.replaceState(null,'',u.pathname+u.search+u.hash); } catch(e){}
-                return n;
+function resolveBackendUrl() {
+    // FIX: supports ?backend=off and ?backend=0 and ?standalone and ?forceOnline
+    try{
+        const url = new URL(window.location.href);
+        const qp = url.searchParams.get('backend');
+        const hasStandalone = url.searchParams.has('standalone');
+        const hasForceOnline = url.searchParams.get('forceOnline');
+
+        if (qp !== null || hasStandalone) {
+            // clean URL for sharing, but remember qp
+            try {
+                const clean = new URL(url);
+                clean.searchParams.delete('backend');
+                clean.searchParams.delete('standalone');
+                clean.searchParams.delete('forceOnline');
+                history.replaceState(null,'',clean.pathname+clean.search+clean.hash);
+            } catch(e){}
+
+            // explicit off
+            if (hasStandalone) {
+                try { localStorage.removeItem(LS_KEY); } catch(e){}
+                return '';
+            }
+            if (qp !== null) {
+                const low = String(qp).toLowerCase().trim();
+                if (low === 'off' || low === '0' || low === 'standalone' || low === 'false') {
+                    try { localStorage.removeItem(LS_KEY); } catch(e){}
+                    return '';
+                }
+                const n = normalizeBackend(qp);
+                if (n) {
+                    try { localStorage.setItem(LS_KEY, n); } catch(e){}
+                    return n;
+                } else {
+                    // qp present but invalid -> treat as off
+                    try { localStorage.removeItem(LS_KEY); } catch(e){}
+                    return '';
+                }
             }
         }
-        if (typeof window.__AEI_BACKEND_URL__ === 'string' && window.__AEI_BACKEND_URL__.length > 0) {
-            const n = normalizeBackend(window.__AEI_BACKEND_URL__);
-            if (n) {
-                try { localStorage.setItem(LS_KEY, n); } catch (e) {}
-                try { const u=new URL(window.location.href); u.searchParams.delete('backend'); history.replaceState(null,'',u.pathname+u.search+u.hash); } catch(e){}
-                return n;
+
+        // If ?forceOnline=1, try LS then default
+        if (hasForceOnline === '1') {
+            try {
+                const ls = localStorage.getItem(LS_KEY);
+                const n = normalizeBackend(ls);
+                if (n) return n;
+            } catch(e){}
+            for (const candidate of DEFAULT_BACKENDS) {
+                const n = normalizeBackend(candidate);
+                if (n) return n;
             }
+            return '';
         }
+
+        // No explicit ?backend param
+        // Try LS
         try {
             const ls = localStorage.getItem(LS_KEY);
             const n = normalizeBackend(ls);
             if (n) return n;
-        } catch (e) {}
+        } catch(e){}
+
+        // Try window.__AEI_BACKEND_URL__
+        try {
+            if (typeof window.__AEI_BACKEND_URL__ === 'string' && window.__AEI_BACKEND_URL__.length > 0) {
+                const n = normalizeBackend(window.__AEI_BACKEND_URL__);
+                if (n) return n;
+            }
+        } catch(e){}
+
+        // Try default (Heroku) - but will be used
         for (const candidate of DEFAULT_BACKENDS) {
             const n = normalizeBackend(candidate);
-            if (n) {
-                try { localStorage.setItem(LS_KEY, n); } catch (e) {}
-                try { const u=new URL(window.location.href); u.searchParams.delete('backend'); history.replaceState(null,'',u.pathname+u.search+u.hash); } catch(e){}
-                return n;
-            }
+            if (n) return n;
         }
-    } catch (e) {}
+    } catch(e){}
     return '';
 }
 
@@ -790,7 +834,7 @@ async function apiFetch(path, opts) {
     const url = apiUrl(path);
     const timeoutMs = (typeof opts.timeoutMs === 'number' && opts.timeoutMs > 0)
         ? opts.timeoutMs
-        : 20000;
+        : 8000;
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), timeoutMs);
 
@@ -882,7 +926,28 @@ const connBadge = document.getElementById('connBadge');
 function setConnBadge(state, text) {
     if (!connBadge) return;
     connBadge.className = state;
-    connBadge.textContent = text;
+    // make tappable
+    connBadge.style.pointerEvents='auto';
+    connBadge.style.cursor='pointer';
+    connBadge.title='Tap to go offline / clear backend URL';
+    if (!connBadge._hasClick) {
+        connBadge._hasClick=true;
+        connBadge.addEventListener('click', ()=>{
+            try{
+                localStorage.removeItem(LS_KEY);
+                const u=new URL(window.location.href);
+                u.searchParams.set('backend','off');
+                location.href=u.toString();
+            }catch(e){
+                try{ localStorage.removeItem(LS_KEY); location.reload(); }catch(e2){}
+            }
+        });
+    }
+    // append hint
+    const hint = (typeof HAS_BACKEND!=='undefined' && HAS_BACKEND) ? ' (tap for offline)' : ' (offline)';
+    connBadge.textContent = text + hint;
+    connBadge.style.borderColor = state==='ok' ? '#00ff88' : state==='err' ? '#ff4466' : '#ffaa44';
+    connBadge.style.color = connBadge.style.borderColor;
 }
 
 const errorDisplay = document.getElementById('errorDisplay');
@@ -1496,7 +1561,7 @@ function drawFibrationCanvas() {
 }
 
 async function fetchMiniAppState() {
-    if (!HAS_BACKEND) { setConnBadge('ok','connected'); return; }
+    if (!HAS_BACKEND) { setConnBadge('ok','offline'); return; }
     const r = await apiJson('/miniapp-state');
     if (!r) {
         setConnBadge('wait', 'no data');
@@ -1976,16 +2041,46 @@ document.addEventListener('visibilitychange', () => {
 async function boot() {
     switchView('grid');
     if (!HAS_BACKEND) {
-        setConnBadge('ok','connected');
-        showError('Backend URL not configured. Append  to the Mini App URL, or set window.__AEI_BACKEND_URL__ before load.', 12000);
+        setConnBadge('ok','offline');
+        showError('Offline mode: Backend disabled. Use ?backend=https://... to go online or ?forceOnline=1 to use saved URL.', 8000);
+        pushLog('info', 'Offline mode - no backend');
+        // still start grid animation
+        try{ if(typeof initializeVisualization==='function') initializeVisualization(); }catch(e){}
         return;
     }
     setConnBadge('wait', 'connecting...');
     pushLog('info', 'Backend: ' + BACKEND_URL);
+
+    // FIX: fail-safe timer - if still connecting after 3s, show error instead of stuck
+    let _bootTimedOut = false;
+    const _bootTimer = setTimeout(()=>{
+        _bootTimedOut = true;
+        setConnBadge('err', 'backend timeout');
+        showError('Backend timeout after 3s: ' + BACKEND_URL + ' - Tap badge to go offline or open ?backend=off. If 401, set REQUIRE_AUTH=0 on Heroku.', 15000);
+        pushLog('warn', 'boot(): backend timeout - ' + BACKEND_URL);
+        // try to render grid anyway
+        try{
+            const grid=document.getElementById('grid');
+            if(grid && grid.innerHTML.trim().length<10){
+                grid.innerHTML='<div style="padding:20px;color:#ffaa44;font-family:monospace;font-size:0.65rem;line-height:1.4;">Backend timeout<br>URL: '+(BACKEND_URL||'none')+'<br><br>1. Tap badge to go offline<br>2. Or open ?backend=off<br>3. If 401 Unauthorized:<br>   heroku config:set REQUIRE_AUTH=0<br>4. Test: curl '+ (BACKEND_URL||'') + 'health<br><br>Offline grid should still work.</div>';
+            }
+        }catch(e){}
+    }, 3000);
+
     startPolling();
-    fetchAll().catch(e => {
+    try{
+        await fetchAll();
+        clearTimeout(_bootTimer);
+        if(_bootTimedOut){
+            setConnBadge('ok','connected (late)');
+        }
+    }catch(e){
+        clearTimeout(_bootTimer);
         pushLog('warn', 'boot(): initial fetchAll rejected: ' + (e && e.message ? e.message : String(e)));
-    });
+        if(!_bootTimedOut){
+            setConnBadge('err','connect error - tap for offline');
+        }
+    }
     if (tmaActive) {
         postHandshake().then(r => {
             if (r && r.ok) {
