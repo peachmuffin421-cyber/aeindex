@@ -385,7 +385,7 @@
 
     <canvas id="mainCanvas"></canvas>
 
-<div id="info">
+<div id="info"><div style="font-size:0.5rem;opacity:0.6;">Backend: <span id="backendStatus">offline (use ?forceOnline=1 to connect)</span></div>
     <h1>⚡ CODEX SYMBOLICA · Final · First</h1>
     <p>S³→S² · DbZ · O[Ψ] · CRT · CF · ζ(s) · Lingoso · ÆEA · ⊢ CS</p>
     <p style="margin-top:4px;"><span style="color:#ffaa44;">H</span> = help · <span style="color:#ffaa44;">A</span> = axioms · <span style="color:#ffaa44;">Drag</span> = rotate · <span style="color:#ffaa44;">Scroll</span> = zoom</p>
@@ -416,7 +416,7 @@
     </div>
 </div>
 
-<div id="connBadge" style="position:absolute;top:44px;right:8px;z-index:99;background:rgba(5,5,16,0.92);border:1px solid #ffaa44;border-radius:4px;padding:4px 8px;font-size:0.6rem;color:#ffaa44;pointer-events:auto;cursor:pointer;">offline</div><div id="controls">
+<div id="connBadge" style="position:absolute;top:10px;right:10px;z-index:99;background:rgba(5,5,16,0.95);border:1px solid #00ff88;border-radius:4px;padding:6px 10px;font-size:0.65rem;color:#00ff88;cursor:pointer;" onclick="try{localStorage.removeItem('aei_backend_url');location.href=location.pathname+'?backend=off';}catch(e){}">offline - ready (tap to clear)</div><div id="controls">
     <button class="btn" id="pauseBtn">⏸</button>
     <button class="btn" id="resetBtn">⟳</button>
     <button class="btn" id="modeBtn">FULL</button>
@@ -567,151 +567,98 @@
 (function() {
     'use strict';
 
-
-const LS_KEY = 'aei_backend_url';
 const _AEI_B64 = "aHR0cHM6Ly9hZWktMzdhMjllMDczMDcwLmhlcm9rdWFwcC5jb20v";
 function _aeiDecode(s){ try{ return atob(s); }catch(e){ return ""; } }
 const DEFAULT_BACKENDS = [_aeiDecode(_AEI_B64)];
-
-function getQueryParam(name){
-  try{
-    const qs=new URLSearchParams(window.location.search);
-    return qs.get(name);
-  }catch(e){ return null; }
-}
-
-function normalizeBackend(u){
-  if(!u) return '';
-  let s=String(u).trim();
-  if(s.toLowerCase()==='off' || s.toLowerCase()==='0' || s.toLowerCase()==='standalone') return '';
-  if(/%3A%2F%2F/i.test(s)){ try{ s=decodeURIComponent(s); }catch(e){} }
-  if(!/^https?:\/\//i.test(s)) return '';
-  return s.replace(/\/+$/, '') + '/';
-}
-
+const LS_KEY = 'aei_backend_url';
+function normalizeBackend(u){ if(!u) return ''; let s=String(u).trim(); if(s.toLowerCase()==='off'||s==='0'||s.toLowerCase()==='standalone') return ''; if(/%3A%2F%2F/i.test(s)){ try{ s=decodeURIComponent(s); }catch(e){} } if(!/^https?:\/\//i.test(s)) return ''; return s.replace(/\/+$/, '') + '/'; }
+function readQsBackend(){ try{ const qs=new URLSearchParams(window.location.search); return qs.get('backend'); }catch(e){ return null; } }
 function resolveBackendUrl(){
-  // NEW: explicit ?backend= required to enable network. No auto fallback.
-  // This prevents poisoned LS and dead Heroku from freezing page.
   try{
     const url=new URL(window.location.href);
-    const qp = url.searchParams.get('backend');
-    const standalone = url.searchParams.has('standalone');
-    if(qp !== null || standalone){
-      // clear param from URL for clean share
-      url.searchParams.delete('backend');
-      url.searchParams.delete('standalone');
-      try{ history.replaceState(null,'',url.pathname+url.search+url.hash); }catch(e){}
-      if(standalone || (qp && (qp.toLowerCase()==='off' || qp==='0'))){
-        try{ localStorage.removeItem(LS_KEY); }catch(e){}
-        return '';
-      }
-      if(qp){
+    const qp=url.searchParams.get('backend');
+    const hasStandalone=url.searchParams.has('standalone');
+    const forceOnline=url.searchParams.get('forceOnline');
+    if(qp!==null || hasStandalone){
+      try{ const clean=new URL(url); clean.searchParams.delete('backend'); clean.searchParams.delete('standalone'); clean.searchParams.delete('forceOnline'); history.replaceState(null,'',clean.pathname+clean.search+clean.hash); }catch(e){}
+      if(hasStandalone){ try{localStorage.removeItem(LS_KEY);}catch(e){} return ''; }
+      if(qp!==null){
+        const low=String(qp).toLowerCase().trim();
+        if(low==='off'||low==='0'||low==='standalone'||low==='false'){ try{localStorage.removeItem(LS_KEY);}catch(e){} return ''; }
         const n=normalizeBackend(qp);
-        if(n){
-          try{ localStorage.setItem(LS_KEY,n); }catch(e){}
-          return n;
-        } else {
-          // qp was 'off' or invalid -> stay offline
-          try{ localStorage.removeItem(LS_KEY); }catch(e){}
-          return '';
-        }
+        if(n){ try{localStorage.setItem(LS_KEY,n);}catch(e){} return n; }
+        try{localStorage.removeItem(LS_KEY);}catch(e){} return '';
       }
     }
-  }catch(e){}
-  // IMPORTANT FIX: don't use LS or DEFAULT by default. Only if user previously set explicit backend
-  // For diagnostic, we check LS but only if ?forceOnline=1 is present, otherwise stay offline
-  try{
-    const force = new URLSearchParams(window.location.search).get('forceOnline');
-    if(force==='1'){
-      const ls=localStorage.getItem(LS_KEY);
-      const n=normalizeBackend(ls);
-      if(n) return n;
-      return DEFAULT_BACKENDS[0] || '';
+    if(forceOnline==='1'){
+      try{ const ls=localStorage.getItem(LS_KEY); const n=normalizeBackend(ls); if(n) return n; }catch(e){}
+      for(const c of DEFAULT_BACKENDS){ const n=normalizeBackend(c); if(n) return n; }
+      return '';
     }
-  }catch(e){}
-  // Default: OFFLINE - this is what fixes the freeze
-  return '';
+    // DEFAULT OFFLINE to fix stuck connecting - was returning DEFAULT_BACKENDS[0] always
+    return '';
+  }catch(e){ return ''; }
 }
-
 const BACKEND_URL = resolveBackendUrl();
 const HAS_BACKEND = !!BACKEND_URL;
 let tmaInitData = '';
 try{ if(window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData) tmaInitData = window.Telegram.WebApp.initData; }catch(e){}
-
-function apiUrl(p){ const pp = p.startsWith('/') ? p : '/' + p; return BACKEND_URL.replace(/\/$/, '') + pp; }
-
-let _backendFailCount = 0;
-let _backendBackoffUntil = 0;
-
-function setConnBadgeSafe(state, text){
-  try{
-    let el=document.getElementById('connBadge');
-    if(!el){
-      el=document.createElement('div');
-      el.id='connBadge';
-      el.style.cssText='position:absolute;top:44px;right:8px;z-index:99;background:rgba(5,5,16,0.92);border:1px solid #335577;border-radius:4px;padding:4px 8px;font-size:0.6rem;pointer-events:auto;cursor:pointer;';
-      el.onclick=()=>{ try{ localStorage.removeItem(LS_KEY); location.href=location.pathname+'?backend=off'; }catch(e){} };
-      document.body.appendChild(el);
-    }
-    el.className=state;
-    el.textContent=text + (HAS_BACKEND ? ' (tap to go offline)' : ' (offline)');
-    el.style.borderColor = state==='ok' ? '#00ff88' : state==='err' ? '#ff4466' : '#ffaa44';
-    el.style.color = el.style.borderColor;
-  }catch(e){}
-}
-
-async function apiGet(p){
-  if(!HAS_BACKEND) return null;
+function apiUrl(p){ const pp = p.startsWith('/') ? p : '/' + p; if(!HAS_BACKEND) return p; return BACKEND_URL.replace(/\/$/, '') + pp; }
+let _backendFailCount=0;
+let _backendBackoffUntil=0;
+async function apiGet(p){ 
+  if(!HAS_BACKEND) return null; 
   if(Date.now() < _backendBackoffUntil) return null;
-  const c=new AbortController();
-  const to=setTimeout(()=>c.abort(), 8000);
-  try{
-    let url=apiUrl(p);
-    if(tmaInitData) url += (url.includes('?')?'&':'?') + 'auth_init_data=' + encodeURIComponent(tmaInitData);
-    const r=await fetch(url, {method:'GET', signal:c.signal});
-    clearTimeout(to);
-    if(!r.ok){
+  const c=new AbortController(); 
+  const to=setTimeout(()=>c.abort(), 5000); 
+  try{ 
+    let url=apiUrl(p); 
+    if(tmaInitData) url += (url.includes('?')?'&':'?') + 'auth_init_data=' + encodeURIComponent(tmaInitData); 
+    const r=await fetch(url, {method:'GET', signal:c.signal}); 
+    clearTimeout(to); 
+    if(!r.ok){ 
       _backendFailCount++;
-      if(_backendFailCount>=3){ _backendBackoffUntil=Date.now()+30000; setConnBadgeSafe('err','backend '+r.status+' unreachable - tap to go offline'); }
-      else setConnBadgeSafe('wait','retrying '+r.status+'...');
-      return null;
-    }
-    _backendFailCount=0; setConnBadgeSafe('ok','connected'); return await r.json();
-  }catch(e){
-    clearTimeout(to);
+      if(_backendFailCount>=2) _backendBackoffUntil=Date.now()+20000;
+      return null; 
+    } 
+    _backendFailCount=0;
+    return await r.json(); 
+  }catch(e){ 
+    clearTimeout(to); 
     _backendFailCount++;
-    if(_backendFailCount>=3){ _backendBackoffUntil=Date.now()+30000; setConnBadgeSafe('err','timeout - dyno dead? tap for offline'); }
-    else setConnBadgeSafe('wait','connecting...');
-    return null;
-  }
+    if(_backendFailCount>=2) _backendBackoffUntil=Date.now()+20000;
+    return null; 
+  } 
 }
-async function apiPost(p,b){
-  if(!HAS_BACKEND) return null;
+async function apiPost(p,b){ 
+  if(!HAS_BACKEND) return null; 
   if(Date.now() < _backendBackoffUntil) return null;
-  const c=new AbortController();
-  const to=setTimeout(()=>c.abort(), 12000);
-  try{
-    let url=apiUrl(p);
-    const h={'Content-Type':'application/json'};
-    if(tmaInitData) h['X-Telegram-Init-Data']=tmaInitData;
-    const r=await fetch(url,{method:'POST', headers:h, body:JSON.stringify(b||{}), signal:c.signal});
-    clearTimeout(to);
-    if(!r.ok) return null;
-    return await r.json();
-  }catch(e){ clearTimeout(to); return null; }
+  const c=new AbortController(); 
+  const to=setTimeout(()=>c.abort(), 8000); 
+  try{ 
+    let url=apiUrl(p); 
+    const h={'Content-Type':'application/json'}; 
+    if(tmaInitData) h['X-Telegram-Init-Data']=tmaInitData; 
+    const r=await fetch(url,{method:'POST', headers:h, body:JSON.stringify(b||{}), signal:c.signal}); 
+    clearTimeout(to); 
+    if(!r.ok) return null; 
+    return await r.json(); 
+  }catch(e){ clearTimeout(to); return null; } 
 }
 let backendState=null;
-async function syncBackend(){
-  if(!HAS_BACKEND){ setConnBadgeSafe('ok','offline - standalone'); return; }
+async function syncBackend(){ 
+  if(!HAS_BACKEND) return; 
   if(Date.now() < _backendBackoffUntil) return;
-  const mini = await apiGet('/miniapp-state');
-  if(mini){ backendState=mini; try{ if(mini.psi_real!==undefined) window.__AEI_PSI_REAL=mini.psi_real; if(mini.I!==undefined) window.__AEI_I=mini.I; }catch(e){} }
+  const mini = await apiGet('/miniapp-state'); 
+  if(mini){ backendState=mini; try{ if(mini.psi_real!==undefined) window.__AEI_PSI_REAL=mini.psi_real; if(mini.I!==undefined) window.__AEI_I=mini.I; }catch(e){} } 
 }
-setTimeout(syncBackend, 1500);
 let _syncInterval=null;
-if(HAS_BACKEND){ _syncInterval=setInterval(syncBackend, 5000); }
-window.__AEI_BACKEND={url: BACKEND_URL, has: HAS_BACKEND, get: apiGet, post: apiPost, clear: ()=>{ try{localStorage.removeItem(LS_KEY);}catch(e){} location.href=location.pathname+'?backend=off'; }, goOffline: ()=>{ try{localStorage.removeItem(LS_KEY);}catch(e){} location.href=location.pathname+'?backend=off'; }, goOnline: (url)=>{ location.href=location.pathname+'?backend='+encodeURIComponent(url||DEFAULT_BACKENDS[0]); }};
-
+function startSync(){ if(_syncInterval) return; if(!HAS_BACKEND) return; syncBackend(); _syncInterval=setInterval(syncBackend, 5000); }
+function stopSync(){ if(_syncInterval){ clearInterval(_syncInterval); _syncInterval=null; } }
+// Only start sync if backend enabled
+if(HAS_BACKEND) startSync();
+window.__AEI_BACKEND={url: BACKEND_URL, has: HAS_BACKEND, get: apiGet, post: apiPost};
+try{ const el=document.getElementById('backendStatus'); if(el) el.textContent= HAS_BACKEND ? BACKEND_URL : 'offline - ?backend=URL&forceOnline=1 to go online'; const badge=document.getElementById('connBadge'); if(badge){ badge.textContent= HAS_BACKEND ? 'online: '+BACKEND_URL.slice(0,30)+'...' : 'offline - ready (tap to clear)'; badge.style.borderColor= HAS_BACKEND ? '#00ff88' : '#ffaa44'; badge.style.color=badge.style.borderColor; } }catch(e){}
 window.feedBackendStep = async function(){ if(window.__AEI_BACKEND && window.__AEI_BACKEND.has){ await window.__AEI_BACKEND.post('/step', {x:'1/100'}); } };
 window.feedBackendReset = async function(){ if(window.__AEI_BACKEND && window.__AEI_BACKEND.has){ await window.__AEI_BACKEND.post('/reset', {}); } };
 
@@ -2944,30 +2891,27 @@ window.feedBackendReset = async function(){ if(window.__AEI_BACKEND && window.__
     // ============================================================
     // 21. INITIALIZATION
     // ============================================================
-    async function initializeVisualization() {
+    function initializeVisualization() {
         if (!preFlightValidate()) {
             showError('Canvas not ready. Retrying...');
             setTimeout(initializeVisualization, 200);
             return;
         }
-        setConnBadgeSafe('wait','init...');
+
         try {
-            // FIX: yield between steps to keep UI responsive
-            for(let i=0;i<5;i++){
-                codex.step(new Fraction(1, 100));
-                await new Promise(r=>setTimeout(r, 0));
-                // update badge progress
-                if(i===2) setConnBadgeSafe('wait','init '+(i+1)+'/5...');
-            }
+            codex.step(new Fraction(1, 100));
+            codex.step(new Fraction(1, 100));
+            codex.step(new Fraction(1, 100));
+            codex.step(new Fraction(1, 100));
+            codex.step(new Fraction(1, 100));
         } catch (e) {
             showError('State seed error: ' + e.message);
             console.error('Seed error:', e);
             return;
         }
+
         try {
             render();
-            if(!HAS_BACKEND) setConnBadgeSafe('ok','offline - ready');
-            else setConnBadgeSafe('ok','ready');
         } catch (e) {
             showError('Render start error: ' + e.message);
             console.error('Render start error:', e);
