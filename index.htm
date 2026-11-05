@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Codex Symbolica · Final · First</title>
+    <title>Codex Symbolica · Autological Visualization</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -378,15 +378,13 @@
         #axiomPanel .ax-item { color: #aaccff; }
         #axiomPanel .ax-active { color: #ffaa44; font-weight: bold; }
     </style>
-<!-- Version: Final | Edition: First -->
-<!-- Version: Final | Edition: First -->
 </head>
 <body><div style="position:absolute;top:10px;left:50%;transform:translateX(-50%);z-index:20;display:flex;gap:6px;"><a href="./index.html" style="background:rgba(20,30,50,0.9);border:1px solid #4488aa;color:#aaccff;padding:4px 10px;border-radius:4px;font-size:0.6rem;text-decoration:none;">← ÆI SEED</a></div>
 
     <canvas id="mainCanvas"></canvas>
 
 <div id="info">
-    <h1>⚡ CODEX SYMBOLICA · Final · First</h1>
+    <h1>⚡ CODEX SYMBOLICA · AUTOLOGICAL VISUALIZATION</h1>
     <p>S³→S² · DbZ · O[Ψ] · CRT · CF · ζ(s) · Lingoso · ÆEA · ⊢ CS</p>
     <p style="margin-top:4px;"><span style="color:#ffaa44;">H</span> = help · <span style="color:#ffaa44;">A</span> = axioms · <span style="color:#ffaa44;">Drag</span> = rotate · <span style="color:#ffaa44;">Scroll</span> = zoom</p>
 </div>
@@ -416,7 +414,7 @@
     </div>
 </div>
 
-<div id="connBadge" style="position:absolute;top:44px;right:8px;z-index:99;background:rgba(5,5,16,0.92);border:1px solid #ffaa44;border-radius:4px;padding:4px 8px;font-size:0.6rem;color:#ffaa44;pointer-events:auto;cursor:pointer;">offline</div><div id="controls">
+<div id="controls">
     <button class="btn" id="pauseBtn">⏸</button>
     <button class="btn" id="resetBtn">⟳</button>
     <button class="btn" id="modeBtn">FULL</button>
@@ -538,7 +536,7 @@
 </div>
 
 <div id="explainPanel" style="display:none;position:absolute;top:20px;left:50%;transform:translateX(-50%);z-index:11;background:rgba(5,5,16,0.95);border:1px solid #335577;border-radius:8px;padding:12px 20px;font-size:0.6rem;max-width:600px;backdrop-filter:blur(8px);box-shadow:0 4px 30px rgba(0,0,0,0.5);line-height:1.6;">
-    <h3 style="color:#00ffcc;margin-bottom:6px;font-size:0.75rem;letter-spacing:1px;">⚡ CODEX SYMBOLICA · Final · First KEY</h3>
+    <h3 style="color:#00ffcc;margin-bottom:6px;font-size:0.75rem;letter-spacing:1px;">⚡ CODEX SYMBOLICA — VISUALIZATION KEY</h3>
     <div><span style="color:#ffaa44;font-weight:bold;">Φ (Quaternion)</span> <span style="opacity:0.8;">— Current state on S³, projected to S² via Hopf fibration π(q) = ((q₀+iq₁)/(1−q₃), (q₂+iq₃)/(1−q₃)).</span></div>
     <div><span style="color:#ffaa44;font-weight:bold;">s² (exact)</span> <span style="opacity:0.8;">— Squared arc length from origin (identity quaternion), exact rational ℚ.</span></div>
     <div><span style="color:#ffaa44;font-weight:bold;">r² (exact)</span> <span style="opacity:0.8;">— Squared radial distance ‖q‖², exact rational ℚ.</span></div>
@@ -567,151 +565,24 @@
 (function() {
     'use strict';
 
-
-const LS_KEY = 'aei_backend_url';
 const _AEI_B64 = "aHR0cHM6Ly9hZWktMzdhMjllMDczMDcwLmhlcm9rdWFwcC5jb20v";
 function _aeiDecode(s){ try{ return atob(s); }catch(e){ return ""; } }
 const DEFAULT_BACKENDS = [_aeiDecode(_AEI_B64)];
-
-function getQueryParam(name){
-  try{
-    const qs=new URLSearchParams(window.location.search);
-    return qs.get(name);
-  }catch(e){ return null; }
-}
-
-function normalizeBackend(u){
-  if(!u) return '';
-  let s=String(u).trim();
-  if(s.toLowerCase()==='off' || s.toLowerCase()==='0' || s.toLowerCase()==='standalone') return '';
-  if(/%3A%2F%2F/i.test(s)){ try{ s=decodeURIComponent(s); }catch(e){} }
-  if(!/^https?:\/\//i.test(s)) return '';
-  return s.replace(/\/+$/, '') + '/';
-}
-
-function resolveBackendUrl(){
-  // NEW: explicit ?backend= required to enable network. No auto fallback.
-  // This prevents poisoned LS and dead Heroku from freezing page.
-  try{
-    const url=new URL(window.location.href);
-    const qp = url.searchParams.get('backend');
-    const standalone = url.searchParams.has('standalone');
-    if(qp !== null || standalone){
-      // clear param from URL for clean share
-      url.searchParams.delete('backend');
-      url.searchParams.delete('standalone');
-      try{ history.replaceState(null,'',url.pathname+url.search+url.hash); }catch(e){}
-      if(standalone || (qp && (qp.toLowerCase()==='off' || qp==='0'))){
-        try{ localStorage.removeItem(LS_KEY); }catch(e){}
-        return '';
-      }
-      if(qp){
-        const n=normalizeBackend(qp);
-        if(n){
-          try{ localStorage.setItem(LS_KEY,n); }catch(e){}
-          return n;
-        } else {
-          // qp was 'off' or invalid -> stay offline
-          try{ localStorage.removeItem(LS_KEY); }catch(e){}
-          return '';
-        }
-      }
-    }
-  }catch(e){}
-  // IMPORTANT FIX: don't use LS or DEFAULT by default. Only if user previously set explicit backend
-  // For diagnostic, we check LS but only if ?forceOnline=1 is present, otherwise stay offline
-  try{
-    const force = new URLSearchParams(window.location.search).get('forceOnline');
-    if(force==='1'){
-      const ls=localStorage.getItem(LS_KEY);
-      const n=normalizeBackend(ls);
-      if(n) return n;
-      return DEFAULT_BACKENDS[0] || '';
-    }
-  }catch(e){}
-  // Default: OFFLINE - this is what fixes the freeze
-  return '';
-}
-
+const LS_KEY = 'aei_backend_url';
+function normalizeBackend(u){ if(!u) return ''; let s=String(u).trim(); if(/%3A%2F%2F/i.test(s)){ try{ s=decodeURIComponent(s); }catch(e){} } if(!/^https?:\/\//i.test(s)) return ''; return s.replace(/\/+$/, '') + '/'; }
+function readQsBackend(){ try{ const qs=new URLSearchParams(window.location.search); return qs.get('backend'); }catch(e){ return null; } }
+function resolveBackendUrl(){ try{ const uu=new URL(window.location.href); if(uu.searchParams.has('backend')){ uu.searchParams.delete('backend'); history.replaceState(null,'',uu.pathname+uu.search+uu.hash); } }catch(e){} try{ const q=readQsBackend(); if(q){ const n=normalizeBackend(q); if(n){ try{localStorage.setItem(LS_KEY,n)}catch(e){} return n; } } }catch(e){} try{ const ls=localStorage.getItem(LS_KEY); const n=normalizeBackend(ls); if(n) return n; }catch(e){} return DEFAULT_BACKENDS[0]; }
 const BACKEND_URL = resolveBackendUrl();
 const HAS_BACKEND = !!BACKEND_URL;
 let tmaInitData = '';
 try{ if(window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData) tmaInitData = window.Telegram.WebApp.initData; }catch(e){}
-
 function apiUrl(p){ const pp = p.startsWith('/') ? p : '/' + p; return BACKEND_URL.replace(/\/$/, '') + pp; }
-
-let _backendFailCount = 0;
-let _backendBackoffUntil = 0;
-
-function setConnBadgeSafe(state, text){
-  try{
-    let el=document.getElementById('connBadge');
-    if(!el){
-      el=document.createElement('div');
-      el.id='connBadge';
-      el.style.cssText='position:absolute;top:44px;right:8px;z-index:99;background:rgba(5,5,16,0.92);border:1px solid #335577;border-radius:4px;padding:4px 8px;font-size:0.6rem;pointer-events:auto;cursor:pointer;';
-      el.onclick=()=>{ try{ localStorage.removeItem(LS_KEY); location.href=location.pathname+'?backend=off'; }catch(e){} };
-      document.body.appendChild(el);
-    }
-    el.className=state;
-    el.textContent=text + (HAS_BACKEND ? ' (tap to go offline)' : ' (offline)');
-    el.style.borderColor = state==='ok' ? '#00ff88' : state==='err' ? '#ff4466' : '#ffaa44';
-    el.style.color = el.style.borderColor;
-  }catch(e){}
-}
-
-async function apiGet(p){
-  if(!HAS_BACKEND) return null;
-  if(Date.now() < _backendBackoffUntil) return null;
-  const c=new AbortController();
-  const to=setTimeout(()=>c.abort(), 8000);
-  try{
-    let url=apiUrl(p);
-    if(tmaInitData) url += (url.includes('?')?'&':'?') + 'auth_init_data=' + encodeURIComponent(tmaInitData);
-    const r=await fetch(url, {method:'GET', signal:c.signal});
-    clearTimeout(to);
-    if(!r.ok){
-      _backendFailCount++;
-      if(_backendFailCount>=3){ _backendBackoffUntil=Date.now()+30000; setConnBadgeSafe('err','backend '+r.status+' unreachable - tap to go offline'); }
-      else setConnBadgeSafe('wait','retrying '+r.status+'...');
-      return null;
-    }
-    _backendFailCount=0; setConnBadgeSafe('ok','connected'); return await r.json();
-  }catch(e){
-    clearTimeout(to);
-    _backendFailCount++;
-    if(_backendFailCount>=3){ _backendBackoffUntil=Date.now()+30000; setConnBadgeSafe('err','timeout - dyno dead? tap for offline'); }
-    else setConnBadgeSafe('wait','connecting...');
-    return null;
-  }
-}
-async function apiPost(p,b){
-  if(!HAS_BACKEND) return null;
-  if(Date.now() < _backendBackoffUntil) return null;
-  const c=new AbortController();
-  const to=setTimeout(()=>c.abort(), 12000);
-  try{
-    let url=apiUrl(p);
-    const h={'Content-Type':'application/json'};
-    if(tmaInitData) h['X-Telegram-Init-Data']=tmaInitData;
-    const r=await fetch(url,{method:'POST', headers:h, body:JSON.stringify(b||{}), signal:c.signal});
-    clearTimeout(to);
-    if(!r.ok) return null;
-    return await r.json();
-  }catch(e){ clearTimeout(to); return null; }
-}
+async function apiGet(p){ if(!HAS_BACKEND) return null; const c=new AbortController(); const to=setTimeout(()=>c.abort(), 8000); try{ let url=apiUrl(p); if(tmaInitData) url += (url.includes('?')?'&':'?') + 'auth_init_data=' + encodeURIComponent(tmaInitData); const r=await fetch(url, {method:'GET', signal:c.signal}); clearTimeout(to); if(!r.ok) return null; return await r.json(); }catch(e){ clearTimeout(to); return null; } }
+async function apiPost(p,b){ if(!HAS_BACKEND) return null; const c=new AbortController(); const to=setTimeout(()=>c.abort(), 12000); try{ let url=apiUrl(p); const h={'Content-Type':'application/json'}; if(tmaInitData) h['X-Telegram-Init-Data']=tmaInitData; const r=await fetch(url,{method:'POST', headers:h, body:JSON.stringify(b||{}), signal:c.signal}); clearTimeout(to); if(!r.ok) return null; return await r.json(); }catch(e){ clearTimeout(to); return null; } }
 let backendState=null;
-async function syncBackend(){
-  if(!HAS_BACKEND){ setConnBadgeSafe('ok','offline - standalone'); return; }
-  if(Date.now() < _backendBackoffUntil) return;
-  const mini = await apiGet('/miniapp-state');
-  if(mini){ backendState=mini; try{ if(mini.psi_real!==undefined) window.__AEI_PSI_REAL=mini.psi_real; if(mini.I!==undefined) window.__AEI_I=mini.I; }catch(e){} }
-}
-setTimeout(syncBackend, 1500);
-let _syncInterval=null;
-if(HAS_BACKEND){ _syncInterval=setInterval(syncBackend, 5000); }
-window.__AEI_BACKEND={url: BACKEND_URL, has: HAS_BACKEND, get: apiGet, post: apiPost, clear: ()=>{ try{localStorage.removeItem(LS_KEY);}catch(e){} location.href=location.pathname+'?backend=off'; }, goOffline: ()=>{ try{localStorage.removeItem(LS_KEY);}catch(e){} location.href=location.pathname+'?backend=off'; }, goOnline: (url)=>{ location.href=location.pathname+'?backend='+encodeURIComponent(url||DEFAULT_BACKENDS[0]); }};
-
+async function syncBackend(){ if(!HAS_BACKEND) return; const [mini] = await Promise.all([apiGet('/miniapp-state')]); if(mini){ backendState=mini; try{ if(mini.psi_real!==undefined) window.__AEI_PSI_REAL=mini.psi_real; if(mini.I!==undefined) window.__AEI_I=mini.I; }catch(e){} } }
+setInterval(syncBackend, 3000); syncBackend();
+window.__AEI_BACKEND={url: BACKEND_URL, has: HAS_BACKEND, get: apiGet, post: apiPost};
 window.feedBackendStep = async function(){ if(window.__AEI_BACKEND && window.__AEI_BACKEND.has){ await window.__AEI_BACKEND.post('/step', {x:'1/100'}); } };
 window.feedBackendReset = async function(){ if(window.__AEI_BACKEND && window.__AEI_BACKEND.has){ await window.__AEI_BACKEND.post('/reset', {}); } };
 
@@ -733,95 +604,6 @@ window.feedBackendReset = async function(){ if(window.__AEI_BACKEND && window.__
     //    All comparisons exact. All construction from integers only.
     // ============================================================
     class Fraction {
-        constructor(n, d) {
-            if (d === undefined) d = 1n;
-            if (typeof n === 'number') n = BigInt(n);
-            if (typeof d === 'number') d = BigInt(d);
-            if (typeof n === 'string') n = BigInt(n);
-            if (typeof d === 'string') d = BigInt(d);
-            if (d === 0n) throw new Error('Fraction: denominator cannot be zero');
-            let num = n, den = d;
-            if (den < 0n) { num = -num; den = -den; }
-            const g = Fraction._gcd(num < 0n ? -num : num, den);
-            this.num = num / g;
-            this.den = den / g;
-        }
-        static _gcd(a, b) {
-            a = a < 0n ? -a : a; b = b < 0n ? -b : b;
-            while (b !== 0n) { const t = b; b = a % b; a = t; }
-            return a === 0n ? 1n : a;
-        }
-        add(o) {
-            const f = o instanceof Fraction ? o : new Fraction(o);
-            return new Fraction(this.num * f.den + f.num * this.den, this.den * f.den);
-        }
-        sub(o) {
-            const f = o instanceof Fraction ? o : new Fraction(o);
-            return new Fraction(this.num * f.den - f.num * this.den, this.den * f.den);
-        }
-        mul(o) {
-            const f = o instanceof Fraction ? o : new Fraction(o);
-            return new Fraction(this.num * f.num, this.den * f.den);
-        }
-        div(o) {
-            const f = o instanceof Fraction ? o : new Fraction(o);
-            if (f.num === 0n) throw new Error('Division by zero');
-            return new Fraction(this.num * f.den, this.den * f.num);
-        }
-        abs() { return new Fraction(this.num < 0n ? -this.num : this.num, this.den); }
-        neg() { return new Fraction(-this.num, this.den); }
-        sign() { return this.num > 0n ? 1 : this.num < 0n ? -1 : 0; }
-        isZero() { return this.num === 0n; }
-        isOne() { return this.num === 1n && this.den === 1n; }
-        isInteger() { return this.den === 1n; }
-        cmp(o) {
-            const f = o instanceof Fraction ? o : new Fraction(o);
-            const lhs = this.num * f.den;
-            const rhs = f.num * this.den;
-            return lhs < rhs ? -1 : lhs > rhs ? 1 : 0;
-        }
-        lt(o) { return this.cmp(o) < 0; }
-        le(o) { return this.cmp(o) <= 0; }
-        gt(o) { return this.cmp(o) > 0; }
-        ge(o) { return this.cmp(o) >= 0; }
-        eq(o) { return this.cmp(o) === 0; }
-        equals(o) { return this.eq(o); }
-        floor() {
-            const q = this.num / this.den;
-            return new Fraction(q - (this.num < 0n && this.num % this.den !== 0n ? 1n : 0n), 1n);
-        }
-        floorInt() {
-            let q = this.num / this.den;
-            if (this.num < 0n && this.num % this.den !== 0n) q -= 1n;
-            return q;
-        }
-        ceilInt() {
-            let q = this.num / this.den;
-            if (this.num > 0n && this.num % this.den !== 0n) q += 1n;
-            return q;
-        }
-        isPerfectSquare() {
-            if (this.num < 0n) return false;
-            const ns = Fraction._isqrt(this.num);
-            const ds = Fraction._isqrt(this.den);
-            return ns * ns === this.num && ds * ds === this.den;
-        }
-        static _isqrt(n) {
-            if (n < 0n) throw new Error('isqrt negative');
-            if (n < 2n) return n;
-            let x0 = n >> 1n;
-            let x1 = (x0 + n / x0) >> 1n;
-            while (x1 < x0) { x0 = x1; x1 = (x0 + n / x0) >> 1n; }
-            return x0;
-        }
-        exactSqrt() {
-            if (!this.isPerfectSquare()) return null;
-            return new Fraction(Fraction._isqrt(this.num), Fraction._isqrt(this.den));
-        }
-        static zero() { return new Fraction(0n, 1n); }
-        static one() { return new Fraction(1n, 1n); }
-        static two() { return new Fraction(2n, 1n); }
-        static half() { return new Fraction(1n, 2n); }
         constructor(n, d) {
             if (d === undefined) d = 1;
             if (d === 0) throw new Error('Fraction: denominator cannot be zero');
@@ -2944,30 +2726,27 @@ window.feedBackendReset = async function(){ if(window.__AEI_BACKEND && window.__
     // ============================================================
     // 21. INITIALIZATION
     // ============================================================
-    async function initializeVisualization() {
+    function initializeVisualization() {
         if (!preFlightValidate()) {
             showError('Canvas not ready. Retrying...');
             setTimeout(initializeVisualization, 200);
             return;
         }
-        setConnBadgeSafe('wait','init...');
+
         try {
-            // FIX: yield between steps to keep UI responsive
-            for(let i=0;i<5;i++){
-                codex.step(new Fraction(1, 100));
-                await new Promise(r=>setTimeout(r, 0));
-                // update badge progress
-                if(i===2) setConnBadgeSafe('wait','init '+(i+1)+'/5...');
-            }
+            codex.step(new Fraction(1, 100));
+            codex.step(new Fraction(1, 100));
+            codex.step(new Fraction(1, 100));
+            codex.step(new Fraction(1, 100));
+            codex.step(new Fraction(1, 100));
         } catch (e) {
             showError('State seed error: ' + e.message);
             console.error('Seed error:', e);
             return;
         }
+
         try {
             render();
-            if(!HAS_BACKEND) setConnBadgeSafe('ok','offline - ready');
-            else setConnBadgeSafe('ok','ready');
         } catch (e) {
             showError('Render start error: ' + e.message);
             console.error('Render start error:', e);
@@ -2984,7 +2763,7 @@ window.feedBackendReset = async function(){ if(window.__AEI_BACKEND && window.__
     // 22. FINAL CONSOLE MANIFEST
     // ============================================================
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-    console.log('⚡ CODEX SYMBOLICA · Final · First');
+    console.log('⚡ CODEX SYMBOLICA · AUTOLOGICAL VISUALIZATION');
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     console.log(' Axioms: s = r | DbZ: Re[Ψ] branching | O[Ψ]: 4D partition sum');
     console.log(' Arithmetic: exact ℚ only (Fraction class); no float in state');
