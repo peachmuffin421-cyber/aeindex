@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Codex Symbolica · Autological Visualization</title>
+    <title>Codex Symbolica · Final · First</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -378,13 +378,15 @@
         #axiomPanel .ax-item { color: #aaccff; }
         #axiomPanel .ax-active { color: #ffaa44; font-weight: bold; }
     </style>
+<!-- Version: Final | Edition: First -->
+<!-- Version: Final | Edition: First -->
 </head>
 <body><div style="position:absolute;top:10px;left:50%;transform:translateX(-50%);z-index:20;display:flex;gap:6px;"><a href="./index.html" style="background:rgba(20,30,50,0.9);border:1px solid #4488aa;color:#aaccff;padding:4px 10px;border-radius:4px;font-size:0.6rem;text-decoration:none;">← ÆI SEED</a></div>
 
     <canvas id="mainCanvas"></canvas>
 
 <div id="info">
-    <h1>⚡ CODEX SYMBOLICA · AUTOLOGICAL VISUALIZATION</h1>
+    <h1>⚡ CODEX SYMBOLICA · Final · First</h1>
     <p>S³→S² · DbZ · O[Ψ] · CRT · CF · ζ(s) · Lingoso · ÆEA · ⊢ CS</p>
     <p style="margin-top:4px;"><span style="color:#ffaa44;">H</span> = help · <span style="color:#ffaa44;">A</span> = axioms · <span style="color:#ffaa44;">Drag</span> = rotate · <span style="color:#ffaa44;">Scroll</span> = zoom</p>
 </div>
@@ -536,7 +538,7 @@
 </div>
 
 <div id="explainPanel" style="display:none;position:absolute;top:20px;left:50%;transform:translateX(-50%);z-index:11;background:rgba(5,5,16,0.95);border:1px solid #335577;border-radius:8px;padding:12px 20px;font-size:0.6rem;max-width:600px;backdrop-filter:blur(8px);box-shadow:0 4px 30px rgba(0,0,0,0.5);line-height:1.6;">
-    <h3 style="color:#00ffcc;margin-bottom:6px;font-size:0.75rem;letter-spacing:1px;">⚡ CODEX SYMBOLICA — VISUALIZATION KEY</h3>
+    <h3 style="color:#00ffcc;margin-bottom:6px;font-size:0.75rem;letter-spacing:1px;">⚡ CODEX SYMBOLICA · Final · First KEY</h3>
     <div><span style="color:#ffaa44;font-weight:bold;">Φ (Quaternion)</span> <span style="opacity:0.8;">— Current state on S³, projected to S² via Hopf fibration π(q) = ((q₀+iq₁)/(1−q₃), (q₂+iq₃)/(1−q₃)).</span></div>
     <div><span style="color:#ffaa44;font-weight:bold;">s² (exact)</span> <span style="opacity:0.8;">— Squared arc length from origin (identity quaternion), exact rational ℚ.</span></div>
     <div><span style="color:#ffaa44;font-weight:bold;">r² (exact)</span> <span style="opacity:0.8;">— Squared radial distance ‖q‖², exact rational ℚ.</span></div>
@@ -604,6 +606,95 @@ window.feedBackendReset = async function(){ if(window.__AEI_BACKEND && window.__
     //    All comparisons exact. All construction from integers only.
     // ============================================================
     class Fraction {
+        constructor(n, d) {
+            if (d === undefined) d = 1n;
+            if (typeof n === 'number') n = BigInt(n);
+            if (typeof d === 'number') d = BigInt(d);
+            if (typeof n === 'string') n = BigInt(n);
+            if (typeof d === 'string') d = BigInt(d);
+            if (d === 0n) throw new Error('Fraction: denominator cannot be zero');
+            let num = n, den = d;
+            if (den < 0n) { num = -num; den = -den; }
+            const g = Fraction._gcd(num < 0n ? -num : num, den);
+            this.num = num / g;
+            this.den = den / g;
+        }
+        static _gcd(a, b) {
+            a = a < 0n ? -a : a; b = b < 0n ? -b : b;
+            while (b !== 0n) { const t = b; b = a % b; a = t; }
+            return a === 0n ? 1n : a;
+        }
+        add(o) {
+            const f = o instanceof Fraction ? o : new Fraction(o);
+            return new Fraction(this.num * f.den + f.num * this.den, this.den * f.den);
+        }
+        sub(o) {
+            const f = o instanceof Fraction ? o : new Fraction(o);
+            return new Fraction(this.num * f.den - f.num * this.den, this.den * f.den);
+        }
+        mul(o) {
+            const f = o instanceof Fraction ? o : new Fraction(o);
+            return new Fraction(this.num * f.num, this.den * f.den);
+        }
+        div(o) {
+            const f = o instanceof Fraction ? o : new Fraction(o);
+            if (f.num === 0n) throw new Error('Division by zero');
+            return new Fraction(this.num * f.den, this.den * f.num);
+        }
+        abs() { return new Fraction(this.num < 0n ? -this.num : this.num, this.den); }
+        neg() { return new Fraction(-this.num, this.den); }
+        sign() { return this.num > 0n ? 1 : this.num < 0n ? -1 : 0; }
+        isZero() { return this.num === 0n; }
+        isOne() { return this.num === 1n && this.den === 1n; }
+        isInteger() { return this.den === 1n; }
+        cmp(o) {
+            const f = o instanceof Fraction ? o : new Fraction(o);
+            const lhs = this.num * f.den;
+            const rhs = f.num * this.den;
+            return lhs < rhs ? -1 : lhs > rhs ? 1 : 0;
+        }
+        lt(o) { return this.cmp(o) < 0; }
+        le(o) { return this.cmp(o) <= 0; }
+        gt(o) { return this.cmp(o) > 0; }
+        ge(o) { return this.cmp(o) >= 0; }
+        eq(o) { return this.cmp(o) === 0; }
+        equals(o) { return this.eq(o); }
+        floor() {
+            const q = this.num / this.den;
+            return new Fraction(q - (this.num < 0n && this.num % this.den !== 0n ? 1n : 0n), 1n);
+        }
+        floorInt() {
+            let q = this.num / this.den;
+            if (this.num < 0n && this.num % this.den !== 0n) q -= 1n;
+            return q;
+        }
+        ceilInt() {
+            let q = this.num / this.den;
+            if (this.num > 0n && this.num % this.den !== 0n) q += 1n;
+            return q;
+        }
+        isPerfectSquare() {
+            if (this.num < 0n) return false;
+            const ns = Fraction._isqrt(this.num);
+            const ds = Fraction._isqrt(this.den);
+            return ns * ns === this.num && ds * ds === this.den;
+        }
+        static _isqrt(n) {
+            if (n < 0n) throw new Error('isqrt negative');
+            if (n < 2n) return n;
+            let x0 = n >> 1n;
+            let x1 = (x0 + n / x0) >> 1n;
+            while (x1 < x0) { x0 = x1; x1 = (x0 + n / x0) >> 1n; }
+            return x0;
+        }
+        exactSqrt() {
+            if (!this.isPerfectSquare()) return null;
+            return new Fraction(Fraction._isqrt(this.num), Fraction._isqrt(this.den));
+        }
+        static zero() { return new Fraction(0n, 1n); }
+        static one() { return new Fraction(1n, 1n); }
+        static two() { return new Fraction(2n, 1n); }
+        static half() { return new Fraction(1n, 2n); }
         constructor(n, d) {
             if (d === undefined) d = 1;
             if (d === 0) throw new Error('Fraction: denominator cannot be zero');
@@ -2763,7 +2854,7 @@ window.feedBackendReset = async function(){ if(window.__AEI_BACKEND && window.__
     // 22. FINAL CONSOLE MANIFEST
     // ============================================================
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-    console.log('⚡ CODEX SYMBOLICA · AUTOLOGICAL VISUALIZATION');
+    console.log('⚡ CODEX SYMBOLICA · Final · First');
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     console.log(' Axioms: s = r | DbZ: Re[Ψ] branching | O[Ψ]: 4D partition sum');
     console.log(' Arithmetic: exact ℚ only (Fraction class); no float in state');
