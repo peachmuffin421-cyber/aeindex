@@ -1497,50 +1497,28 @@ function drawFibrationCanvas() {
 
 async function fetchMiniAppState() {
     if (!HAS_BACKEND) { setConnBadge('ok','connected'); return; }
-    let r = await apiJson('/miniapp-state');
+    const r = await apiJson('/miniapp-state');
     if (!r) {
         setConnBadge('wait', 'no data');
-        pushLog('warn','miniapp-state empty response');
         return;
     }
     if (r.__error) {
-        // If 401, try public health to diagnose and show auth issue
-        if (r.__status === 401) {
-            const health = await apiJson('/health');
-            if (health && !health.__error) {
-                setConnBadge('err', 'auth required');
-                showError('Backend requires Telegram auth. Open inside Telegram or set REQUIRE_AUTH=0 on Heroku. Health: tick='+ (health.seed_tick||0), 8000);
-                pushLog('warn','401 on miniapp-state, health OK: ' + JSON.stringify(health).slice(0,120));
-            } else {
-                setConnBadge('err', 'backend down');
-                showError('Backend unreachable or crashed: ' + (r.error||'401'), 6000);
-            }
-            // Still try to render placeholder if we have cached
-            if (state.tick > 0) return;
-            // Try fetching without auth as fallback for debugging
-            try {
-                const fallbackUrl = apiUrl('/miniapp-state');
-                const res = await fetch(fallbackUrl, {mode:'cors'});
-                const txt = await res.text();
-                pushLog('info','fallback fetch status='+res.status+' body='+txt.slice(0,200));
-            } catch(e){ pushLog('error','fallback fetch failed: '+e); }
-            return;
-        }
-        // handle H12 / 503 seed_busy as loading, not error
+        // : handle H12 / 503 seed_busy as loading, not error
         if (r.__status === 503 && r.__body && r.__body.error === 'seed_busy') {
             setConnBadge('wait', 'seed busy…');
+            // If we have cached state, keep showing it
             if (state.tick > 0) return;
         }
+        // If backend returned error but we have previous state, don't blank UI
         if (state.tick > 0) {
             setConnBadge('wait', 'retrying…');
             setTimeout(() => fetchMiniAppState(), 800);
             return;
         }
-        setConnBadge('err', 'state error ' + (r.__status||''));
-        showError('State error: ' + (r.error||'unknown') + ' status=' + (r.__status||''), 5000);
+        setConnBadge('err', 'state error');
         return;
     }
-    // Stale flag from cached snapshot
+    // Stale flag from  cached snapshot
     if (r.stale) {
         setConnBadge('wait', 'stale ' + (r.tick || ''));
     } else {
