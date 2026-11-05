@@ -416,7 +416,7 @@
     </div>
 </div>
 
-<div id="controls">
+<div id="connBadge" style="position:absolute;top:44px;right:8px;z-index:18;background:rgba(5,5,16,0.92);border:1px solid #ffaa44;border-radius:4px;padding:2px 6px;font-size:0.5rem;color:#ffaa44;pointer-events:none;">connecting...</div><div id="controls">
     <button class="btn" id="pauseBtn">⏸</button>
     <button class="btn" id="resetBtn">⟳</button>
     <button class="btn" id="modeBtn">FULL</button>
@@ -571,20 +571,87 @@ const _AEI_B64 = "aHR0cHM6Ly9hZWktMzdhMjllMDczMDcwLmhlcm9rdWFwcC5jb20v";
 function _aeiDecode(s){ try{ return atob(s); }catch(e){ return ""; } }
 const DEFAULT_BACKENDS = [_aeiDecode(_AEI_B64)];
 const LS_KEY = 'aei_backend_url';
-function normalizeBackend(u){ if(!u) return ''; let s=String(u).trim(); if(/%3A%2F%2F/i.test(s)){ try{ s=decodeURIComponent(s); }catch(e){} } if(!/^https?:\/\//i.test(s)) return ''; return s.replace(/\/+$/, '') + '/'; }
-function readQsBackend(){ try{ const qs=new URLSearchParams(window.location.search); return qs.get('backend'); }catch(e){ return null; } }
-function resolveBackendUrl(){ try{ const uu=new URL(window.location.href); if(uu.searchParams.has('backend')){ uu.searchParams.delete('backend'); history.replaceState(null,'',uu.pathname+uu.search+uu.hash); } }catch(e){} try{ const q=readQsBackend(); if(q){ const n=normalizeBackend(q); if(n){ try{localStorage.setItem(LS_KEY,n)}catch(e){} return n; } } }catch(e){} try{ const ls=localStorage.getItem(LS_KEY); const n=normalizeBackend(ls); if(n) return n; }catch(e){} return DEFAULT_BACKENDS[0]; }
+function normalizeBackend(u){ if(!u) return ''; let s=String(u).trim(); if(s.toLowerCase()==='off' || s.toLowerCase()==='0' || s.toLowerCase()==='standalone') return ''; if(/%3A%2F%2F/i.test(s)){ try{ s=decodeURIComponent(s); }catch(e){} } if(!/^https?:\/\//i.test(s)) return ''; return s.replace(/\/+$/, '') + '/'; }
+function readQsBackend(){ try{ const qs=new URLSearchParams(window.location.search); if(qs.has('standalone') || qs.get('backend')==='off') return 'off'; return qs.get('backend'); }catch(e){ return null; } }
+function resolveBackendUrl(){ 
+  try{ const uu=new URL(window.location.href); if(uu.searchParams.has('backend')||uu.searchParams.has('standalone')){ const had=uu.searchParams.get('backend'); uu.searchParams.delete('backend'); uu.searchParams.delete('standalone'); history.replaceState(null,'',uu.pathname+uu.search+uu.hash); if(had && (had.toLowerCase()==='off'||had==='0')) { try{localStorage.removeItem(LS_KEY);}catch(e){} return ''; } } }catch(e){}
+  try{ const q=readQsBackend(); if(q!==null){ if(q==='off'||q==='0'||q.toLowerCase()==='standalone'){ try{localStorage.removeItem(LS_KEY);}catch(e){} return ''; } const n=normalizeBackend(q); if(n){ try{localStorage.setItem(LS_KEY,n)}catch(e){} return n; } if(q && q.trim()!==''){ /* explicit off already handled */ } } }catch(e){}
+  try{ const ls=localStorage.getItem(LS_KEY); const n=normalizeBackend(ls); if(n) return n; }catch(e){}
+  // FIX: Don't auto-save default backend to LS, return it as fallback only, so stale LS doesn't poison
+  return DEFAULT_BACKENDS[0] || '';
+}
 const BACKEND_URL = resolveBackendUrl();
 const HAS_BACKEND = !!BACKEND_URL;
 let tmaInitData = '';
 try{ if(window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData) tmaInitData = window.Telegram.WebApp.initData; }catch(e){}
 function apiUrl(p){ const pp = p.startsWith('/') ? p : '/' + p; return BACKEND_URL.replace(/\/$/, '') + pp; }
-async function apiGet(p){ if(!HAS_BACKEND) return null; const c=new AbortController(); const to=setTimeout(()=>c.abort(), 8000); try{ let url=apiUrl(p); if(tmaInitData) url += (url.includes('?')?'&':'?') + 'auth_init_data=' + encodeURIComponent(tmaInitData); const r=await fetch(url, {method:'GET', signal:c.signal}); clearTimeout(to); if(!r.ok) return null; return await r.json(); }catch(e){ clearTimeout(to); return null; } }
-async function apiPost(p,b){ if(!HAS_BACKEND) return null; const c=new AbortController(); const to=setTimeout(()=>c.abort(), 12000); try{ let url=apiUrl(p); const h={'Content-Type':'application/json'}; if(tmaInitData) h['X-Telegram-Init-Data']=tmaInitData; const r=await fetch(url,{method:'POST', headers:h, body:JSON.stringify(b||{}), signal:c.signal}); clearTimeout(to); if(!r.ok) return null; return await r.json(); }catch(e){ clearTimeout(to); return null; } }
+
+// FIX: visible badge + backoff
+let _backendFailCount = 0;
+let _backendBackoffUntil = 0;
+function setConnBadgeSafe(state, text){
+  try{
+    let el=document.getElementById('connBadge');
+    if(!el){
+      el=document.createElement('div');
+      el.id='connBadge';
+      el.style.cssText='position:absolute;top:44px;right:8px;z-index:18;background:rgba(5,5,16,0.92);border:1px solid #335577;border-radius:4px;padding:2px 6px;font-size:0.5rem;pointer-events:none;';
+      document.body.appendChild(el);
+    }
+    el.className=state; el.textContent=text;
+    el.style.borderColor = state==='ok' ? '#00ff88' : state==='err' ? '#ff4466' : '#ffaa44';
+    el.style.color = el.style.borderColor;
+  }catch(e){}
+}
+async function apiGet(p){ 
+  if(!HAS_BACKEND) return null; 
+  if(Date.now() < _backendBackoffUntil) return null;
+  const c=new AbortController(); const to=setTimeout(()=>c.abort(), 8000); 
+  try{ 
+    let url=apiUrl(p); 
+    if(tmaInitData) url += (url.includes('?')?'&':'?') + 'auth_init_data=' + encodeURIComponent(tmaInitData); 
+    const r=await fetch(url, {method:'GET', signal:c.signal}); 
+    clearTimeout(to); 
+    if(!r.ok){ 
+      _backendFailCount++; 
+      if(_backendFailCount>=3){ _backendBackoffUntil=Date.now()+30000; setConnBadgeSafe('err','backend unreachable'); console.warn('backend fail', r.status, p); } 
+      else setConnBadgeSafe('wait','retrying...'); 
+      return null; 
+    } 
+    _backendFailCount=0; setConnBadgeSafe('ok','connected'); return await r.json(); 
+  }catch(e){ 
+    clearTimeout(to); 
+    _backendFailCount++; 
+    if(_backendFailCount>=3){ _backendBackoffUntil=Date.now()+30000; setConnBadgeSafe('err','timeout/backoff'); } 
+    else setConnBadgeSafe('wait','connecting...'); 
+    return null; 
+  } 
+}
+async function apiPost(p,b){ 
+  if(!HAS_BACKEND) return null; 
+  if(Date.now() < _backendBackoffUntil) return null;
+  const c=new AbortController(); const to=setTimeout(()=>c.abort(), 12000); 
+  try{ 
+    let url=apiUrl(p); 
+    const h={'Content-Type':'application/json'}; 
+    if(tmaInitData) h['X-Telegram-Init-Data']=tmaInitData; 
+    const r=await fetch(url,{method:'POST', headers:h, body:JSON.stringify(b||{}), signal:c.signal}); 
+    clearTimeout(to); 
+    if(!r.ok) return null; 
+    return await r.json(); 
+  }catch(e){ clearTimeout(to); return null; } 
+}
 let backendState=null;
-async function syncBackend(){ if(!HAS_BACKEND) return; const [mini] = await Promise.all([apiGet('/miniapp-state')]); if(mini){ backendState=mini; try{ if(mini.psi_real!==undefined) window.__AEI_PSI_REAL=mini.psi_real; if(mini.I!==undefined) window.__AEI_I=mini.I; }catch(e){} } }
-setInterval(syncBackend, 3000); syncBackend();
-window.__AEI_BACKEND={url: BACKEND_URL, has: HAS_BACKEND, get: apiGet, post: apiPost};
+async function syncBackend(){ 
+  if(!HAS_BACKEND) { setConnBadgeSafe('ok','standalone'); return; } 
+  if(Date.now() < _backendBackoffUntil) return;
+  const mini = await apiGet('/miniapp-state'); 
+  if(mini){ backendState=mini; try{ if(mini.psi_real!==undefined) window.__AEI_PSI_REAL=mini.psi_real; if(mini.I!==undefined) window.__AEI_I=mini.I; }catch(e){} } 
+}
+// FIX: don't block main thread on load, delay first sync, then interval
+setTimeout(syncBackend, 1500);
+setInterval(syncBackend, 5000);
+window.__AEI_BACKEND={url: BACKEND_URL, has: HAS_BACKEND, get: apiGet, post: apiPost, clear: ()=>{ try{localStorage.removeItem(LS_KEY);}catch(e){} location.reload(); }};
 window.feedBackendStep = async function(){ if(window.__AEI_BACKEND && window.__AEI_BACKEND.has){ await window.__AEI_BACKEND.post('/step', {x:'1/100'}); } };
 window.feedBackendReset = async function(){ if(window.__AEI_BACKEND && window.__AEI_BACKEND.has){ await window.__AEI_BACKEND.post('/reset', {}); } };
 
@@ -2817,19 +2884,21 @@ window.feedBackendReset = async function(){ if(window.__AEI_BACKEND && window.__
     // ============================================================
     // 21. INITIALIZATION
     // ============================================================
-    function initializeVisualization() {
+    async function initializeVisualization() {
         if (!preFlightValidate()) {
             showError('Canvas not ready. Retrying...');
             setTimeout(initializeVisualization, 200);
             return;
         }
 
+        setConnBadgeSafe('wait','init...');
+        // FIX: non-blocking stepped init to avoid freezing Android WebView
         try {
-            codex.step(new Fraction(1, 100));
-            codex.step(new Fraction(1, 100));
-            codex.step(new Fraction(1, 100));
-            codex.step(new Fraction(1, 100));
-            codex.step(new Fraction(1, 100));
+            for(let i=0;i<5;i++){
+                codex.step(new Fraction(1, 100));
+                // yield to event loop so backend fetch and UI can breathe
+                await new Promise(r=>setTimeout(r, 60));
+            }
         } catch (e) {
             showError('State seed error: ' + e.message);
             console.error('Seed error:', e);
@@ -2838,6 +2907,7 @@ window.feedBackendReset = async function(){ if(window.__AEI_BACKEND && window.__
 
         try {
             render();
+            setConnBadgeSafe('ok','ready');
         } catch (e) {
             showError('Render start error: ' + e.message);
             console.error('Render start error:', e);
