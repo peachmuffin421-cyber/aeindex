@@ -416,7 +416,7 @@
     </div>
 </div>
 
-<div id="connBadge" style="position:absolute;top:44px;right:8px;z-index:18;background:rgba(5,5,16,0.92);border:1px solid #ffaa44;border-radius:4px;padding:2px 6px;font-size:0.5rem;color:#ffaa44;pointer-events:none;">connecting...</div><div id="controls">
+<div id="connBadge" style="position:absolute;top:44px;right:8px;z-index:99;background:rgba(5,5,16,0.92);border:1px solid #ffaa44;border-radius:4px;padding:4px 8px;font-size:0.6rem;color:#ffaa44;pointer-events:auto;cursor:pointer;">offline</div><div id="controls">
     <button class="btn" id="pauseBtn">⏸</button>
     <button class="btn" id="resetBtn">⟳</button>
     <button class="btn" id="modeBtn">FULL</button>
@@ -567,91 +567,151 @@
 (function() {
     'use strict';
 
+
+const LS_KEY = 'aei_backend_url';
 const _AEI_B64 = "aHR0cHM6Ly9hZWktMzdhMjllMDczMDcwLmhlcm9rdWFwcC5jb20v";
 function _aeiDecode(s){ try{ return atob(s); }catch(e){ return ""; } }
 const DEFAULT_BACKENDS = [_aeiDecode(_AEI_B64)];
-const LS_KEY = 'aei_backend_url';
-function normalizeBackend(u){ if(!u) return ''; let s=String(u).trim(); if(s.toLowerCase()==='off' || s.toLowerCase()==='0' || s.toLowerCase()==='standalone') return ''; if(/%3A%2F%2F/i.test(s)){ try{ s=decodeURIComponent(s); }catch(e){} } if(!/^https?:\/\//i.test(s)) return ''; return s.replace(/\/+$/, '') + '/'; }
-function readQsBackend(){ try{ const qs=new URLSearchParams(window.location.search); if(qs.has('standalone') || qs.get('backend')==='off') return 'off'; return qs.get('backend'); }catch(e){ return null; } }
-function resolveBackendUrl(){ 
-  try{ const uu=new URL(window.location.href); if(uu.searchParams.has('backend')||uu.searchParams.has('standalone')){ const had=uu.searchParams.get('backend'); uu.searchParams.delete('backend'); uu.searchParams.delete('standalone'); history.replaceState(null,'',uu.pathname+uu.search+uu.hash); if(had && (had.toLowerCase()==='off'||had==='0')) { try{localStorage.removeItem(LS_KEY);}catch(e){} return ''; } } }catch(e){}
-  try{ const q=readQsBackend(); if(q!==null){ if(q==='off'||q==='0'||q.toLowerCase()==='standalone'){ try{localStorage.removeItem(LS_KEY);}catch(e){} return ''; } const n=normalizeBackend(q); if(n){ try{localStorage.setItem(LS_KEY,n)}catch(e){} return n; } if(q && q.trim()!==''){ /* explicit off already handled */ } } }catch(e){}
-  try{ const ls=localStorage.getItem(LS_KEY); const n=normalizeBackend(ls); if(n) return n; }catch(e){}
-  // FIX: Don't auto-save default backend to LS, return it as fallback only, so stale LS doesn't poison
-  return DEFAULT_BACKENDS[0] || '';
+
+function getQueryParam(name){
+  try{
+    const qs=new URLSearchParams(window.location.search);
+    return qs.get(name);
+  }catch(e){ return null; }
 }
+
+function normalizeBackend(u){
+  if(!u) return '';
+  let s=String(u).trim();
+  if(s.toLowerCase()==='off' || s.toLowerCase()==='0' || s.toLowerCase()==='standalone') return '';
+  if(/%3A%2F%2F/i.test(s)){ try{ s=decodeURIComponent(s); }catch(e){} }
+  if(!/^https?:\/\//i.test(s)) return '';
+  return s.replace(/\/+$/, '') + '/';
+}
+
+function resolveBackendUrl(){
+  // NEW: explicit ?backend= required to enable network. No auto fallback.
+  // This prevents poisoned LS and dead Heroku from freezing page.
+  try{
+    const url=new URL(window.location.href);
+    const qp = url.searchParams.get('backend');
+    const standalone = url.searchParams.has('standalone');
+    if(qp !== null || standalone){
+      // clear param from URL for clean share
+      url.searchParams.delete('backend');
+      url.searchParams.delete('standalone');
+      try{ history.replaceState(null,'',url.pathname+url.search+url.hash); }catch(e){}
+      if(standalone || (qp && (qp.toLowerCase()==='off' || qp==='0'))){
+        try{ localStorage.removeItem(LS_KEY); }catch(e){}
+        return '';
+      }
+      if(qp){
+        const n=normalizeBackend(qp);
+        if(n){
+          try{ localStorage.setItem(LS_KEY,n); }catch(e){}
+          return n;
+        } else {
+          // qp was 'off' or invalid -> stay offline
+          try{ localStorage.removeItem(LS_KEY); }catch(e){}
+          return '';
+        }
+      }
+    }
+  }catch(e){}
+  // IMPORTANT FIX: don't use LS or DEFAULT by default. Only if user previously set explicit backend
+  // For diagnostic, we check LS but only if ?forceOnline=1 is present, otherwise stay offline
+  try{
+    const force = new URLSearchParams(window.location.search).get('forceOnline');
+    if(force==='1'){
+      const ls=localStorage.getItem(LS_KEY);
+      const n=normalizeBackend(ls);
+      if(n) return n;
+      return DEFAULT_BACKENDS[0] || '';
+    }
+  }catch(e){}
+  // Default: OFFLINE - this is what fixes the freeze
+  return '';
+}
+
 const BACKEND_URL = resolveBackendUrl();
 const HAS_BACKEND = !!BACKEND_URL;
 let tmaInitData = '';
 try{ if(window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData) tmaInitData = window.Telegram.WebApp.initData; }catch(e){}
+
 function apiUrl(p){ const pp = p.startsWith('/') ? p : '/' + p; return BACKEND_URL.replace(/\/$/, '') + pp; }
 
-// FIX: visible badge + backoff
 let _backendFailCount = 0;
 let _backendBackoffUntil = 0;
+
 function setConnBadgeSafe(state, text){
   try{
     let el=document.getElementById('connBadge');
     if(!el){
       el=document.createElement('div');
       el.id='connBadge';
-      el.style.cssText='position:absolute;top:44px;right:8px;z-index:18;background:rgba(5,5,16,0.92);border:1px solid #335577;border-radius:4px;padding:2px 6px;font-size:0.5rem;pointer-events:none;';
+      el.style.cssText='position:absolute;top:44px;right:8px;z-index:99;background:rgba(5,5,16,0.92);border:1px solid #335577;border-radius:4px;padding:4px 8px;font-size:0.6rem;pointer-events:auto;cursor:pointer;';
+      el.onclick=()=>{ try{ localStorage.removeItem(LS_KEY); location.href=location.pathname+'?backend=off'; }catch(e){} };
       document.body.appendChild(el);
     }
-    el.className=state; el.textContent=text;
+    el.className=state;
+    el.textContent=text + (HAS_BACKEND ? ' (tap to go offline)' : ' (offline)');
     el.style.borderColor = state==='ok' ? '#00ff88' : state==='err' ? '#ff4466' : '#ffaa44';
     el.style.color = el.style.borderColor;
   }catch(e){}
 }
-async function apiGet(p){ 
-  if(!HAS_BACKEND) return null; 
+
+async function apiGet(p){
+  if(!HAS_BACKEND) return null;
   if(Date.now() < _backendBackoffUntil) return null;
-  const c=new AbortController(); const to=setTimeout(()=>c.abort(), 8000); 
-  try{ 
-    let url=apiUrl(p); 
-    if(tmaInitData) url += (url.includes('?')?'&':'?') + 'auth_init_data=' + encodeURIComponent(tmaInitData); 
-    const r=await fetch(url, {method:'GET', signal:c.signal}); 
-    clearTimeout(to); 
-    if(!r.ok){ 
-      _backendFailCount++; 
-      if(_backendFailCount>=3){ _backendBackoffUntil=Date.now()+30000; setConnBadgeSafe('err','backend unreachable'); console.warn('backend fail', r.status, p); } 
-      else setConnBadgeSafe('wait','retrying...'); 
-      return null; 
-    } 
-    _backendFailCount=0; setConnBadgeSafe('ok','connected'); return await r.json(); 
-  }catch(e){ 
-    clearTimeout(to); 
-    _backendFailCount++; 
-    if(_backendFailCount>=3){ _backendBackoffUntil=Date.now()+30000; setConnBadgeSafe('err','timeout/backoff'); } 
-    else setConnBadgeSafe('wait','connecting...'); 
-    return null; 
-  } 
+  const c=new AbortController();
+  const to=setTimeout(()=>c.abort(), 8000);
+  try{
+    let url=apiUrl(p);
+    if(tmaInitData) url += (url.includes('?')?'&':'?') + 'auth_init_data=' + encodeURIComponent(tmaInitData);
+    const r=await fetch(url, {method:'GET', signal:c.signal});
+    clearTimeout(to);
+    if(!r.ok){
+      _backendFailCount++;
+      if(_backendFailCount>=3){ _backendBackoffUntil=Date.now()+30000; setConnBadgeSafe('err','backend '+r.status+' unreachable - tap to go offline'); }
+      else setConnBadgeSafe('wait','retrying '+r.status+'...');
+      return null;
+    }
+    _backendFailCount=0; setConnBadgeSafe('ok','connected'); return await r.json();
+  }catch(e){
+    clearTimeout(to);
+    _backendFailCount++;
+    if(_backendFailCount>=3){ _backendBackoffUntil=Date.now()+30000; setConnBadgeSafe('err','timeout - dyno dead? tap for offline'); }
+    else setConnBadgeSafe('wait','connecting...');
+    return null;
+  }
 }
-async function apiPost(p,b){ 
-  if(!HAS_BACKEND) return null; 
+async function apiPost(p,b){
+  if(!HAS_BACKEND) return null;
   if(Date.now() < _backendBackoffUntil) return null;
-  const c=new AbortController(); const to=setTimeout(()=>c.abort(), 12000); 
-  try{ 
-    let url=apiUrl(p); 
-    const h={'Content-Type':'application/json'}; 
-    if(tmaInitData) h['X-Telegram-Init-Data']=tmaInitData; 
-    const r=await fetch(url,{method:'POST', headers:h, body:JSON.stringify(b||{}), signal:c.signal}); 
-    clearTimeout(to); 
-    if(!r.ok) return null; 
-    return await r.json(); 
-  }catch(e){ clearTimeout(to); return null; } 
+  const c=new AbortController();
+  const to=setTimeout(()=>c.abort(), 12000);
+  try{
+    let url=apiUrl(p);
+    const h={'Content-Type':'application/json'};
+    if(tmaInitData) h['X-Telegram-Init-Data']=tmaInitData;
+    const r=await fetch(url,{method:'POST', headers:h, body:JSON.stringify(b||{}), signal:c.signal});
+    clearTimeout(to);
+    if(!r.ok) return null;
+    return await r.json();
+  }catch(e){ clearTimeout(to); return null; }
 }
 let backendState=null;
-async function syncBackend(){ 
-  if(!HAS_BACKEND) { setConnBadgeSafe('ok','standalone'); return; } 
+async function syncBackend(){
+  if(!HAS_BACKEND){ setConnBadgeSafe('ok','offline - standalone'); return; }
   if(Date.now() < _backendBackoffUntil) return;
-  const mini = await apiGet('/miniapp-state'); 
-  if(mini){ backendState=mini; try{ if(mini.psi_real!==undefined) window.__AEI_PSI_REAL=mini.psi_real; if(mini.I!==undefined) window.__AEI_I=mini.I; }catch(e){} } 
+  const mini = await apiGet('/miniapp-state');
+  if(mini){ backendState=mini; try{ if(mini.psi_real!==undefined) window.__AEI_PSI_REAL=mini.psi_real; if(mini.I!==undefined) window.__AEI_I=mini.I; }catch(e){} }
 }
-// FIX: don't block main thread on load, delay first sync, then interval
 setTimeout(syncBackend, 1500);
-setInterval(syncBackend, 5000);
-window.__AEI_BACKEND={url: BACKEND_URL, has: HAS_BACKEND, get: apiGet, post: apiPost, clear: ()=>{ try{localStorage.removeItem(LS_KEY);}catch(e){} location.reload(); }};
+let _syncInterval=null;
+if(HAS_BACKEND){ _syncInterval=setInterval(syncBackend, 5000); }
+window.__AEI_BACKEND={url: BACKEND_URL, has: HAS_BACKEND, get: apiGet, post: apiPost, clear: ()=>{ try{localStorage.removeItem(LS_KEY);}catch(e){} location.href=location.pathname+'?backend=off'; }, goOffline: ()=>{ try{localStorage.removeItem(LS_KEY);}catch(e){} location.href=location.pathname+'?backend=off'; }, goOnline: (url)=>{ location.href=location.pathname+'?backend='+encodeURIComponent(url||DEFAULT_BACKENDS[0]); }};
+
 window.feedBackendStep = async function(){ if(window.__AEI_BACKEND && window.__AEI_BACKEND.has){ await window.__AEI_BACKEND.post('/step', {x:'1/100'}); } };
 window.feedBackendReset = async function(){ if(window.__AEI_BACKEND && window.__AEI_BACKEND.has){ await window.__AEI_BACKEND.post('/reset', {}); } };
 
@@ -2890,24 +2950,24 @@ window.feedBackendReset = async function(){ if(window.__AEI_BACKEND && window.__
             setTimeout(initializeVisualization, 200);
             return;
         }
-
         setConnBadgeSafe('wait','init...');
-        // FIX: non-blocking stepped init to avoid freezing Android WebView
         try {
+            // FIX: yield between steps to keep UI responsive
             for(let i=0;i<5;i++){
                 codex.step(new Fraction(1, 100));
-                // yield to event loop so backend fetch and UI can breathe
-                await new Promise(r=>setTimeout(r, 60));
+                await new Promise(r=>setTimeout(r, 0));
+                // update badge progress
+                if(i===2) setConnBadgeSafe('wait','init '+(i+1)+'/5...');
             }
         } catch (e) {
             showError('State seed error: ' + e.message);
             console.error('Seed error:', e);
             return;
         }
-
         try {
             render();
-            setConnBadgeSafe('ok','ready');
+            if(!HAS_BACKEND) setConnBadgeSafe('ok','offline - ready');
+            else setConnBadgeSafe('ok','ready');
         } catch (e) {
             showError('Render start error: ' + e.message);
             console.error('Render start error:', e);
