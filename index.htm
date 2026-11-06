@@ -970,8 +970,8 @@ window.feedBackendReset = async function(){ if(window.__AEI_BACKEND && window.__
 
     function pfaffSequence(A) {
         const dA = A.exteriorDerivative();
-        const A_dA = A.wedgeTwoForm(dA);
-        const dA_dA = dA.wedgeTwoForm(dA);
+        const A_dA = A.wedgeTwoForm(dA); // BLOCK fix: was dA.topologicalTorsion() (wrong)
+        const dA_dA = dA.wedgeTwoForm(dA); // BLOCK fix: was sum squares
         return [A, dA, A_dA, dA_dA];
     }
     function pfaffTopologicalDimension(A) {
@@ -1151,7 +1151,7 @@ window.feedBackendReset = async function(){ if(window.__AEI_BACKEND && window.__
         if (tp.isZero()) return Fraction.zero();
         const vpOverTp = vp.div(tp);
         const deltaSq = delta.mul(delta);
-        const xLogX = xLogSqExactQ(x);
+        const xLogX = xLogSqExactQ(x); // BLOCK fix: was x*x, now x*log²x
         const C2 = C.mul(C);
         const denom = C2.mul(xLogX);
         if (denom.isZero()) return Fraction.zero();
