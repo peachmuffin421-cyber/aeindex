@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<!-- Version: Final, Edition: First -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>ÆI Seed · GAIA TWA · CS vFinal Ed.40 ultimate H12fix Audit-Patched</title>
+<title>ÆI Seed · GAIA TWA · CS vFinal Edition First</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html, body {
@@ -633,7 +634,7 @@ html, body {
 <div id="errorDisplay"></div>
 
 <div id="explainPanel">
-    <h3>⚡ ÆI SEED · GAIA CODEX · CS vFinal Ed.13</h3>
+    <h3>⚡ ÆI SEED · GAIA CODEX · Final Edition First
     <div class="item"><b>What this is</b> <span>— The <b>ÆI seed</b> (GAIA/ÆI Codex), not the ÆEA market bot. It runs the prime-sieve → lattice → Hopf-fibration → s²=r² → SelfEvolution loop from ÆI.md §3–§8. Every state value is an exact Fraction (a/b) displayed as the plain-text Maths of the CODEX_SYMBOLICA.</span></div>
     <div class="item"><b>𝒮_STATUS</b> <span>— Seed state: <code>coherent</code> / <code>evolving</code> / <code>initialized</code>. Tick = seed steps; Generation = SelfEvolution generations; prime count = 𝒜[p] sieve output; lattice points = Λ₂₄ centers; ℐ_metric = intelligence metric; logic hash = deterministic SHA-256 of the current logic core.</span></div>
     <div class="item"><b>δ(s²−r²)</b> <span>— The <b>primary evolution gate</b> (ÆI.md §2.4 Axiom 1). s² = arc length squared, r² = radial distance squared. Deviation triggers DbZ branching and SelfEvolution mutation. The bar shows s²/r² ratio (green at the centre = coherence, white marker at 1.0).</span></div>
@@ -993,7 +994,7 @@ function pushToast(toast) {
     el.className = 'toast';
     if (toast.kind === 'seed') {
         el.classList.add(toast.coherence ? 'seed-coherent' : 'seed-evolving');
-        const devShort = formatFracShort(toast.deviation_sq, 18); // Ed39 even shorter
+        const devShort = formatFracShort(toast.deviation_sq, 18);
         el.innerHTML =
             '<div class="toast-title">' + (toast.coherence ? '𝒮_coh' : '𝒟_evo') + ' · 𝒯_step</div>' +
             '<div class="toast-line">𝒯_tick <span class="v">' + escapeHtml(String(toast.tick ?? '—')) + '</span> · 𝒯_gen <span class="v">' + escapeHtml(String(toast.generation ?? '—')) + '</span></div>' +
@@ -1026,7 +1027,6 @@ async function fetchToasts() {
         }
     }
     if (Array.isArray(r.toasts)) {
-        // Ed39: defense - truncate any huge fields in raw toasts before push
         r.toasts = r.toasts.map(t => {
             try {
                 if (t.deviation_sq && String(t.deviation_sq).length > 60) t.deviation_sq = String(t.deviation_sq).slice(0,24) + '…(' + String(t.deviation_sq).length + 'ch)';
@@ -1518,7 +1518,6 @@ async function fetchMiniAppState() {
         return;
     }
     if (r.__error) {
-        // Ed38: handle H12 / 503 seed_busy as loading, not error
         if (r.__status === 503 && r.__body && r.__body.error === 'seed_busy') {
             setConnBadge('wait', 'seed busy…');
             // If we have cached state, keep showing it
@@ -1533,7 +1532,6 @@ async function fetchMiniAppState() {
         setConnBadge('err', 'state error');
         return;
     }
-    // Stale flag from Ed38 cached snapshot
     if (r.stale) {
         setConnBadge('wait', 'stale ' + (r.tick || ''));
     } else {
@@ -2015,7 +2013,7 @@ async function boot() {
             }
         }
     }, 3000);
-    pushLog('info', 'ÆI Seed TWA vFinal Edition 13 booted');
+    pushLog('info', 'ÆI Seed TWA vFinal Edition First booted');
 }
 
 if (document.readyState === 'complete' || document.readyState === 'interactive') {
@@ -2025,7 +2023,7 @@ if (document.readyState === 'complete' || document.readyState === 'interactive')
 }
 
 console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-console.log('⚡ ÆI SEED · GAIA CODEX · CS vFinal Edition 13');
+console.log('⚡ ÆI SEED · GAIA CODEX · Final Edition First
 console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 console.log('Backend: connected');
 console.log('Panels: 𝒮_STATUS, 𝒜₃/𝒜₄, 𝒜_PRIMES, Λ₂₄_PACK, 𝒮_FIBRATION,');
