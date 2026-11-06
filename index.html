@@ -693,9 +693,17 @@ function normalizeBackend(u) {
     }
     if (!/^https?:\/\//i.test(s)) return '';
     try {
-        const parsed = new URL(s);
-        const h = parsed.hostname.toLowerCase();
-        if (h === 'localhost' || h === '127.0.0.1' || h === '::1' || h.startsWith('10.') || h.startsWith('192.168.') || h.startsWith('172.') && (()=>{const sec=parseInt(h.split('.')[1]||'0',10); return sec>=16 && sec<=31;})() || h.includes('169.254.')) return '';
+        const urlObj = new URL(s);
+        const host = urlObj.hostname.toLowerCase();
+        if (host === 'localhost' || host === '127.0.0.1' || host === '::1') return '';
+        if (host.startsWith('10.')) return '';
+        if (host.startsWith('192.168.')) return '';
+        if (host.indexOf('169.254.') !== -1) return '';
+        if (host.startsWith('172.')) {
+            const parts = host.split('.');
+            const second = parseInt(parts[1] || '0', 10);
+            if (second >= 16 && second <= 31) return '';
+        }
     } catch(e) {}
     return s.replace(/\/+$/, '') + '/';
 }
