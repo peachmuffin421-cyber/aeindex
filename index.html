@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>ÆI Seed · GAIA TWA · CS vFinal Ed.40 ultimate H12fix</title>
+<title>ÆI Seed · GAIA TWA · CS vFinal Ed.40 ultimate H12fix Audit-Patched</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html, body {
@@ -663,6 +663,21 @@ const _AEI_B64 = "aHR0cHM6Ly9hZWktMzdhMjllMDczMDcwLmhlcm9rdWFwcC5jb20v";
 function _aeiDecode(s){ try{ return atob(s); }catch(e){ return ""; } }
 const DEFAULT_BACKENDS = [_aeiDecode(_AEI_B64)];
 
+function _parseFractionSafe(s){
+    try{
+        const t = String(s).trim();
+        if(t.includes('/')){
+            const parts = t.split('/');
+            const n = Number(parts[0]);
+            const d = Number(parts[1]);
+            if(d!==0) return n/d;
+        }
+        const v = Number(t);
+        return isNaN(v) ? 0 : v;
+    }catch(e){ return 0; }
+}
+
+
 const LS_KEY = 'aei_backend_url';
 
 function normalizeBackend(u) {
@@ -1245,7 +1260,7 @@ function parsePsiReal(psiRealStr) {
             if (isFinite(n) && isFinite(d) && d !== 0) return n / d;
             return 0;
         }
-        const f = parseFloat(psiRealStr);
+        const f = _parseFractionSafe(psiRealStr);
         return isFinite(f) ? f : 0;
     } catch (e) {
         return 0;
@@ -1458,9 +1473,9 @@ function drawFibrationCanvas() {
     ctx.lineWidth = 1.5;
     ctx.beginPath();
     traj.forEach((q, i) => {
-        const a = parseFloat(q.a) || 0;
-        const b = parseFloat(q.b) || 0;
-        const c = parseFloat(q.c) || 0;
+        const a = _parseFractionSafe(q.a) || 0;
+        const b = _parseFractionSafe(q.b) || 0;
+        const c = _parseFractionSafe(q.c) || 0;
         const mag = Math.sqrt(a*a + b*b + c*c) || 1;
         const na = a / mag;
         const nb = b / mag;
@@ -1472,8 +1487,8 @@ function drawFibrationCanvas() {
     });
     ctx.stroke();
     try {
-        const hz = parseFloat(state.hopf_base[0]) || 0;
-        const hw = parseFloat(state.hopf_base[1]) || 0;
+        const hz = _parseFractionSafe(state.hopf_base[0]) || 0;
+        const hw = _parseFractionSafe(state.hopf_base[1]) || 0;
         const hmag = Math.sqrt(hz*hz + hw*hw) || 1;
         const hx = cx + (hz / hmag) * R;
         const hy = cy - (hw / hmag) * R;
@@ -1666,8 +1681,8 @@ function drawTrajectory(canvas, traj) {
         return;
     }
     const points = traj.map(q => {
-        const a = parseFloat(q.a) || 0;
-        const b = parseFloat(q.b) || 0;
+        const a = _parseFractionSafe(q.a) || 0;
+        const b = _parseFractionSafe(q.b) || 0;
         return { a, b };
     });
     let minA = Infinity, maxA = -Infinity, minB = Infinity, maxB = -Infinity;
@@ -1857,9 +1872,9 @@ function drawFibView(canvas, traj) {
         ctx.lineWidth = 2;
         ctx.beginPath();
         traj.forEach((q, i) => {
-            const a = parseFloat(q.a) || 0;
-            const b = parseFloat(q.b) || 0;
-            const c = parseFloat(q.c) || 0;
+            const a = _parseFractionSafe(q.a) || 0;
+            const b = _parseFractionSafe(q.b) || 0;
+            const c = _parseFractionSafe(q.c) || 0;
             const mag = Math.sqrt(a*a + b*b + c*c) || 1;
             const x = cx + (a / mag) * R;
             const y = cy - (b / mag) * R;
@@ -1869,8 +1884,8 @@ function drawFibView(canvas, traj) {
         ctx.stroke();
     }
     try {
-        const hz = parseFloat(state.hopf_base[0]) || 0;
-        const hw = parseFloat(state.hopf_base[1]) || 0;
+        const hz = _parseFractionSafe(state.hopf_base[0]) || 0;
+        const hw = _parseFractionSafe(state.hopf_base[1]) || 0;
         const hmag = Math.sqrt(hz*hz + hw*hw) || 1;
         const hx = cx + (hz / hmag) * R;
         const hy = cy - (hw / hmag) * R;
