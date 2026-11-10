@@ -269,8 +269,8 @@ function drawCodex(){
   }
   arcFor(s2, R+10, "#6ee7ff");
   arcFor(r2, R+20, "#7ee787");
-  // lattice dots around the sphere — capped, golden-angle spread
-  var n=liveState.lattice_points||0; var show=Math.min(n, 24);
+  // lattice dots around the sphere — capped at backend cap 120, golden-angle spread (outward growth)
+  var n=liveState.lattice_points||0; var show=Math.min(n, 120); // outward: backend cap is 120 on dyno
   for(var i=0;i<show;i++){
     var a=(i*137.5)*Math.PI/180; var rr=R*0.72;
     var x=cx+Math.cos(a)*rr, y=cy+Math.sin(a)*rr*0.72;
