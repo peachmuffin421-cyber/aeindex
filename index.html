@@ -14,6 +14,10 @@
   Backend URL is stored base64 and decoded at runtime.
   Never put a plain backend URL in view-source or in the UI.
   Deploy: copy this file as-is to aeindex/index.html, overwriting the old 11-panel view.
+  Patched: hold last real lattice on Ed41 placeholder (stale+ed41+lattice 0) + Backend Replies panel.
+  Combined: Seedling pet graphics + Codex Symbolica live picture (S² + Hopf) in this one file.
+  The Codex canvas below is drawn from the same live /miniapp-state as Live Seed. Full Codex stays in index.htm.
+  Bridge: this file lives alongside index.htm (Codex Symbolica visualization) only. Link at bottom.
   No other file needed. This is the only entry file.
   This IS the entry point. Update README.md: index.html = Seedling (only).
 ============================================================ -->
@@ -41,6 +45,9 @@ input{width:100%;padding:11px 12px;border-radius:12px;border:1px solid var(--lin
 details{margin-top:14px;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:6px 16px} details summary{cursor:pointer;padding:12px 0;font-weight:700;font-size:16px;list-style:none} details summary::-webkit-details-marker{display:none} details summary::after{content:"  +";color:var(--cyan)} details[open] summary::after{content:"  —"} details p,details li{font-size:14px;color:#d8defa} details h3{margin:18px 0 6px;font-size:15px}
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px} .chip{background:#0a0f24;border:1px solid var(--line);border-radius:999px;padding:4px 9px;font-size:12px}
 .nav{margin-top:14px;font-size:13px;color:var(--muted)} .nav a{margin-right:12px}
+.codex-canvas{width:100%;height:auto;display:block;background:#050510;border:1px solid var(--line);border-radius:14px;margin-top:10px}
+.codex-legend{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.reply{background:#0f1730;border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-top:10px;font-size:13px} .reply b{display:block;font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin-bottom:2px} .reply pre{white-space:pre-wrap;word-break:break-word;font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#c8d0f5;margin:8px 0 0;max-height:180px;overflow:auto} .reply details{margin:8px 0 0;padding:0;background:transparent;border:0} .reply details summary{padding:6px 0;font-size:12px}
 </style>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
@@ -82,6 +89,15 @@ details{margin-top:14px;background:var(--card);border:1px solid var(--line);bord
 </div>
 
 <div class="card">
+<h2 style="margin:0;font-size:18px">Codex Symbolica — live picture</h2>
+<p class="small" style="margin:6px 0 0">Same S² → Hopf picture as Codex Symbolica, drawn from the same live <span class="mono">GET /miniapp-state</span> as Live Seed. Cyan arc = s², green arc = r², purple dot = φ on the Hopf base. When s² = r² the arcs line up.</p>
+<canvas id="codexCanvas" class="codex-canvas" width="700" height="360"></canvas>
+<div class="codex-legend"><span class="chip">● S² base sphere</span><span class="chip" style="color:#6ee7ff">— s² · arc_sq</span><span class="chip" style="color:#7ee787">— r² · radius_sq</span><span class="chip" style="color:#ff8fc7">○ Hopf fibre</span><span class="chip" style="color:#aa66ff">● φ projection</span></div>
+<p class="small" id="codexNote" style="margin-top:10px">Waiting for backend — standalone toy.</p>
+<p class="small">Full Codex Symbolica visualization: <a href="./index.htm">Codex Symbolica</a></p>
+</div>
+
+<div class="card">
 <h2 style="margin:0;font-size:18px">Live Seed — from backend</h2>
 <p class="small" id="liveNote" style="margin:6px 0 0">Standalone toy — no backend yet. Feed still plays locally.</p>
 <div class="kv">
@@ -101,6 +117,13 @@ details{margin-top:14px;background:var(--card);border:1px solid var(--line);bord
 <div><b>phi</b><span id="lv-phi" class="mono">—</span></div>
 </div>
 <p class="small" style="margin-top:10px">All seed numbers above come from <span class="mono">GET /miniapp-state</span> as exact Fractions (a/b). The frontend does not compute them.</p>
+</div>
+
+<div class="card">
+<h2 style="margin:0;font-size:18px">Backend replies — what the backend said back</h2>
+<p class="small" style="margin:6px 0 0">Last reply per button that talks to the backend. Talk / Say, Play Hopf, and Rest are local-only and never call the backend, so they have no backend reply.</p>
+<div id="replies"></div>
+<p class="small" style="margin-top:10px">Raw JSON below has URL fields redacted. This UI never shows a backend URL.</p>
 </div>
 
 <div class="card">
@@ -206,6 +229,130 @@ function render(){
   $("xpVal").textContent = pet.xp; $("xpBar").style.width = clamp(pet.xp,0,100) + "%";
   $("taughtChips").innerHTML = pet.taught.map(function(w){ return "<span class='chip'>"+esc(w)+"</span>"; }).join("") || "<span class='small'>Nothing taught yet.</span>";
   $("log").innerHTML = pet.loopLog.map(function(l){ return "<li>"+esc(l)+"</li>"; }).join("") || "<li style='color:var(--muted)'>No loops yet — feed a prime to start.</li>";
+  try{ drawCodex(); }catch(e){}
+}
+
+// ---------- Codex Symbolica — live picture (same state as Live Seed) ----------
+function parseFracNum(v){
+  if(v===undefined||v===null||v==="") return 0;
+  if(typeof v==="number") return v;
+  var s=String(v).trim();
+  if(s.indexOf("/")!==-1){ var parts=s.split("/"); var n=parseFloat(parts[0]), d=parseFloat(parts[1]); if(!isFinite(n)||!isFinite(d)||d===0) return 0; return n/d; }
+  var n2=parseFloat(s); return isFinite(n2)?n2:0;
+}
+function drawCodex(){
+  var cv=$("codexCanvas"); if(!cv) return;
+  var ctx=cv.getContext("2d"); if(!ctx) return;
+  var W=cv.width, H=cv.height;
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle="#050510"; ctx.fillRect(0,0,W,H);
+  var cx=175, cy=180, R=138;
+  // S² base sphere
+  ctx.beginPath(); ctx.arc(cx,cy,R,0,Math.PI*2); ctx.fillStyle="rgba(20,27,49,0.9)"; ctx.fill(); ctx.strokeStyle="#2a3560"; ctx.lineWidth=1.5; ctx.stroke();
+  ctx.beginPath(); ctx.ellipse(cx,cy,R,R*0.36,0,0,Math.PI*2); ctx.strokeStyle="rgba(106,140,255,0.35)"; ctx.stroke();
+  ctx.beginPath(); ctx.ellipse(cx,cy,R*0.36,R,0,0,Math.PI*2); ctx.strokeStyle="rgba(106,140,255,0.25)"; ctx.stroke();
+  ctx.beginPath(); ctx.ellipse(cx,cy,R*0.72,R*0.72,Math.PI/4,0,Math.PI*2); ctx.strokeStyle="rgba(106,140,255,0.18)"; ctx.stroke();
+  ctx.fillStyle="rgba(154,166,214,0.9)"; ctx.font="11px ui-monospace, Menlo, monospace"; ctx.textAlign="left"; ctx.fillText("S² base sphere", 12, H-10);
+  if(!liveState){
+    ctx.beginPath(); ctx.arc(cx,cy,R,0,Math.PI*2); ctx.setLineDash([6,6]); ctx.strokeStyle="rgba(255,209,102,0.7)"; ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle="#ffd166"; ctx.font="13px system-ui, sans-serif"; ctx.textAlign="center"; ctx.fillText("Waiting for backend — standalone toy", cx, cy);
+    ctx.fillStyle="#9aa6d6"; ctx.font="11px system-ui, sans-serif"; ctx.fillText("Feed still plays locally.", cx, cy+20);
+    if($("codexNote")) $("codexNote").textContent="Waiting for backend — standalone toy.";
+    return;
+  }
+  var s2=parseFracNum(liveState.arc_sq), r2=parseFracNum(liveState.radius_sq), dev=parseFracNum(liveState.deviation_sq);
+  var coh=!!liveState.coherence;
+  // s² arc (cyan) and r² arc (green) — same scale, so overlap = coherence
+  function arcFor(val, radius, color){
+    var frac=Math.max(0, Math.min(1.2, Math.abs(val)));
+    ctx.beginPath(); ctx.arc(cx,cy,radius,-Math.PI/2,-Math.PI/2+frac*Math.PI*2*0.85); ctx.strokeStyle=color; ctx.lineWidth=4; ctx.stroke();
+  }
+  arcFor(s2, R+10, "#6ee7ff");
+  arcFor(r2, R+20, "#7ee787");
+  // lattice dots around the sphere — capped, golden-angle spread
+  var n=liveState.lattice_points||0; var show=Math.min(n, 24);
+  for(var i=0;i<show;i++){
+    var a=(i*137.5)*Math.PI/180; var rr=R*0.72;
+    var x=cx+Math.cos(a)*rr, y=cy+Math.sin(a)*rr*0.72;
+    ctx.beginPath(); ctx.arc(x,y,3,0,Math.PI*2); ctx.fillStyle="#ffd166"; ctx.fill();
+  }
+  // Hopf base -> phi point on S²
+  var hz=0, hw=0;
+  if(liveState.hopf_base && liveState.hopf_base.length>=2){ hz=parseFracNum(liveState.hopf_base[0]); hw=parseFracNum(liveState.hopf_base[1]); }
+  else if(liveState.phi){ hz=parseFracNum(liveState.phi.a); hw=parseFracNum(liveState.phi.b); }
+  var mag=Math.sqrt(hz*hz+hw*hw)||1; var nx=hz/mag, ny=hw/mag;
+  var px=cx+nx*R, py=cy-ny*R;
+  // Hopf fibre ring
+  ctx.beginPath(); ctx.arc(px,py,14,0,Math.PI*2); ctx.strokeStyle="#ff8fc7"; ctx.lineWidth=1.2; ctx.stroke();
+  ctx.beginPath(); ctx.arc(px,py,6,0,Math.PI*2); ctx.fillStyle="#aa66ff"; ctx.fill(); ctx.strokeStyle="#fff"; ctx.lineWidth=1; ctx.stroke();
+  ctx.fillStyle="#aa66ff"; ctx.font="11px ui-monospace, Menlo, monospace"; ctx.textAlign="left"; ctx.fillText("● φ projection", W-130, H-10);
+  // Right-side read-out — same numbers as Live Seed
+  var x0=380, y0=36;
+  ctx.textAlign="left"; ctx.fillStyle="#eef1ff"; ctx.font="700 14px system-ui, sans-serif"; ctx.fillText("Live — same state as Live Seed", x0, y0);
+  ctx.font="12px ui-monospace, Menlo, monospace"; ctx.fillStyle="#d8defa";
+  var lines=[
+    "tick: "+(liveState.tick!==undefined?liveState.tick:"—")+" · gen: "+(liveState.generation!==undefined?liveState.generation:"—"),
+    "prime_count: "+(liveState.prime_count!==undefined?liveState.prime_count:"—"),
+    "lattice_points: "+(liveState.lattice_points!==undefined?liveState.lattice_points:"—"),
+    "s²: "+String(liveState.arc_sq||"—"),
+    "r²: "+String(liveState.radius_sq||"—"),
+    "deviation: "+String(liveState.deviation_sq||"—"),
+    "coherence: "+(coh?"coherent · s² = r²":"evolving · s² ≠ r²"),
+    "I: "+String(liveState.I||"—"),
+    "psi_real: "+String(liveState.psi_real||"—"),
+    "hopf: "+(liveState.hopf_base?liveState.hopf_base.join(", "):"—")
+  ];
+  for(var li=0;li<lines.length;li++){ ctx.fillText(lines[li].slice(0,44), x0, y0+24+li*22); }
+  // Pet glow bar — bond drives the light
+  var bond=pet?pet.bond:0; var energy=pet?pet.energy:0;
+  ctx.fillStyle="#0a0f24"; ctx.fillRect(x0, y0+24+lines.length*22+10, 280, 10);
+  ctx.fillStyle="#6ee7ff"; ctx.fillRect(x0, y0+24+lines.length*22+10, 280*Math.max(0,Math.min(1,bond/100)), 10);
+  ctx.fillStyle="#9aa6d6"; ctx.font="11px system-ui, sans-serif"; ctx.fillText("Seedling bond "+bond+" / 100 · energy "+energy+" / 100", x0, y0+24+lines.length*22+36);
+  if(liveState._holdingLattice){ ctx.fillStyle="#ffd166"; ctx.fillText("Holding last real lattice — placeholder (lattice 0)", x0, y0+24+lines.length*22+54); }
+  else if(coh){ ctx.fillStyle="#7ee787"; ctx.fillText("Coherent — arcs line up", x0, y0+24+lines.length*22+54); }
+  if($("codexNote")) $("codexNote").textContent = liveState._holdingLattice ? "Holding last real lattice — backend sent stale placeholder (lattice 0). Tick still live." : (coh ? "Coherent — s² and r² arcs line up." : "Evolving — gap between s² and r² is the deviation.");
+}
+
+// ---------- Backend Replies (in-memory only, not localStorage) ----------
+var lastReplies = { step:null, encode:null, reset:null, handshake:null };
+function redactUrls(v){
+  if(typeof v === "string"){ if(v.indexOf("http")==0) return "[redacted]"; return v; }
+  if(v && typeof v === "object"){
+    if(Array.isArray(v)) return v.map(redactUrls);
+    var o = {}; for(var k in v){ if(/url/i.test(k)) o[k] = "[redacted]"; else o[k] = redactUrls(v[k]); } return o;
+  }
+  return v;
+}
+function summarizeReply(action, r){
+  if(!r) return "No reply.";
+  if(r.__error) return "Error: " + (r.error || "unknown");
+  if(!r.ok) return "Error: " + (r.error || "not ok");
+  try{
+    if(action==="step" && r.record){ var rec=r.record; return "tick " + rec.tick + " · prime " + rec.prime + " · prime_count " + rec.prime_count + " · lattice " + rec.lattice_points + " · coherence " + (rec.coherence ? "coherent" : "evolving") + " · deviation " + rec.deviation_sq + " · I " + rec.I; }
+    if(action==="encode" && r.result){ var res=r.result; return "syllable " + res.syllable + " · length " + res.length + " · s² " + res.arc_sq + " · r² " + res.radius_sq + " · deviation " + res.deviation_sq + " · coherence " + (res.coherence ? "coherent" : "evolving"); }
+    if(action==="reset" && r.state){ var st=r.state; return "state " + (st.state||"—") + " · tick " + (st.tick!==undefined?st.tick:"—") + " · generation " + (st.generation!==undefined?st.generation:"—"); }
+    if(action==="handshake"){ return "user_id " + (r.user_id!==undefined?r.user_id:"—") + " · username @" + (r.username||"—"); }
+  }catch(e){}
+  return "ok: true";
+}
+function recordReply(action, label, endpoint, r){
+  var entry = { label:label, endpoint:endpoint, time:new Date().toLocaleTimeString(), ok: !!(r && !r.__error && r.ok), summary: summarizeReply(action, r), raw: redactUrls(r||{}) };
+  lastReplies[action] = entry;
+  renderReplies();
+  return entry;
+}
+function renderReplies(){
+  var el = $("replies"); if(!el) return;
+  var order = [["step","Feed a Prime","POST /step"],["encode","Teach A / U / M / AUM","POST /encode-syllable"],["reset","Reset","POST /reset"],["handshake","Handshake","POST /handshake"]];
+  var html = "";
+  for(var i=0;i<order.length;i++){
+    var key=order[i][0], label=order[i][1], ep=order[i][2];
+    var e = lastReplies[key];
+    if(!e){ html += "<div class='reply'><b>"+esc(label)+" · "+esc(ep)+"</b><span class='small'>No reply yet — tap the button above.</span></div>"; continue; }
+    html += "<div class='reply'><b>"+esc(label)+" · "+esc(ep)+" · "+esc(e.time)+" · "+(e.ok?"ok":"error")+"</b><div>"+esc(e.summary)+"</div><details><summary>Raw JSON</summary><pre>"+esc(JSON.stringify(e.raw, null, 2).slice(0,4000))+"</pre></details></div>";
+  }
+  html += "<div class='reply'><b>Talk / Say · Play Hopf · Rest</b><span class='small'>Local-only — no backend call, no backend reply.</span></div>";
+  el.innerHTML = html;
 }
 
 // ---------- Backend API ----------
@@ -241,8 +388,9 @@ async function apiPost(path, body){
 }
 function fmtFrac(v, fallback){ if(v===undefined||v===null||v==="") return fallback||"—"; var s=String(v); return s.length>32 ? s.slice(0,32)+"…" : s; }
 function renderLive(){
-  if(!liveState){ $("liveNote").textContent = HAS_BACKEND ? "Waiting for backend…" : "Standalone toy — no backend yet. Feed still plays locally."; return; }
-  $("liveNote").textContent = liveState.stale ? "Backend connected — showing cached snapshot (stale)." : "Live from backend — exact Fractions from /miniapp-state.";
+  if(!liveState){ $("liveNote").textContent = HAS_BACKEND ? "Waiting for backend…" : "Standalone toy — no backend yet. Feed still plays locally."; try{ drawCodex(); }catch(e){} return; }
+  if(liveState._holdingLattice){ $("liveNote").textContent = "Holding last real lattice — backend sent stale placeholder (lattice 0). Tick still live."; }
+  else $("liveNote").textContent = liveState.stale ? "Backend connected — showing cached snapshot (stale)." : "Live from backend — exact Fractions from /miniapp-state.";
   $("lv-state").textContent = liveState.state || "—";
   $("lv-tick").textContent = (liveState.tick!==undefined?liveState.tick:"—");
   $("lv-gen").textContent = (liveState.generation!==undefined?liveState.generation:"—");
@@ -257,6 +405,7 @@ function renderLive(){
   $("lv-psi").textContent = fmtFrac(liveState.psi_real); $("lv-psi").title = String(liveState.psi_real||"");
   $("lv-hopf").textContent = liveState.hopf_base ? liveState.hopf_base.join(", ") : "—";
   $("lv-phi").textContent = liveState.phi ? ("a="+liveState.phi.a+" b="+liveState.phi.b+" c="+liveState.phi.c+" d="+liveState.phi.d) : "—";
+  try{ drawCodex(); }catch(e){}
 }
 async function fetchMiniAppState(){
   if(!HAS_BACKEND){ setBadge("", "standalone"); renderLive(); return; }
@@ -268,10 +417,30 @@ async function fetchMiniAppState(){
     else { setBadge("wait","retrying…"); }
     return;
   }
-  failures = 0; liveState = r; setBadge("ok","connected"); renderLive();
+  failures = 0;
+  var isPlaceholder = (r && r.stale===true && r.ed41===true && r.lattice_points===0);
+  if(isPlaceholder && liveState && liveState.lattice_points>0){
+    var merged = {}; for(var k in r) merged[k]=r[k];
+    merged.lattice_points = liveState.lattice_points;
+    merged.primes_tail = liveState.primes_tail;
+    merged.arc_sq = liveState.arc_sq;
+    merged.radius_sq = liveState.radius_sq;
+    merged.deviation_sq = liveState.deviation_sq;
+    merged.coherence = liveState.coherence;
+    merged.I = liveState.I;
+    merged.psi_real = liveState.psi_real;
+    merged.hopf_base = liveState.hopf_base;
+    merged.phi = liveState.phi;
+    merged._holdingLattice = true;
+    liveState = merged;
+  } else {
+    if(r) r._holdingLattice = false;
+    liveState = r;
+  }
+  setBadge("ok","connected"); renderLive();
 }
 async function boot(){
-  render();
+  render(); renderReplies();
   if(BACKEND_QS_WAS_MALFORMED){ setBadge("err","bad ?backend="); return; }
   if(!HAS_BACKEND){ setBadge("", "standalone"); renderLive(); return; }
   setBadge("wait","waking dyno…");
@@ -280,7 +449,8 @@ async function boot(){
   if(health && health.__error){ setBadge("err","backend unreachable"); pushLog("Health probe failed — will keep retrying."); }
   else { setBadge("ok","connected"); }
   var init = getInitData();
-  if(init){ try{ var h = await apiPost("/handshake", {}); if(h && h.ok) pushLog("Handshake OK."); }catch(e){} }
+  if(init){ try{ var h = await apiPost("/handshake", {}); if(h){ recordReply("handshake","Handshake","POST /handshake", h); if(h.ok) pushLog("Handshake OK — backend reply: " + summarizeReply("handshake", h)); } }catch(e){} }
+  renderReplies();
   await fetchMiniAppState();
   setInterval(fetchMiniAppState, 3000);
   setInterval(fetchMiniAppState, 300000);
@@ -293,10 +463,11 @@ async function doFeed(){
     haptic("impact");
     if(HAS_BACKEND){
       var r = await apiPost("/step", {x:"1/100"});
+      recordReply("step","Feed a Prime","POST /step", r);
       if(r && !r.__error && r.ok){
         pet.hunger = clamp(pet.hunger-25,0,100); pet.energy = clamp(pet.energy-5,0,100); pet.bond = clamp(pet.bond+8,0,100); pet.xp += 12; pet.localPrimes += 1;
         pet.speech = "Thank you. That prime locked a lattice point and closed a Hopf fibre. s² ≈ r².";
-        pushLog("Fed prime → POST /step OK. Waiting for /miniapp-state to confirm.");
+        pushLog("Fed prime → POST /step OK — backend reply: " + summarizeReply("step", r));
         if(pet.bond>=95){ pet.generation += 1; pet.bond = 40; pet.speech = "I evolved! Generation " + pet.generation + ". My light is stronger now."; pushLog("Pet evolved → generation " + pet.generation + "."); }
         savePet(); render(); await fetchMiniAppState(); return;
       }
@@ -348,11 +519,12 @@ async function doTeach(){
   haptic("light");
   if(["A","U","M","AUM"].indexOf(upper)!==-1 && HAS_BACKEND){
     var r = await apiPost("/encode-syllable", {syllable: upper});
+    recordReply("encode","Teach A / U / M / AUM","POST /encode-syllable", r);
     if(r && !r.__error && r.ok){
       if(pet.taught.indexOf(upper)===-1) pet.taught.push(upper);
       pet.bond = clamp(pet.bond+10,0,100); pet.xp += 10;
       pet.speech = "Encoded “" + upper + "” into my Lingoso trajectory. s², r² and deviation are in the Live Seed panel.";
-      pushLog("Encoded syllable “" + upper + "” → POST /encode-syllable OK.");
+      pushLog("Encoded syllable “" + upper + "” → backend reply: " + summarizeReply("encode", r));
       input.value = ""; savePet(); render(); await fetchMiniAppState(); return;
     }
     pushLog("Encode failed (" + (r && (r.error||"unknown")) + ") — saved locally instead.");
@@ -366,8 +538,8 @@ async function doTeach(){
 async function doReset(){
   if(!confirm("Reset the backend seed and your local pet?")) return;
   haptic("impact");
-  if(HAS_BACKEND){ var r = await apiPost("/reset", {}); if(r && !r.__error) pushLog("Backend reset → POST /reset OK."); else pushLog("Backend reset failed — local reset only."); }
-  pet = JSON.parse(JSON.stringify(DEFAULT_PET)); liveState = null; savePet(); render(); renderLive();
+  if(HAS_BACKEND){ var r = await apiPost("/reset", {}); recordReply("reset","Reset","POST /reset", r); if(r && !r.__error) pushLog("Backend reset → backend reply: " + summarizeReply("reset", r)); else pushLog("Backend reset failed — local reset only."); }
+  pet = JSON.parse(JSON.stringify(DEFAULT_PET)); liveState = null; savePet(); render(); renderLive(); renderReplies();
   pet.speech = "Fresh start. Hello again. Feed me a prime.";
   pushLog("Reset — fresh Seedling."); savePet(); render();
 }
