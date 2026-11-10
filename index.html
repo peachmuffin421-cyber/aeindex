@@ -6,16 +6,16 @@
 <title>Seedling Tamagotchi — AEI Seed TWA</title>
 <!-- ============================================================
   AEI SEED TWA — Repo A Frontend
-  File: index.html — Seedling Tamagotchi (replacement entry)
+  File: index.html — Seedling Tamagotchi (ONLY entry, Seedling version)
   Single static file. No build step. No bundler. No node_modules.
   No server-side code. No secrets. No bot token in this file.
   Pet state lives in localStorage only.
   Seed state comes from the backend via /miniapp-state.
   Backend URL is stored base64 and decoded at runtime.
   Never put a plain backend URL in view-source or in the UI.
-  Deploy: FIRST: git mv index.html dashboard.html (preserve old dashboard).
-  THEN: copy this file as-is to aeindex/index.html.
-  Update README.md repo map. Do NOT delete dashboard.html.
+  Deploy: copy this file as-is to aeindex/index.html, overwriting the old 11-panel view.
+  No other file needed. This is the only entry file.
+  This IS the entry point. Update README.md: index.html = Seedling (only).
 ============================================================ -->
 <style>
 :root{--bg:#0b1020;--card:#141b31;--card2:#1a2342;--line:#2a3560;--text:#eef1ff;--muted:#9aa6d6;--green:#7ee787;--cyan:#6ee7ff;--pink:#ff8fc7;--gold:#ffd166;--btn:#2b3a6e;--btn2:#3b2f6e}
@@ -111,7 +111,7 @@ details{margin-top:14px;background:var(--card);border:1px solid var(--line);bord
 <details id="explainer">
 <summary>What is the Seedling? — tap to expand</summary>
 <h3>What it is</h3>
-<p>A toy / onboarding frontend skin for the ÆI Seed TWA — the GAIA / ÆI Codex seed. Not the ÆEA market bot. It lives in Repo A Frontend, alongside <span class="mono">dashboard.html</span> (the full 11-panel dashboard, preserved) and <span class="mono">index.htm</span> (Codex Symbolica visualization). This file itself is now <span class="mono">index.html</span>, so it is the entry point.</p>
+<p>A toy / onboarding frontend skin for the ÆI Seed TWA — the GAIA / ÆI Codex seed. Not the ÆEA market bot. It lives in Repo A Frontend. This file IS the entry point. It replaces the old 11-panel view. It lives alongside <span class="mono">index.htm</span> (Codex Symbolica visualization) only.</p>
 <h3>What it does</h3>
 <p>It gives you a pet to care for. Each <b>Feed a Prime</b> sends <span class="mono">POST /step</span> with <span class="mono">{x: '1/100'}</span> to the backend. The backend then runs the real seed loop:</p>
 <ol>
@@ -141,7 +141,7 @@ details{margin-top:14px;background:var(--card);border:1px solid var(--line);bord
 <p>Backend resolution: <span class="mono">window.AEI_BACKEND_URL</span> → <span class="mono">?backend=</span> (read once, saved, stripped from the address bar) → <span class="mono">localStorage['aei_backend_url']</span> → built-in default (base64, decoded at runtime). GET polls carry auth as <span class="mono">?auth_init_data=</span>. POSTs carry <span class="mono">X-Telegram-Init-Data</span>. The UI shows only <span class="mono">● connected</span> / <span class="mono">● standalone</span>, never the URL.</p>
 </details>
 
-<p class="nav">Back to: <a href="./dashboard.html">Full dashboard</a> <a href="./index.htm">Codex Symbolica</a></p>
+<p class="nav">Also: <a href="./index.htm">Codex Symbolica</a></p>
 </div>
 
 <script>
