@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Seedling Tamagotchi — AEI Seed TWA</title>
+<!-- ============================================================
+  AEI SEED TWA — Repo A Frontend
+  File: index.html — Seedling Tamagotchi (ONLY entry, Seedling version)
+  Single static file. No build step. No bundler. No node_modules.
+  No server-side code. No secrets. No bot token in this file.
+  Pet state lives in localStorage only.
+  Seed state comes from the backend via /miniapp-state.
+  Backend URL is stored base64 and decoded at runtime.
+  Never put a plain backend URL in view-source or in the UI.
+  Deploy: copy this file as-is to aeindex/index.html, overwriting the old 11-panel view.
+  Patched: hold last real lattice on Ed41 placeholder (stale+ed41+lattice 0) + Backend Replies panel.
+  Combined: Seedling pet graphics + Codex Symbolica live picture (S² + Hopf) in this one file.
+  The Codex canvas below is drawn from the same live /miniapp-state as Live Seed. Full Codex stays in index.htm.
+  Bridge: this file lives alongside index.htm (Codex Symbolica visualization) only. Link at bottom.
+  No other file needed. This is the only entry file.
+  This IS the entry point. Update README.md: index.html = Seedling (only).
+============================================================ -->
+<style>
+:root{--bg:#0b1020;--card:#141b31;--card2:#1a2342;--line:#2a3560;--text:#eef1ff;--muted:#9aa6d6;--green:#7ee787;--cyan:#6ee7ff;--pink:#ff8fc7;--gold:#ffd166;--btn:#2b3a6e;--btn2:#3b2f6e}
+*{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;line-height:1.45}
+a{color:var(--cyan)} .wrap{max-width:760px;margin:0 auto;padding:16px 14px 40px}
+header{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+h1{font-size:26px;margin:4px 0 2px} .sub{color:var(--muted);font-size:13px;margin:0}
+.badge{display:inline-flex;gap:6px;align-items:center;border:1px solid var(--line);border-radius:999px;padding:6px 10px;font-size:12px;white-space:nowrap;background:#10162e}
+.dot{width:9px;height:9px;border-radius:50%;background:#888} .dot.ok{background:var(--green)} .dot.wait{background:var(--gold)} .dot.err{background:#ff6b6b}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin-top:14px}
+.pet{display:flex;gap:16px;align-items:center} .avatar{font-size:72px;line-height:1;filter:brightness(var(--glow,1));transition:filter .3s} .bubble{flex:1;background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:10px 12px;font-size:14px}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace} .small{font-size:12px;color:var(--muted)} .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+@media(max-width:520px){.grid{grid-template-columns:1fr} .pet{flex-direction:column;align-items:flex-start} .avatar{font-size:64px}}
+.bar{height:8px;background:#0a0f24;border-radius:999px;overflow:hidden;border:1px solid var(--line)} .fill{height:100%;background:linear-gradient(90deg,var(--cyan),var(--green));border-radius:999px}
+.fill.hunger{background:linear-gradient(90deg,#ffb86b,#ff6b6b)} .fill.energy{background:linear-gradient(90deg,#ffe066,#7ee787)}
+.row{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin:2px 0 4px} .row b{color:var(--text)}
+.btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px} button{border:0;border-radius:12px;padding:11px 14px;font-size:14px;font-weight:600;cursor:pointer;color:#fff;background:var(--btn)} button.primary{background:#1f7a4d} button.warn{background:#7a2f2f} button:disabled{opacity:.55;cursor:wait}
+input{width:100%;padding:11px 12px;border-radius:12px;border:1px solid var(--line);background:#0a0f24;color:var(--text);font-size:14px}
+.two{display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:8px} @media(max-width:520px){.two{grid-template-columns:1fr}}
+.kv{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px} @media(max-width:520px){.kv{grid-template-columns:1fr}}
+.kv div{background:#0f1730;border:1px solid var(--line);border-radius:12px;padding:9px 10px;font-size:13px} .kv b{display:block;font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin-bottom:2px}
+.log{max-height:220px;overflow:auto;margin:10px 0 0;padding-left:18px;font-size:13px} .log li{margin:6px 0}
+details{margin-top:14px;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:6px 16px} details summary{cursor:pointer;padding:12px 0;font-weight:700;font-size:16px;list-style:none} details summary::-webkit-details-marker{display:none} details summary::after{content:"  +";color:var(--cyan)} details[open] summary::after{content:"  —"} details p,details li{font-size:14px;color:#d8defa} details h3{margin:18px 0 6px;font-size:15px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px} .chip{background:#0a0f24;border:1px solid var(--line);border-radius:999px;padding:4px 9px;font-size:12px}
+.nav{margin-top:14px;font-size:13px;color:var(--muted)} .nav a{margin-right:12px}
+.codex-canvas{width:100%;height:auto;display:block;background:#050510;border:1px solid var(--line);border-radius:14px;margin-top:10px}
+.codex-legend{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.reply{background:#0f1730;border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-top:10px;font-size:13px} .reply b{display:block;font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin-bottom:2px} .reply pre{white-space:pre-wrap;word-break:break-word;font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#c8d0f5;margin:8px 0 0;max-height:180px;overflow:auto} .reply details{margin:8px 0 0;padding:0;background:transparent;border:0} .reply details summary{padding:6px 0;font-size:12px}
+</style>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body>
+<div class="wrap">
+<header>
+<div><h1>🌱 Seedling Tamagotchi</h1><p class="sub">A friendly pet on top of the ÆI Seed loop. Feed it a prime — the real seed runs in the backend.</p></div>
+<span class="badge"><span class="dot" id="dot"></span><span id="badge">standalone</span></span>
+</header>
+
+<div class="card">
+<div class="pet">
+<div class="avatar" id="avatar">🌱</div>
+<div style="flex:1;min-width:0">
+<div class="bubble" id="speech">Hello. I am your Seedling. Feed me a prime, and I will learn how to answer you.</div>
+<div class="small" style="margin-top:8px"><span id="stageLabel">Stage: Seedling</span> &nbsp;·&nbsp; <span id="petGen">Pet generation: 1</span> &nbsp;·&nbsp; <span id="localPrimes">Local primes fed: 0</span></div>
+<div class="chips" id="taughtChips"></div>
+</div>
+</div>
+
+<div class="grid">
+<div><div class="row"><span>Hunger</span><b id="hungerVal">40 / 100</b></div><div class="bar"><div class="fill hunger" id="hungerBar" style="width:40%"></div></div></div>
+<div><div class="row"><span>Energy</span><b id="energyVal">70 / 100</b></div><div class="bar"><div class="fill energy" id="energyBar" style="width:70%"></div></div></div>
+<div><div class="row"><span>Bond</span><b id="bondVal">15 / 100</b></div><div class="bar"><div class="fill" id="bondBar" style="width:15%"></div></div></div>
+<div><div class="row"><span>XP</span><b id="xpVal">0</b></div><div class="bar"><div class="fill" id="xpBar" style="width:0%"></div></div></div>
+</div>
+
+<div class="btns">
+<button class="primary" id="feedBtn">Feed a Prime · Step</button>
+<button id="playBtn">Play Hopf</button>
+<button id="restBtn">Rest</button>
+<button id="talkBtn">Talk</button>
+<button class="warn" id="resetBtn">Reset</button>
+</div>
+
+<div class="two"><input id="teachInput" placeholder="Teach a word — try coherence, or A / U / M / AUM for Lingoso"><button id="teachBtn">Teach</button></div>
+<div class="two"><input id="talkInput" placeholder="Say something to your Seedling…"><button id="sayBtn">Say</button></div>
+<p class="small">Feed = <span class="mono">POST /step</span> when connected. Teach A / U / M / AUM = <span class="mono">POST /encode-syllable</span>. Other words are taught locally. Hunger / Energy / Bond / XP are local pet state only.</p>
+</div>
+
+<div class="card">
+<h2 style="margin:0;font-size:18px">Codex Symbolica — live picture</h2>
+<p class="small" style="margin:6px 0 0">Same S² → Hopf picture as Codex Symbolica, drawn from the same live <span class="mono">GET /miniapp-state</span> as Live Seed. Cyan arc = s², green arc = r², purple dot = φ on the Hopf base. When s² = r² the arcs line up.</p>
+<canvas id="codexCanvas" class="codex-canvas" width="700" height="360"></canvas>
+<div class="codex-legend"><span class="chip">● S² base sphere</span><span class="chip" style="color:#6ee7ff">— s² · arc_sq</span><span class="chip" style="color:#7ee787">— r² · radius_sq</span><span class="chip" style="color:#ff8fc7">○ Hopf fibre</span><span class="chip" style="color:#aa66ff">● φ projection</span></div>
+<p class="small" id="codexNote" style="margin-top:10px">Waiting for backend — standalone toy.</p>
+<p class="small">Full Codex Symbolica visualization: <a href="./index.htm">Codex Symbolica</a></p>
+</div>
+
+<div class="card">
+<h2 style="margin:0;font-size:18px">Live Seed — from backend</h2>
+<p class="small" id="liveNote" style="margin:6px 0 0">Standalone toy — no backend yet. Feed still plays locally.</p>
+<div class="kv">
+<div><b>State</b><span id="lv-state">—</span></div>
+<div><b>Tick</b><span id="lv-tick">—</span></div>
+<div><b>Generation (backend)</b><span id="lv-gen">—</span></div>
+<div><b>Prime count</b><span id="lv-prime-count">—</span></div>
+<div><b>Lattice points</b><span id="lv-lattice">—</span></div>
+<div><b>Primes tail</b><span id="lv-primes" class="mono">—</span></div>
+<div><b>s² · arc_sq</b><span id="lv-s2" class="mono">—</span></div>
+<div><b>r² · radius_sq</b><span id="lv-r2" class="mono">—</span></div>
+<div><b>Deviation · deviation_sq</b><span id="lv-dev" class="mono">—</span></div>
+<div><b>Coherence</b><span id="lv-coh">—</span></div>
+<div><b>I · intelligence</b><span id="lv-i" class="mono">—</span></div>
+<div><b>psi_real</b><span id="lv-psi" class="mono">—</span></div>
+<div><b>Hopf base (z, w)</b><span id="lv-hopf" class="mono">—</span></div>
+<div><b>phi</b><span id="lv-phi" class="mono">—</span></div>
+</div>
+<p class="small" style="margin-top:10px">All seed numbers above come from <span class="mono">GET /miniapp-state</span> as exact Fractions (a/b). The frontend does not compute them.</p>
+</div>
+
+<div class="card">
+<h2 style="margin:0;font-size:18px">Backend replies — what the backend said back</h2>
+<p class="small" style="margin:6px 0 0">Last reply per button that talks to the backend. Talk / Say, Play Hopf, and Rest are local-only and never call the backend, so they have no backend reply.</p>
+<div id="replies"></div>
+<p class="small" style="margin-top:10px">Raw JSON below has URL fields redacted. This UI never shows a backend URL.</p>
+</div>
+
+<div class="card">
+<h2 style="margin:0;font-size:18px">Loop log</h2>
+<ul class="log" id="log"></ul>
+</div>
+
+<details id="explainer">
+<summary>What is the Seedling? — tap to expand</summary>
+<h3>What it is</h3>
+<p>A toy / onboarding frontend skin for the ÆI Seed TWA — the GAIA / ÆI Codex seed. Not the ÆEA market bot. It lives in Repo A Frontend. This file IS the entry point. It replaces the old 11-panel view. It lives alongside <span class="mono">index.htm</span> (Codex Symbolica visualization) only.</p>
+<h3>What it does</h3>
+<p>It gives you a pet to care for. Each <b>Feed a Prime</b> sends <span class="mono">POST /step</span> with <span class="mono">{x: '1/100'}</span> to the backend. The backend then runs the real seed loop:</p>
+<ol>
+<li><b>Primorial / prime step</b> — generate the next prime, exact Fraction.</li>
+<li><b>Lattice step</b> — stereographic-project the prime, add a sphere to Leech lattice Λ₂₄.</li>
+<li><b>Wavefunction</b> — integrate ψ over the lattice, blending with the prior rectified ψ so DbZ persists.</li>
+<li><b>Trajectory</b> — generate the Natalia-fibrated quaternionic path.</li>
+<li><b>Aetheric gate</b> — validate s² = r², compute deviation_sq.</li>
+<li><b>DbZ</b> — if deviation ≠ 0, rectify ψ.</li>
+<li><b>Metric</b> — record intelligence metric I.</li>
+<li><b>Evolution + Observer</b> — SelfEvolutionCore.evolve_step + observer integral 𝒪[Ψ].</li>
+</ol>
+<p>It then polls <span class="mono">GET /miniapp-state</span> every 3 seconds and displays the backend’s values: primes tail, lattice points, psi_real, I, deviation, coherence, Hopf base.</p>
+<h3>What it does NOT do</h3>
+<ul>
+<li>It does not run the seed loop itself.</li>
+<li>It does not compute seed values with floats.</li>
+<li>It does not replace <span class="mono">app.py</span> / <span class="mono">AEI_Seed</span> / SelfEvolutionCore.</li>
+<li>It does not talk to the crawler relay directly. The Cloudflare Worker relay is a stateless fetch proxy; frontier logic lives in <span class="mono">app.py</span>, and crawled doc hashes become the next <span class="mono">x</span>.</li>
+<li>It does not store a bot token or any secret. It only forwards the initData Telegram itself injected.</li>
+</ul>
+<h3>Standalone mode</h3>
+<p>When no backend is reachable, it runs a local simulation so you can still play. Those numbers are toy numbers, not the real seed. The Live Seed panel will say so.</p>
+<h3>The pet layer</h3>
+<p>Hunger / Energy / Bond / XP / speech / dialogue are gamification to make the loop feel alive. They are local only, stored in this browser’s localStorage, and have no backend counterpart.</p>
+<h3>How it is wired</h3>
+<p>Backend resolution: <span class="mono">window.AEI_BACKEND_URL</span> → <span class="mono">?backend=</span> (read once, saved, stripped from the address bar) → <span class="mono">localStorage['aei_backend_url']</span> → built-in default (base64, decoded at runtime). GET polls carry auth as <span class="mono">?auth_init_data=</span>. POSTs carry <span class="mono">X-Telegram-Init-Data</span>. The UI shows only <span class="mono">● connected</span> / <span class="mono">● standalone</span>, never the URL.</p>
+</details>
+
+<p class="nav">Also: <a href="./index.htm">Codex Symbolica</a></p>
+</div>
+
+<script>
+(function(){
+"use strict";
+// ---------- Backend resolution (same as index.html) ----------
+var _AEI_B64 = "aHR0cHM6Ly9hZWktMzdhMjllMDczMDcwLmhlcm9rdWFwcC5jb20v";
+var BACKEND_QS_WAS_MALFORMED = false;
+var BACKEND_URL = "";
+var HAS_BACKEND = false;
+function resolveBackendUrl(){
+  if (window.AEI_BACKEND_URL) return String(window.AEI_BACKEND_URL).replace(/\/$/,"");
+  try{
+    var qs = new URLSearchParams(window.location.search).get("backend");
+    if (qs){
+      try{ var u = new URL(qs); var clean = u.toString().replace(/\/$/,"");
+        try{ localStorage.setItem("aei_backend_url", clean); }catch(e){}
+        try{ history.replaceState({}, "", window.location.pathname); }catch(e){}
+        return clean;
+      }catch(e){ BACKEND_QS_WAS_MALFORMED = true; return ""; }
+    }
+  }catch(e){}
+  try{ var stored = localStorage.getItem("aei_backend_url"); if (stored) return String(stored).replace(/\/$/,""); }catch(e){}
+  try{ return atob(_AEI_B64).replace(/\/$/,""); }catch(e){ return ""; }
+}
+BACKEND_URL = resolveBackendUrl();
+HAS_BACKEND = !!BACKEND_URL && !BACKEND_QS_WAS_MALFORMED;
+
+// ---------- Telegram ----------
+var tg = (window.Telegram && window.Telegram.WebApp) ? window.Telegram.WebApp : null;
+try{ if (tg){ tg.ready(); tg.expand(); } }catch(e){}
+function getInitData(){ try{ return tg && tg.initData ? tg.initData : ""; }catch(e){ return ""; } }
+function haptic(kind){ try{ if (tg && tg.HapticFeedback){ if(kind==="impact") tg.HapticFeedback.impactOccurred("medium"); else tg.HapticFeedback.selectionChanged(); } }catch(e){} }
+
+// ---------- Helpers ----------
+function $(id){ return document.getElementById(id); }
+function esc(s){ return String(s).replace(/[&<>"']/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
+function clamp(n,a,b){ return Math.max(a, Math.min(b, n)); }
+function isPrime(n){ if(n<2) return false; for(var i=2;i*i<=n;i++) if(n%i===0) return false; return true; }
+function nextPrime(n){ var c=n+1; while(!isPrime(c)) c++; return c; }
+
+// ---------- Pet state: localStorage only ----------
+var PET_KEY = "seedling_pet_v1";
+var DEFAULT_PET = { hunger:40, energy:70, bond:15, xp:0, generation:1, localPrimes:0, lastPrime:2, taught:["coherence"], loopLog:[], speech:"Hello. I am your Seedling. Feed me a prime, and I will learn how to answer you." };
+function loadPet(){ try{ var raw = localStorage.getItem(PET_KEY); if(!raw) return JSON.parse(JSON.stringify(DEFAULT_PET)); var p = JSON.parse(raw); var out = JSON.parse(JSON.stringify(DEFAULT_PET)); for(var k in out){ if(p[k]!==undefined) out[k]=p[k]; } return out; }catch(e){ return JSON.parse(JSON.stringify(DEFAULT_PET)); } }
+function savePet(){ try{ localStorage.setItem(PET_KEY, JSON.stringify(pet)); }catch(e){} }
+var pet = loadPet();
+function pushLog(text){ pet.loopLog.unshift(new Date().toLocaleTimeString() + " — " + text); pet.loopLog = pet.loopLog.slice(0,40); savePet(); render(); }
+function stageFor(){ var score = pet.bond + pet.xp; if(score>=220) return {emoji:"✨", label:"Ancient"}; if(score>=140) return {emoji:"🌳", label:"Tree"}; if(score>=70) return {emoji:"🌸", label:"Bloom"}; if(score>=30) return {emoji:"🌿", label:"Sprout"}; return {emoji:"🌱", label:"Seedling"}; }
+function render(){
+  var st = stageFor();
+  $("avatar").textContent = st.emoji;
+  var glow = 0.55 + (pet.energy/100)*0.55; if(pet.hunger>80) glow -= 0.15;
+  $("avatar").style.setProperty("--glow", glow.toFixed(2));
+  $("stageLabel").textContent = "Stage: " + st.label;
+  $("petGen").textContent = "Pet generation: " + pet.generation;
+  $("localPrimes").textContent = "Local primes fed: " + pet.localPrimes;
+  $("speech").textContent = pet.speech;
+  $("hungerVal").textContent = pet.hunger + " / 100"; $("hungerBar").style.width = pet.hunger + "%";
+  $("energyVal").textContent = pet.energy + " / 100"; $("energyBar").style.width = pet.energy + "%";
+  $("bondVal").textContent = pet.bond + " / 100"; $("bondBar").style.width = pet.bond + "%";
+  $("xpVal").textContent = pet.xp; $("xpBar").style.width = clamp(pet.xp,0,100) + "%";
+  $("taughtChips").innerHTML = pet.taught.map(function(w){ return "<span class='chip'>"+esc(w)+"</span>"; }).join("") || "<span class='small'>Nothing taught yet.</span>";
+  $("log").innerHTML = pet.loopLog.map(function(l){ return "<li>"+esc(l)+"</li>"; }).join("") || "<li style='color:var(--muted)'>No loops yet — feed a prime to start.</li>";
+  try{ drawCodex(); }catch(e){}
+}
+
+// ---------- Codex Symbolica — live picture (same state as Live Seed) ----------
+function parseFracNum(v){
+  if(v===undefined||v===null||v==="") return 0;
+  if(typeof v==="number") return v;
+  var s=String(v).trim();
+  if(s.indexOf("/")!==-1){ var parts=s.split("/"); var n=parseFloat(parts[0]), d=parseFloat(parts[1]); if(!isFinite(n)||!isFinite(d)||d===0) return 0; return n/d; }
+  var n2=parseFloat(s); return isFinite(n2)?n2:0;
+}
+function drawCodex(){
+  var cv=$("codexCanvas"); if(!cv) return;
+  var ctx=cv.getContext("2d"); if(!ctx) return;
+  var W=cv.width, H=cv.height;
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle="#050510"; ctx.fillRect(0,0,W,H);
+  var cx=175, cy=180, R=138;
+  // S² base sphere
+  ctx.beginPath(); ctx.arc(cx,cy,R,0,Math.PI*2); ctx.fillStyle="rgba(20,27,49,0.9)"; ctx.fill(); ctx.strokeStyle="#2a3560"; ctx.lineWidth=1.5; ctx.stroke();
+  ctx.beginPath(); ctx.ellipse(cx,cy,R,R*0.36,0,0,Math.PI*2); ctx.strokeStyle="rgba(106,140,255,0.35)"; ctx.stroke();
+  ctx.beginPath(); ctx.ellipse(cx,cy,R*0.36,R,0,0,Math.PI*2); ctx.strokeStyle="rgba(106,140,255,0.25)"; ctx.stroke();
+  ctx.beginPath(); ctx.ellipse(cx,cy,R*0.72,R*0.72,Math.PI/4,0,Math.PI*2); ctx.strokeStyle="rgba(106,140,255,0.18)"; ctx.stroke();
+  ctx.fillStyle="rgba(154,166,214,0.9)"; ctx.font="11px ui-monospace, Menlo, monospace"; ctx.textAlign="left"; ctx.fillText("S² base sphere", 12, H-10);
+  if(!liveState){
+    ctx.beginPath(); ctx.arc(cx,cy,R,0,Math.PI*2); ctx.setLineDash([6,6]); ctx.strokeStyle="rgba(255,209,102,0.7)"; ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle="#ffd166"; ctx.font="13px system-ui, sans-serif"; ctx.textAlign="center"; ctx.fillText("Waiting for backend — standalone toy", cx, cy);
+    ctx.fillStyle="#9aa6d6"; ctx.font="11px system-ui, sans-serif"; ctx.fillText("Feed still plays locally.", cx, cy+20);
+    if($("codexNote")) $("codexNote").textContent="Waiting for backend — standalone toy.";
+    return;
+  }
+  var s2=parseFracNum(liveState.arc_sq), r2=parseFracNum(liveState.radius_sq), dev=parseFracNum(liveState.deviation_sq);
+  var coh=!!liveState.coherence;
+  // s² arc (cyan) and r² arc (green) — same scale, so overlap = coherence
+  function arcFor(val, radius, color){
+    var frac=Math.max(0, Math.min(1.2, Math.abs(val)));
+    ctx.beginPath(); ctx.arc(cx,cy,radius,-Math.PI/2,-Math.PI/2+frac*Math.PI*2*0.85); ctx.strokeStyle=color; ctx.lineWidth=4; ctx.stroke();
+  }
+  arcFor(s2, R+10, "#6ee7ff");
+  arcFor(r2, R+20, "#7ee787");
+  // lattice dots around the sphere — capped at backend cap 120, golden-angle spread (outward growth)
+  var n=liveState.lattice_points||0; var show=Math.min(n, 120); // outward: backend cap is 120 on dyno
+  for(var i=0;i<show;i++){
+    var a=(i*137.5)*Math.PI/180; var rr=R*0.72;
+    var x=cx+Math.cos(a)*rr, y=cy+Math.sin(a)*rr*0.72;
+    ctx.beginPath(); ctx.arc(x,y,3,0,Math.PI*2); ctx.fillStyle="#ffd166"; ctx.fill();
+  }
+  // Hopf base -> phi point on S²
+  var hz=0, hw=0;
+  if(liveState.hopf_base && liveState.hopf_base.length>=2){ hz=parseFracNum(liveState.hopf_base[0]); hw=parseFracNum(liveState.hopf_base[1]); }
+  else if(liveState.phi){ hz=parseFracNum(liveState.phi.a); hw=parseFracNum(liveState.phi.b); }
+  var mag=Math.sqrt(hz*hz+hw*hw)||1; var nx=hz/mag, ny=hw/mag;
+  var px=cx+nx*R, py=cy-ny*R;
+  // Hopf fibre ring
+  ctx.beginPath(); ctx.arc(px,py,14,0,Math.PI*2); ctx.strokeStyle="#ff8fc7"; ctx.lineWidth=1.2; ctx.stroke();
+  ctx.beginPath(); ctx.arc(px,py,6,0,Math.PI*2); ctx.fillStyle="#aa66ff"; ctx.fill(); ctx.strokeStyle="#fff"; ctx.lineWidth=1; ctx.stroke();
+  ctx.fillStyle="#aa66ff"; ctx.font="11px ui-monospace, Menlo, monospace"; ctx.textAlign="left"; ctx.fillText("● φ projection", W-130, H-10);
+  // Right-side read-out — same numbers as Live Seed
+  var x0=380, y0=36;
+  ctx.textAlign="left"; ctx.fillStyle="#eef1ff"; ctx.font="700 14px system-ui, sans-serif"; ctx.fillText("Live — same state as Live Seed", x0, y0);
+  ctx.font="12px ui-monospace, Menlo, monospace"; ctx.fillStyle="#d8defa";
+  var lines=[
+    "tick: "+(liveState.tick!==undefined?liveState.tick:"—")+" · gen: "+(liveState.generation!==undefined?liveState.generation:"—"),
+    "prime_count: "+(liveState.prime_count!==undefined?liveState.prime_count:"—"),
+    "lattice_points: "+(liveState.lattice_points!==undefined?liveState.lattice_points:"—"),
+    "s²: "+String(liveState.arc_sq||"—"),
+    "r²: "+String(liveState.radius_sq||"—"),
+    "deviation: "+String(liveState.deviation_sq||"—"),
+    "coherence: "+(coh?"coherent · s² = r²":"evolving · s² ≠ r²"),
+    "I: "+String(liveState.I||"—"),
+    "psi_real: "+String(liveState.psi_real||"—"),
+    "hopf: "+(liveState.hopf_base?liveState.hopf_base.join(", "):"—")
+  ];
+  for(var li=0;li<lines.length;li++){ ctx.fillText(lines[li].slice(0,44), x0, y0+24+li*22); }
+  // Pet glow bar — bond drives the light
+  var bond=pet?pet.bond:0; var energy=pet?pet.energy:0;
+  ctx.fillStyle="#0a0f24"; ctx.fillRect(x0, y0+24+lines.length*22+10, 280, 10);
+  ctx.fillStyle="#6ee7ff"; ctx.fillRect(x0, y0+24+lines.length*22+10, 280*Math.max(0,Math.min(1,bond/100)), 10);
+  ctx.fillStyle="#9aa6d6"; ctx.font="11px system-ui, sans-serif"; ctx.fillText("Seedling bond "+bond+" / 100 · energy "+energy+" / 100", x0, y0+24+lines.length*22+36);
+  if(liveState._holdingLattice){ ctx.fillStyle="#ffd166"; ctx.fillText("Holding last real lattice — placeholder (lattice 0)", x0, y0+24+lines.length*22+54); }
+  else if(coh){ ctx.fillStyle="#7ee787"; ctx.fillText("Coherent — arcs line up", x0, y0+24+lines.length*22+54); }
+  if($("codexNote")) $("codexNote").textContent = liveState._holdingLattice ? "Holding last real lattice — backend sent stale placeholder (lattice 0). Tick still live." : (coh ? "Coherent — s² and r² arcs line up." : "Evolving — gap between s² and r² is the deviation.");
+}
+
+// ---------- Backend Replies (in-memory only, not localStorage) ----------
+var lastReplies = { step:null, encode:null, reset:null, handshake:null };
+function redactUrls(v){
+  if(typeof v === "string"){ if(v.indexOf("http")==0) return "[redacted]"; return v; }
+  if(v && typeof v === "object"){
+    if(Array.isArray(v)) return v.map(redactUrls);
+    var o = {}; for(var k in v){ if(/url/i.test(k)) o[k] = "[redacted]"; else o[k] = redactUrls(v[k]); } return o;
+  }
+  return v;
+}
+function summarizeReply(action, r){
+  if(!r) return "No reply.";
+  if(r.__error) return "Error: " + (r.error || "unknown");
+  if(!r.ok) return "Error: " + (r.error || "not ok");
+  try{
+    if(action==="step" && r.record){ var rec=r.record; return "tick " + rec.tick + " · prime " + rec.prime + " · prime_count " + rec.prime_count + " · lattice " + rec.lattice_points + " · coherence " + (rec.coherence ? "coherent" : "evolving") + " · deviation " + rec.deviation_sq + " · I " + rec.I; }
+    if(action==="encode" && r.result){ var res=r.result; return "syllable " + res.syllable + " · length " + res.length + " · s² " + res.arc_sq + " · r² " + res.radius_sq + " · deviation " + res.deviation_sq + " · coherence " + (res.coherence ? "coherent" : "evolving"); }
+    if(action==="reset" && r.state){ var st=r.state; return "state " + (st.state||"—") + " · tick " + (st.tick!==undefined?st.tick:"—") + " · generation " + (st.generation!==undefined?st.generation:"—"); }
+    if(action==="handshake"){ return "user_id " + (r.user_id!==undefined?r.user_id:"—") + " · username @" + (r.username||"—"); }
+  }catch(e){}
+  return "ok: true";
+}
+function recordReply(action, label, endpoint, r){
+  var entry = { label:label, endpoint:endpoint, time:new Date().toLocaleTimeString(), ok: !!(r && !r.__error && r.ok), summary: summarizeReply(action, r), raw: redactUrls(r||{}) };
+  lastReplies[action] = entry;
+  renderReplies();
+  return entry;
+}
+function renderReplies(){
+  var el = $("replies"); if(!el) return;
+  var order = [["step","Feed a Prime","POST /step"],["encode","Teach A / U / M / AUM","POST /encode-syllable"],["reset","Reset","POST /reset"],["handshake","Handshake","POST /handshake"]];
+  var html = "";
+  for(var i=0;i<order.length;i++){
+    var key=order[i][0], label=order[i][1], ep=order[i][2];
+    var e = lastReplies[key];
+    if(!e){ html += "<div class='reply'><b>"+esc(label)+" · "+esc(ep)+"</b><span class='small'>No reply yet — tap the button above.</span></div>"; continue; }
+    html += "<div class='reply'><b>"+esc(label)+" · "+esc(ep)+" · "+esc(e.time)+" · "+(e.ok?"ok":"error")+"</b><div>"+esc(e.summary)+"</div><details><summary>Raw JSON</summary><pre>"+esc(JSON.stringify(e.raw, null, 2).slice(0,4000))+"</pre></details></div>";
+  }
+  html += "<div class='reply'><b>Talk / Say · Play Hopf · Rest</b><span class='small'>Local-only — no backend call, no backend reply.</span></div>";
+  el.innerHTML = html;
+}
+
+// ---------- Backend API ----------
+var failures = 0, backoffUntil = 0, liveState = null;
+function setBadge(kind, text){
+  var dot = $("dot"); dot.className = "dot " + (kind==="ok"?"ok":kind==="wait"?"wait":kind==="err"?"err":"");
+  $("badge").textContent = text;
+}
+async function apiGet(path, timeoutMs){
+  if(!HAS_BACKEND) return {__error:true, error:"no backend"};
+  var url = BACKEND_URL + path;
+  var init = getInitData();
+  if(init) url += (url.indexOf("?")===-1?"?":"&") + "auth_init_data=" + encodeURIComponent(init);
+  var ctrl = null, timer = null;
+  try{
+    if(window.AbortController){ ctrl = new AbortController(); timer = setTimeout(function(){ try{ctrl.abort();}catch(e){} }, timeoutMs||6000); }
+    var res = await fetch(url, { signal: ctrl ? ctrl.signal : undefined });
+    if(timer) clearTimeout(timer);
+    var data = await res.json().catch(function(){ return {__error:true, error:"bad json", __status:res.status}; });
+    if(!res.ok && !data.__error) data.__error = true;
+    data.__status = res.status; return data;
+  }catch(e){ if(timer) clearTimeout(timer); return {__error:true, error:String(e && e.message || e), __network:true}; }
+}
+async function apiPost(path, body){
+  if(!HAS_BACKEND) return {__error:true, error:"no backend"};
+  var init = getInitData(); var headers = {"Content-Type":"application/json"};
+  if(init) headers["X-Telegram-Init-Data"] = init;
+  try{
+    var res = await fetch(BACKEND_URL + path, { method:"POST", headers:headers, body: JSON.stringify(body||{}) });
+    var data = await res.json().catch(function(){ return {__error:true, error:"bad json"}; });
+    if(!res.ok) data.__error = true; return data;
+  }catch(e){ return {__error:true, error:String(e && e.message || e)}; }
+}
+function fmtFrac(v, fallback){ if(v===undefined||v===null||v==="") return fallback||"—"; var s=String(v); return s.length>32 ? s.slice(0,32)+"…" : s; }
+function renderLive(){
+  if(!liveState){ $("liveNote").textContent = HAS_BACKEND ? "Waiting for backend…" : "Standalone toy — no backend yet. Feed still plays locally."; try{ drawCodex(); }catch(e){} return; }
+  if(liveState._holdingLattice){ $("liveNote").textContent = "Holding last real lattice — backend sent stale placeholder (lattice 0). Tick still live."; }
+  else $("liveNote").textContent = liveState.stale ? "Backend connected — showing cached snapshot (stale)." : "Live from backend — exact Fractions from /miniapp-state.";
+  $("lv-state").textContent = liveState.state || "—";
+  $("lv-tick").textContent = (liveState.tick!==undefined?liveState.tick:"—");
+  $("lv-gen").textContent = (liveState.generation!==undefined?liveState.generation:"—");
+  $("lv-prime-count").textContent = (liveState.prime_count!==undefined?liveState.prime_count:"—");
+  $("lv-lattice").textContent = (liveState.lattice_points!==undefined?liveState.lattice_points:"—");
+  $("lv-primes").textContent = (liveState.primes_tail && liveState.primes_tail.length) ? liveState.primes_tail.join(", ") : "—";
+  $("lv-s2").textContent = fmtFrac(liveState.arc_sq); $("lv-s2").title = String(liveState.arc_sq||"");
+  $("lv-r2").textContent = fmtFrac(liveState.radius_sq); $("lv-r2").title = String(liveState.radius_sq||"");
+  $("lv-dev").textContent = fmtFrac(liveState.deviation_sq); $("lv-dev").title = String(liveState.deviation_sq||"");
+  $("lv-coh").textContent = liveState.coherence ? "coherent · s² = r²" : "evolving · s² ≠ r²";
+  $("lv-i").textContent = fmtFrac(liveState.I); $("lv-i").title = String(liveState.I||"");
+  $("lv-psi").textContent = fmtFrac(liveState.psi_real); $("lv-psi").title = String(liveState.psi_real||"");
+  $("lv-hopf").textContent = liveState.hopf_base ? liveState.hopf_base.join(", ") : "—";
+  $("lv-phi").textContent = liveState.phi ? ("a="+liveState.phi.a+" b="+liveState.phi.b+" c="+liveState.phi.c+" d="+liveState.phi.d) : "—";
+  try{ drawCodex(); }catch(e){}
+}
+async function fetchMiniAppState(){
+  if(!HAS_BACKEND){ setBadge("", "standalone"); renderLive(); return; }
+  if(Date.now() < backoffUntil){ setBadge("wait","backing off…"); return; }
+  var r = await apiGet("/miniapp-state", 6000);
+  if(r && r.__error){
+    failures++;
+    if(failures>=3){ backoffUntil = Date.now()+30000; setBadge("err","backend unreachable"); pushLog("Backend unreachable — backing off 30s."); }
+    else { setBadge("wait","retrying…"); }
+    return;
+  }
+  failures = 0;
+  var isPlaceholder = (r && r.stale===true && r.ed41===true && r.lattice_points===0);
+  if(isPlaceholder && liveState && liveState.lattice_points>0){
+    var merged = {}; for(var k in r) merged[k]=r[k];
+    merged.lattice_points = liveState.lattice_points;
+    merged.primes_tail = liveState.primes_tail;
+    merged.arc_sq = liveState.arc_sq;
+    merged.radius_sq = liveState.radius_sq;
+    merged.deviation_sq = liveState.deviation_sq;
+    merged.coherence = liveState.coherence;
+    merged.I = liveState.I;
+    merged.psi_real = liveState.psi_real;
+    merged.hopf_base = liveState.hopf_base;
+    merged.phi = liveState.phi;
+    merged._holdingLattice = true;
+    liveState = merged;
+  } else {
+    if(r) r._holdingLattice = false;
+    liveState = r;
+  }
+  setBadge("ok","connected"); renderLive();
+}
+async function boot(){
+  render(); renderReplies();
+  if(BACKEND_QS_WAS_MALFORMED){ setBadge("err","bad ?backend="); return; }
+  if(!HAS_BACKEND){ setBadge("", "standalone"); renderLive(); return; }
+  setBadge("wait","waking dyno…");
+  var health = await apiGet("/health", 6000);
+  if(health && health.__error && health.__network){ health = await apiGet("/health", 45000); }
+  if(health && health.__error){ setBadge("err","backend unreachable"); pushLog("Health probe failed — will keep retrying."); }
+  else { setBadge("ok","connected"); }
+  var init = getInitData();
+  if(init){ try{ var h = await apiPost("/handshake", {}); if(h){ recordReply("handshake","Handshake","POST /handshake", h); if(h.ok) pushLog("Handshake OK — backend reply: " + summarizeReply("handshake", h)); } }catch(e){} }
+  renderReplies();
+  await fetchMiniAppState();
+  setInterval(fetchMiniAppState, 3000);
+  setInterval(fetchMiniAppState, 300000);
+}
+
+// ---------- Actions ----------
+async function doFeed(){
+  var btn = $("feedBtn"); btn.disabled = true;
+  try{
+    haptic("impact");
+    if(HAS_BACKEND){
+      var r = await apiPost("/step", {x:"1/100"});
+      recordReply("step","Feed a Prime","POST /step", r);
+      if(r && !r.__error && r.ok){
+        pet.hunger = clamp(pet.hunger-25,0,100); pet.energy = clamp(pet.energy-5,0,100); pet.bond = clamp(pet.bond+8,0,100); pet.xp += 12; pet.localPrimes += 1;
+        pet.speech = "Thank you. That prime locked a lattice point and closed a Hopf fibre. s² ≈ r².";
+        pushLog("Fed prime → POST /step OK — backend reply: " + summarizeReply("step", r));
+        if(pet.bond>=95){ pet.generation += 1; pet.bond = 40; pet.speech = "I evolved! Generation " + pet.generation + ". My light is stronger now."; pushLog("Pet evolved → generation " + pet.generation + "."); }
+        savePet(); render(); await fetchMiniAppState(); return;
+      }
+      pushLog("POST /step failed (" + (r && (r.error||"unknown")) + ") — playing locally instead.");
+    }
+    // Local / standalone simulation
+    var p = nextPrime(pet.lastPrime); pet.lastPrime = p; pet.localPrimes += 1;
+    pet.hunger = clamp(pet.hunger-25,0,100); pet.energy = clamp(pet.energy-5,0,100); pet.bond = clamp(pet.bond+8,0,100); pet.xp += 12;
+    pet.speech = "Standalone nibble: prime " + p + " → lattice point locked. Hopf fibre closed · s² ≈ r².";
+    pushLog("Standalone: prime " + p + " → lattice point locked. Hopf fibre closed · s² ≈ r².");
+    if(pet.bond>=95){ pet.generation += 1; pet.bond = 40; pet.speech = "I evolved! Generation " + pet.generation + "."; pushLog("Pet evolved → generation " + pet.generation + "."); }
+    savePet(); render();
+  } finally { btn.disabled = false; }
+}
+function doPlay(){
+  haptic("light");
+  pet.bond = clamp(pet.bond+6,0,100); pet.energy = clamp(pet.energy-10,0,100); pet.xp += 4;
+  pet.speech = "Whee! We spun around the Hopf fibre together.";
+  pushLog("Played Hopf — bond up, energy down a little.");
+  savePet(); render();
+}
+function doRest(){
+  haptic("light");
+  pet.energy = clamp(pet.energy+30,0,100); pet.hunger = clamp(pet.hunger+8,0,100);
+  pet.speech = "Zzz… my light is brighter now. Thank you for letting me rest.";
+  pushLog("Rested — energy restored.");
+  savePet(); render();
+}
+function doTalk(text){
+  var msg = (text||"").trim();
+  if(msg){
+    var lower = msg.toLowerCase();
+    var found = pet.taught.find(function(w){ return lower.indexOf(w.toLowerCase())!==-1; });
+    if(found) pet.speech = "You said “" + found + "”. I remember it. It lives in my lattice now.";
+    else pet.speech = "I heard you: “" + msg.slice(0,60) + "”. Teach it to me and I will remember it.";
+    pet.bond = clamp(pet.bond+2,0,100);
+    pushLog("Talk: “" + msg.slice(0,60) + "”");
+  } else {
+    if(pet.hunger>70) pet.speech = "My light is getting dim… a prime, or a little rest, would help.";
+    else if(pet.energy<25) pet.speech = "I am sleepy. A little rest would help.";
+    else if(pet.taught.length) pet.speech = "I still remember “" + pet.taught[pet.taught.length-1] + "”. Teach me another word?";
+    else pet.speech = "Hello. I am your Seedling. Feed me a prime, and I will learn how to answer you.";
+  }
+  savePet(); render();
+}
+async function doTeach(){
+  var input = $("teachInput"); var word = input.value.trim(); if(!word) return;
+  var upper = word.toUpperCase();
+  haptic("light");
+  if(["A","U","M","AUM"].indexOf(upper)!==-1 && HAS_BACKEND){
+    var r = await apiPost("/encode-syllable", {syllable: upper});
+    recordReply("encode","Teach A / U / M / AUM","POST /encode-syllable", r);
+    if(r && !r.__error && r.ok){
+      if(pet.taught.indexOf(upper)===-1) pet.taught.push(upper);
+      pet.bond = clamp(pet.bond+10,0,100); pet.xp += 10;
+      pet.speech = "Encoded “" + upper + "” into my Lingoso trajectory. s², r² and deviation are in the Live Seed panel.";
+      pushLog("Encoded syllable “" + upper + "” → backend reply: " + summarizeReply("encode", r));
+      input.value = ""; savePet(); render(); await fetchMiniAppState(); return;
+    }
+    pushLog("Encode failed (" + (r && (r.error||"unknown")) + ") — saved locally instead.");
+  }
+  if(pet.taught.indexOf(word)===-1) pet.taught.push(word);
+  pet.bond = clamp(pet.bond+6,0,100); pet.xp += 6;
+  pet.speech = "Learned “" + word + "”. I will remember it.";
+  pushLog("Taught word: “" + word + "”.");
+  input.value = ""; savePet(); render();
+}
+async function doReset(){
+  if(!confirm("Reset the backend seed and your local pet?")) return;
+  haptic("impact");
+  if(HAS_BACKEND){ var r = await apiPost("/reset", {}); recordReply("reset","Reset","POST /reset", r); if(r && !r.__error) pushLog("Backend reset → backend reply: " + summarizeReply("reset", r)); else pushLog("Backend reset failed — local reset only."); }
+  pet = JSON.parse(JSON.stringify(DEFAULT_PET)); liveState = null; savePet(); render(); renderLive(); renderReplies();
+  pet.speech = "Fresh start. Hello again. Feed me a prime.";
+  pushLog("Reset — fresh Seedling."); savePet(); render();
+}
+
+$("feedBtn").addEventListener("click", doFeed);
+$("playBtn").addEventListener("click", doPlay);
+$("restBtn").addEventListener("click", doRest);
+$("talkBtn").addEventListener("click", function(){ doTalk(""); });
+$("sayBtn").addEventListener("click", function(){ doTalk($("talkInput").value); $("talkInput").value=""; });
+$("talkInput").addEventListener("keydown", function(e){ if(e.key==="Enter"){ doTalk($("talkInput").value); $("talkInput").value=""; } });
+$("teachBtn").addEventListener("click", doTeach);
+$("teachInput").addEventListener("keydown", function(e){ if(e.key==="Enter") doTeach(); });
+$("resetBtn").addEventListener("click", doReset);
+
+boot();
+})();
+</script>
+</body>
+</html>
