@@ -571,7 +571,7 @@
 const LS_KEY = 'aei_backend_url';
 function normalizeBackend(u){ if(!u) return ''; let s=String(u).trim(); if(/%3A%2F%2F/i.test(s)){ try{ s=decodeURIComponent(s); }catch(e){} } if(!/^https?:\/\//i.test(s)) return ''; return s.replace(/\/+$/, '') + '/'; }
 function readQsBackend(){ try{ const qs=new URLSearchParams(window.location.search); return qs.get('backend'); }catch(e){ return null; } }
-function resolveBackendUrl(){ let q=null; try{ q=readQsBackend(); }catch(e){} try{ const uu=new URL(window.location.href); if(uu.searchParams.has('backend')){ uu.searchParams.delete('backend'); history.replaceState(null,'',uu.pathname+uu.search+uu.hash); } }catch(e){} try{ if(window.AE_BACKEND_URL){ const n=normalizeBackend(window.AE_BACKEND_URL); if(n) return n; } }catch(e){} try{ if(q){ const n=normalizeBackend(q); if(n){ try{localStorage.setItem(LS_KEY,n)}catch(e){} return n; } } }catch(e){} try{ const ls=localStorage.getItem(LS_KEY); const n=normalizeBackend(ls); if(n) return n; }catch(e){} return ''; }
+function resolveBackendUrl(){ let q=null; try{ q=readQsBackend(); }catch(e){} try{ const uu=new URL(window.location.href); if(uu.searchParams.has('backend')){ uu.searchParams.delete('backend'); history.replaceState(null,'',uu.pathname+uu.search+uu.hash); } }catch(e){} try{ if(window.AE_BACKEND_URL){ const n=normalizeBackend(window.AE_BACKEND_URL); if(n){ try{ localStorage.setItem(LS_KEY, n); }catch(e){} return n; } } }catch(e){} try{ if(q){ const n=normalizeBackend(q); if(n){ try{localStorage.setItem(LS_KEY,n)}catch(e){} return n; } } }catch(e){} try{ const ls=localStorage.getItem(LS_KEY); const n=normalizeBackend(ls); if(n) return n; }catch(e){} return ''; }
 const BACKEND_URL = resolveBackendUrl();
 const HAS_BACKEND = !!BACKEND_URL;
 let tmaInitData = '';
@@ -712,8 +712,6 @@ window.feedBackendReset = async function(){ if(window.__AEI_BACKEND && window.__
 
     // ============================================================
     // 2. EXACT SERIES PRIMITIVES (formally indexed partial sums in ℚ)
-    //    Spec: each truncation is an explicitly bounded partial sum,
-    //    never a silent approximation. Index bound is part of the value.
     // ============================================================
     const Series = {
         cosPartial(x, n) {
@@ -795,9 +793,6 @@ window.feedBackendReset = async function(){ if(window.__AEI_BACKEND && window.__
                 const inv = Fraction.one().div(exact);
                 return new Quat(this.a.mul(inv), this.b.mul(inv), this.c.mul(inv), this.d.mul(inv));
             }
-            // If ns is non-square, exact normalization impossible in ℚ.
-            // Return clone preserving exact ℚ; magnitude tracked via normSq().
-            // Prevents 1/‖q‖² distortion from previous fallback.
             return this.clone();
         }
         isNormalizedExact() {
@@ -864,9 +859,6 @@ window.feedBackendReset = async function(){ if(window.__AEI_BACKEND && window.__
 
     // ============================================================
     // 4. CLIFFORD / DIFFERENTIAL FORM STUBS (𝒜₁₁–𝒜₁₉, ℬ₁–ℬ₃₀)
-    //    Represent A (1-form), F = dA (2-form), T4 = A∧dA (3-form),
-    //    K = dA∧dA (4-form), Q = L(J)A, W = i(J)dA, U = i(J)A.
-    //    Exact ℚ coefficients. PTD from Pfaff sequence.
     // ============================================================
     class OneForm {
         constructor(ax, ay, az, at) {
@@ -875,11 +867,7 @@ window.feedBackendReset = async function(){ if(window.__AEI_BACKEND && window.__
             this.az = az instanceof Fraction ? az : Fraction.zero();
             this.at = at instanceof Fraction ? at : Fraction.zero();
         }
-        // Exterior derivative stub: curl-like exact ℚ proxy per 𝒜₁₂
-        // For Audit compliance: returns 2-form with components derived from differences
         exteriorDerivative() {
-            // Exact ℚ: F_ij = ∂_i A_j - ∂_j A_i approximated as A_i - A_j for constant field proxy
-            // Preserves exactness: d²=0 will hold for constant proxy, PTD logic remains exact ℚ
             const Fxy = this.ax.sub(this.ay);
             const Fxz = this.ax.sub(this.az);
             const Fyz = this.ay.sub(this.az);
@@ -889,8 +877,6 @@ window.feedBackendReset = async function(){ if(window.__AEI_BACKEND && window.__
             return new TwoForm(Fxy, Fxz, Fyz, Ftx, Fty, Ftz);
         }
         wedgeTwoForm(F) {
-            // A ∧ F = 3-form: (A∧F)_{ijk}= Σ cyclic A_i F_jk exact ℚ per 𝒜₁₈
-            // xyz, xyt, xzt, yzt components
             const xyz = this.ax.mul(F.yz).sub(this.ay.mul(F.xz)).add(this.az.mul(F.xy));
             const xyt = this.ax.mul(F.ty).neg().add(this.ay.mul(F.tx)).add(this.at.mul(F.xy));
             const xzt = this.ax.mul(F.tz).neg().add(this.az.mul(F.tx)).sub(this.at.mul(F.xz));
@@ -919,7 +905,6 @@ window.feedBackendReset = async function(){ if(window.__AEI_BACKEND && window.__
             this.tz = tz instanceof Fraction ? tz : Fraction.zero();
         }
         exteriorDerivative() {
-            // dF = 3-form: sum of derivatives, exact ℚ proxy, preserves d²=0
             return new ThreeForm(
                 this.xy.add(this.xz).add(this.yz),
                 this.tx.add(this.ty).add(this.xy),
@@ -928,13 +913,9 @@ window.feedBackendReset = async function(){ if(window.__AEI_BACKEND && window.__
             );
         }
         wedgeTwoForm(other) {
-            // F ∧ F = 4-form K = dA∧dA exact ℚ Pfaffian per ℬ₁₄, ℬ₁₉
-            // xyzt = F_xy*F_zt + F_xz*F_yt + F_xt*F_yz with signs
-            // Using storage: F_xy=xy, F_xz=xz, F_yz=yz, F_tx=tx, F_ty=ty, F_tz=tz
-            // F_xt = -tx, F_yt = -ty, F_zt = -tz
-            const term1 = this.xy.mul(other.tz).neg(); // xy * -tz
-            const term2 = this.xz.mul(other.ty).neg(); // xz * -ty
-            const term3 = this.tx.mul(other.yz).neg(); // tx = F_tx, F_yz = yz => -tx*yz
+            const term1 = this.xy.mul(other.tz).neg();
+            const term2 = this.xz.mul(other.ty).neg();
+            const term3 = this.tx.mul(other.yz).neg();
             const k = term1.add(term2).add(term3).mul(new Fraction(2,1));
             return new FourForm(k);
         }
@@ -947,13 +928,11 @@ window.feedBackendReset = async function(){ if(window.__AEI_BACKEND && window.__
         }
     }
     class ThreeForm {
-        // (xyz, xyt, xzt, yzt) exact ℚ per PTD spec
         constructor(xyz, xyt, xzt, yzt) {
             this.xyz = xyz instanceof Fraction ? xyz : Fraction.zero();
             this.xyt = xyt instanceof Fraction ? xyt : Fraction.zero();
             this.xzt = xzt instanceof Fraction ? xzt : Fraction.zero();
             this.yzt = yzt instanceof Fraction ? yzt : Fraction.zero();
-            // legacy aliases for backward compat
             this.txt = this.xyt;
             this.tyz = this.yzt;
             this.txy = this.xyt;
@@ -969,8 +948,8 @@ window.feedBackendReset = async function(){ if(window.__AEI_BACKEND && window.__
 
     function pfaffSequence(A) {
         const dA = A.exteriorDerivative();
-        const A_dA = A.wedgeTwoForm(dA); // BLOCK fix: was dA.topologicalTorsion() (wrong)
-        const dA_dA = dA.wedgeTwoForm(dA); // BLOCK fix: was sum squares
+        const A_dA = A.wedgeTwoForm(dA);
+        const dA_dA = dA.wedgeTwoForm(dA);
         return [A, dA, A_dA, dA_dA];
     }
     function pfaffTopologicalDimension(A) {
@@ -1092,8 +1071,6 @@ window.feedBackendReset = async function(){ if(window.__AEI_BACKEND && window.__
 
     // ============================================================
     // 9. ZETA ON CRITICAL LINE (𝒟₁₁, 𝒟₁₂, 𝒲₁, 𝒲₂₅, 𝒲₂₇)
-    //    Exact rational Dirichlet partial sum + functional equation
-    //    consistency check. Truncation bound is explicit.
     // ============================================================
     const ZETA_DIRICHLET_TERMS = 24;
     const ZETA_LN_TERMS = 10;
@@ -1118,7 +1095,7 @@ window.feedBackendReset = async function(){ if(window.__AEI_BACKEND && window.__
             const lnN = lnCache[n - 1];
             const angle = lnN.mul(imPart).neg();
             const nFrac = new Fraction(n, 1);
-            const invSqrtN_exact = invSqrtExactQ(nFrac); // exact ℚ via exp(-0.5 ln n)
+            const invSqrtN_exact = invSqrtExactQ(nFrac);
             const cosA = Series.cosPartial(angle, 10).value;
             const sinA = Series.sinPartial(angle, 10).value;
             reSum = reSum.add(invSqrtN_exact.mul(cosA));
@@ -1129,7 +1106,6 @@ window.feedBackendReset = async function(){ if(window.__AEI_BACKEND && window.__
 
     // ============================================================
     // 10. INTELLIGENCE METRIC (ℱ₅, ℱ₁₁, 𝒮₄)
-    //     I = (vp/tp)·exp[−|Δ|²/(C²x log²x)]·|∇×Φ|norm
     // ============================================================
     function normalizedCurl(phi) {
         const cx = phi.b.mul(phi.c).sub(phi.d.mul(phi.a));
@@ -1144,13 +1120,13 @@ window.feedBackendReset = async function(){ if(window.__AEI_BACKEND && window.__
     function xLogSqExactQ(x) {
         if (x.isZero() || x.num <= 0) return Fraction.one();
         const lnX = Series.lnPartial(x, 10).value;
-        return x.mul(lnX.mul(lnX)); // x * log²x per ℱ₅
+        return x.mul(lnX.mul(lnX));
     }
     function intelligenceMetric(vp, tp, delta, C, x, phi) {
         if (tp.isZero()) return Fraction.zero();
         const vpOverTp = vp.div(tp);
         const deltaSq = delta.mul(delta);
-        const xLogX = xLogSqExactQ(x); // BLOCK fix: was x*x, now x*log²x
+        const xLogX = xLogSqExactQ(x);
         const C2 = C.mul(C);
         const denom = C2.mul(xLogX);
         if (denom.isZero()) return Fraction.zero();
@@ -1162,7 +1138,6 @@ window.feedBackendReset = async function(){ if(window.__AEI_BACKEND && window.__
 
     // ============================================================
     // 11. DbZ GATE (ℱ₃, ℱ₄, 𝒳₇, 𝒳₈, 𝒵₁₀)
-    //     DbZ(a,b) = a if b=0, else a⊕b, branch on Re[ψ]
     // ============================================================
     function dbzGate(a, b) {
         if (b === 0) return a;
@@ -1187,41 +1162,27 @@ window.feedBackendReset = async function(){ if(window.__AEI_BACKEND && window.__
         { label: 'n', condition: 's = 2πr/2', loop: 'half' }
     ];
 
-    // All constants via formally indexed partial sums with explicit bound per Memo
     function piExactPartial() {
-        // π = 4*atan(1) - atanPartial bound 12 explicit
         const a = Series.atanPartial(Fraction.one(), 12);
         return a.value.mul(new Fraction(4,1));
     }
     function phiExactPartial() {
-        // φ = [1;1,1,1,1,1,1,1,1,1] CF depth 10, exact ℚ, bound=10
         return cfEvaluateExact([1,1,1,1,1,1,1,1,1,1]);
     }
     function eExactPartial() {
-        // e = exp(1) bound 10
         return Series.expPartial(Fraction.one(), 10).value;
     }
     function lingosoArcLength(phonemeLabel, r) {
-        // All via exact ℚ Series/CF, per 𝒢₁-𝒢₄₀ + Memo Magnitude Enforcement
         switch (phonemeLabel) {
-            case 'a': // φ - golden ratio
-                return r.mul(phiExactPartial());
-            case 'u': // π r
-                return r.mul(piExactPartial());
-            case 'm': // 2π r
-                return r.mul(piExactPartial().mul(new Fraction(2,1)));
-            case 's': // 126/100 exact ℚ
-                return r.mul(new Fraction(126, 100));
-            case 'i': // s=r identity
-                return r;
-            case 'e': // r(1+1/φ)
-                return r.mul(Fraction.one().add(Fraction.one().div(phiExactPartial())));
-            case 'o': // 2πr/φ
-                return r.mul(piExactPartial().mul(new Fraction(2,1)).div(phiExactPartial()));
-            case 'l': // e * r - logarithmic spiral
-                return r.mul(eExactPartial());
-            case 'n': // π r (half loop)
-                return r.mul(piExactPartial());
+            case 'a': return r.mul(phiExactPartial());
+            case 'u': return r.mul(piExactPartial());
+            case 'm': return r.mul(piExactPartial().mul(new Fraction(2,1)));
+            case 's': return r.mul(new Fraction(126, 100));
+            case 'i': return r;
+            case 'e': return r.mul(Fraction.one().add(Fraction.one().div(phiExactPartial())));
+            case 'o': return r.mul(piExactPartial().mul(new Fraction(2,1)).div(phiExactPartial()));
+            case 'l': return r.mul(eExactPartial());
+            case 'n': return r.mul(piExactPartial());
             default: return r;
         }
     }
@@ -1251,7 +1212,6 @@ window.feedBackendReset = async function(){ if(window.__AEI_BACKEND && window.__
 
     // ============================================================
     // 13. ÆEA IMBALANCE (ℋ₁, ℋ₂, ℋ₃, ℋ₇, ℋ₃₁, ℋ₃₂)
-    //     Î = Σ(Π^{>66.6} − Π^{<33.3})
     // ============================================================
     function aeaeImbalance(probabilities) {
         let sum = Fraction.zero();
@@ -1481,15 +1441,13 @@ window.feedBackendReset = async function(){ if(window.__AEI_BACKEND && window.__
                     this.quatHistory = [this.quatHistory[0]].concat(this.quatHistory.slice(-300));
                 }
 
-                // Exact ℚ cannot take sqrt of arbitrary sum; we preserve s² and r² both as ‖·‖²
-                // Coherence condition becomes s² == r² ⇔ s == r for s,r≥0, exact in ℚ
                 let sSqAcc = Fraction.zero();
                 for (let i = 1; i < this.quatHistory.length; i++) {
                     sSqAcc = sSqAcc.add(this.quatHistory[i].sub(this.quatHistory[i - 1]).normSq());
                 }
                 this.sSq = sSqAcc;
                 this.rSq = this.q.normSq();
-                this.s = this.sSq.exactSqrt() ? this.sSq.exactSqrt() : this.sSq; // s = sqrt(s²) if exact else proxy
+                this.s = this.sSq.exactSqrt() ? this.sSq.exactSqrt() : this.sSq;
                 this.r = this.rSq.exactSqrt() ? this.rSq.exactSqrt() : this.rSq;
                 this.s2 = this.sSq;
                 this.r2 = this.rSq;
@@ -1777,28 +1735,22 @@ window.feedBackendReset = async function(){ if(window.__AEI_BACKEND && window.__
     }
 
     function preFlightValidate() {
-        // Memo requirement: Function Blocking, Magnitude Enforcement, Syntax Linting, Context Refresh
         if (!resizeCanvas()) return false;
         if (!canvas._width || !canvas._height) return false;
         if (canvas._width < 1 || canvas._height < 1) return false;
         try {
-            // Magnitude Enforcement: Fraction invariants exact ℚ
             const half = new Fraction(1,2);
             if (!half.add(half).equals(Fraction.one())) { console.error('PF: Fraction add'); return false; }
             const q1 = Quat.one();
             if (!q1.normSq().equals(Fraction.one())) { console.error('PF: Quat norm'); return false; }
-            // Function Blocking: Series bounds explicit, no float in state
             const cosB = Series.cosPartial(Fraction.one(), 1);
             if (cosB.bound !== 1 || !(cosB.value instanceof Fraction)) { console.error('PF: Series bound'); return false; }
-            // Syntax Linting: PTD ∈ {1..4}
             const dummyA = new OneForm(Fraction.one(), Fraction.zero(), Fraction.zero(), Fraction.zero());
             const ptd = pfaffTopologicalDimension(dummyA);
             if (ptd < 1 || ptd > 4) { console.error('PF: PTD range', ptd); return false; }
-            // Syntax Linting: Hopf map singular handling
             const qSing = new Quat(Fraction.zero(), Fraction.zero(), Fraction.zero(), Fraction.one());
             const hopf = qSing.hopfMap();
             if (!hopf.singular) { console.error('PF: Hopf singular'); return false; }
-            // Context Refresh: lingoso uses Series/CF not literals (checked by function existence)
             if (typeof piExactPartial !== 'function' || typeof phiExactPartial !== 'function') { console.error('PF: Context Refresh funcs missing'); return false; }
             const piTest = piExactPartial();
             if (piTest.isZero()) { console.error('PF: pi zero'); return false; }
@@ -2383,7 +2335,6 @@ window.feedBackendReset = async function(){ if(window.__AEI_BACKEND && window.__
 
                 if (showTrace && codex.proofTrace.length > 0) {
                     proofTrace.classList.add('visible');
-                    /* Final, First edition: build trace lines with textContent, so trace text cannot inject markup. */
                     while (proofTraceLines.firstChild) proofTraceLines.removeChild(proofTraceLines.firstChild);
                     for (let i = codex.proofTrace.length - 1; i >= 0; i--) {
                         const e = codex.proofTrace[i];
@@ -2679,8 +2630,7 @@ window.feedBackendReset = async function(){ if(window.__AEI_BACKEND && window.__
     });
 
     
-    // feed visualization clicks back to bot
-    const _origEncode = window.encodeSyllable; // may not exist
+    const _origEncode = window.encodeSyllable;
     window.feedBackendStep = async function(){ if(window.__AEI_BACKEND && window.__AEI_BACKEND.has){ await window.__AEI_BACKEND.post('/step', {x:'1/100'}); } };
     window.feedBackendReset = async function(){ if(window.__AEI_BACKEND && window.__AEI_BACKEND.has){ await window.__AEI_BACKEND.post('/reset', {}); } };
 
