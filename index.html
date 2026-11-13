@@ -66,7 +66,7 @@ details{margin-top:14px;background:var(--card);border:1px solid var(--line);bord
 <div class="card"><h2 style="margin:0;font-size:18px">Lingoso — A · U · M · AUM · arc-length language</h2><p class="small" style="margin:6px 0 0">A = outward spiral φ · U = chord π · M = closed loop 2π · AUM = the three in order. Each tap = <span class="mono">POST /encode-syllable</span> when connected, else local exact check. A syllable counts only when its vocal arc satisfies s = r.</p><div class="btns"><button id="lingA">A · φ spiral</button><button id="lingU">U · π chord</button><button id="lingM">M · 2π loop</button><button class="primary" id="lingAUM">AUM · full arc</button></div><div class="kv"><div><b>Last syllable</b><span id="lingLast">—</span></div><div><b>Arc check · s = r ?</b><span id="lingArc">—</span></div><div><b>Syllables encoded</b><span id="lingCount">0</span></div><div><b>Backend reply</b><span id="lingReply" class="mono">—</span></div></div></div>
 <div class="card"><h2 style="margin:0;font-size:18px">ÆEA Market — chart · BB×58 · δ · ℛ_regime · 𝒫_arc · ℱ_VG · orders</h2>
 <p class="small" style="margin:6px 0 0">MT4-parity port. Order of operations per ordered tick: tick → bars → 13 normalised indicators + Ichimoku → m / n counted only on >66.6 / <33.3 → δ = m − n − 2 → ℛ_regime → BB×58 → 𝒫_arc → signal iff δ-gate → order / trailing / ℱ_VG. Long-press / tap on chart adds ℱ_VG anchor. Count on signal bar, toll on first bar after — toll block precedes count block.</p>
-<div class="grid"><div><b class="small">Timeframe</b><select id="aeTimeframe"><option value="M1">M1</option><option value="M5">M5</option><option value="M15" selected>M15</option><option value="H1">H1</option><option value="H4">H4</option><option value="D1">D1</option></select></div><div><b class="small">Chart type</b><select id="aeChartType"><option value="candles" selected>Candles</option><option value="line">Line</option><option value="bars">Bars</option></select></div></div>
+<div class="grid"><div><b class="small">Timeframe</b><select id="aeTimeframe"><option value="M1" selected>M1</option><option value="M5">M5</option><option value="M15">M15</option><option value="H1">H1</option><option value="H4">H4</option><option value="D1">D1</option></select></div><div><b class="small">Chart type</b><select id="aeChartType"><option value="candles" selected>Candles</option><option value="line">Line</option><option value="bars">Bars</option></select></div></div>
 <canvas id="aeChartCanvas" class="chart-canvas" width="820" height="360"></canvas>
 <p class="small" id="aeChartNote">Standalone synthetic bars until backend / market feed delivers real bars. Tap chart to add ℱ_VG anchor at that price.</p>
 <div class="kv"><div><b>δ · m − n − 2</b><span id="aeDelta">—</span></div><div><b>m / n · overbought / oversold</b><span id="aeMN">—</span></div><div><b>Signal</b><span id="aeSignal">⊙ NEUTRAL</span></div><div><b>ℛ_regime</b><span id="aeRegime">—</span></div><div><b>𝒫_arc · projection</b><span id="aeParc">—</span></div><div><b>ℱ_VG anchors</b><span id="aeFVG">0</span></div><div><b>BB×58 · last band</b><span id="aeBB">—</span></div><div><b>Orders / open</b><span id="aeOrdersCount">0 / 0</span></div></div>
@@ -196,7 +196,7 @@ function localSeedStep(xStr){
 function currentMarketX(){ if(!feed.price||!feed.prevPrice) return "1/100"; var d=Math.abs(feed.price-feed.prevPrice); if(d===0) return "1/100"; return marketXFromDelta(d,10000); }
 function updateFeedStrip(){ $("mOrdered").textContent=feed.ordered; $("mSymbol").textContent=feed.symbol; $("mPrice").textContent=feed.price?feed.price.toFixed(2):"—"; $("mProvider").textContent=feed.provider; $("mSource").textContent=feed.source; $("mX").textContent=currentMarketX(); }
 // ---- ÆEA engine (local mirror, MT4-parity order) ----
-var aeea={bars:[],indicators:[],m:0,n:0,delta:-2,regime:"—",bb58:[],fvg:[],orders:[],nextOrd:1,signal:"⊙ NEUTRAL",parc:0,signalTick:-1,count:0,toll:0,lastDir:0,deltaHist:[],correct:0,total:0,signalHistory:[],commissionFrozen:0,pointSize:0.01,ihk:null,authoritative_m:0,authoritative_n:0};
+var aeea={bars:[],indicators:[],m:0,n:0,delta:-2,regime:"—",bb58:[],fvg:[],orders:[],nextOrd:1,signal:"⊙ NEUTRAL",parc:0,signalTick:-1,signalBar:-1,currentBucket:null,count:0,toll:0,lastDir:0,deltaHist:[],correct:0,total:0,signalHistory:[],commissionFrozen:0,pointSize:0.01,ihk:null,authoritative_m:0,authoritative_n:0};
 function sma(arr,per){if(arr.length<per)return null; var s=0; for(var i=arr.length-per;i<arr.length;i++)s+=arr[i]; return s/per;}
 function stdPop(arr,per){var m=sma(arr,per); if(m===null)return null; var v=0; for(var i=arr.length-per;i<arr.length;i++)v+=(arr[i]-m)*(arr[i]-m); return Math.sqrt(v/per);}
 function _norm100(series){ if(!series.length) return 50; var mn=Math.min.apply(null,series), mx=Math.max.apply(null,series); if(mx===mn) return 50; return 100*(series[series.length-1]-mn)/(mx-mn); }
@@ -239,6 +239,18 @@ function computeDelta(){
 }
 function regimeFrom(){ var d=aeea.delta; var r="⊙ NEUTRAL"; if(d>=1)r="↑ BULL / Hawk"; else if(d<=-1)r="↓ BEAR / Dove"; if(aeea.bars.length<5)r="— warming up"; aeea.regime=r; return r; }
 function parcFrom(){ var closes=aeea.bars.map(function(b){return b.close;}); if(closes.length<3)return 0; var last=closes[closes.length-1], prev=closes[closes.length-2]; var slope=last-prev; var bb=aeea.bb58.length?aeea.bb58[aeea.bb58.length-1]:null; var target=last+slope*3; if(bb){ if(target>bb.up)target=bb.up; if(target<bb.lo)target=bb.lo; } aeea.parc=target; return target; }
+function tfMinutes(tf){var m={M1:1,M5:5,M15:15,M30:30,H1:60,H4:240,D1:1440}; return m[String(tf||"M1").toUpperCase()]||1;}
+function tfBucket(ts,tf){return Math.floor((ts||Date.now())/(tfMinutes(tf)*60000));}
+function syncBackendBars(bars,provider,tf){
+  if(!Array.isArray(bars)||!bars.length) return false;
+  aeea.bars=bars.map(function(b){return {open:parseFloat(b.o!==undefined?b.o:b.open),high:parseFloat(b.h!==undefined?b.h:b.high),low:parseFloat(b.l!==undefined?b.l:b.low),close:parseFloat(b.c!==undefined?b.c:b.close),volume:parseFloat(b.v!==undefined?b.v:b.volume)||1,t:b.t?b.t*1000:b.t,tick:feed.ordered};}).filter(function(b){return isFinite(b.close);});
+  if(!aeea.bars.length) return false;
+  if(aeea.bars.length>200) aeea.bars=aeea.bars.slice(-200);
+  var last=aeea.bars[aeea.bars.length-1];
+  aeea.currentBucket=tfBucket(last.t||Date.now(),tf||$("aeTimeframe").value);
+  feed.price=last.close; feed.provider=provider||feed.provider; feed.source="market · backend bars";
+  updateFeedStrip(); renderAEEA(); drawAeChart(); return true;
+}
 function onBar(){ aeea.indicators=computeIndicators(); aeea.bb58=computeBB58(); computeDelta(); regimeFrom(); parcFrom();
   var warmingUp = !aeea.bars || aeea.bars.length<5 || !aeea.indicators || aeea.indicators.length<13;
   aeea.count=0; aeea.toll=0;
@@ -246,10 +258,10 @@ function onBar(){ aeea.indicators=computeIndicators(); aeea.bb58=computeBB58(); 
   if(!warmingUp){
     if(aeea.delta===1||aeea.delta>1){sig="↑ BUY"; dir=1;} else if(aeea.delta<=-1){sig="↓ SELL"; dir=-1;}
   }
-  var tick=feed.ordered;
+  var barIdx=aeea.bars.length-1;
   if(!warmingUp && dir!==0){
-    if(aeea.signalTick!==-1 && tick===aeea.signalTick+5){ aeea.toll=1; pushAeLog("Toll 1 — "+sig+" (toll block, independent)"); }
-    if(tick!==aeea.signalTick && tick!==aeea.signalTick+5){ aeea.count=1; aeea.signalTick=tick; pushAeLog("Count 1 — "+sig+" on signal bar"); }
+    if(aeea.signalBar!==-1 && barIdx===aeea.signalBar+1){ aeea.toll=1; pushAeLog("Toll 1 — "+sig+" (toll block, independent)"); }
+    if(barIdx!==aeea.signalBar && barIdx!==aeea.signalBar+1){ aeea.count=1; aeea.signalBar=barIdx; aeea.signalTick=barIdx; pushAeLog("Count 1 — "+sig+" on signal bar"); }
   }
   aeea.signal=sig; aeea.lastDir=dir; if(!aeea.signalHistory) aeea.signalHistory=[]; if(!warmingUp && sig!=="⊙ NEUTRAL"){ aeea.signalHistory.push(sig+" @ "+feed.ordered+" (δ "+aeea.delta+")"); if(aeea.signalHistory.length>40) aeea.signalHistory.shift(); }
   var price=feed.price; if(price){ var kept=[]; aeea.fvg.forEach(function(a){ var crossed=(a.type==="topp"&&price>=a.price)||(a.type==="bott"&&price<=a.price); if(crossed) pushAeLog("ℱ_VG maintenance: remove "+a.type+" @ "+a.price); else kept.push(a); }); aeea.fvg=kept; }
@@ -258,10 +270,16 @@ function onBar(){ aeea.indicators=computeIndicators(); aeea.bb58=computeBB58(); 
 function onTick(price,volume,ts,provider){
   feed.provider=provider||feed.provider; feed.lastTs=ts||Date.now();
   if(aeea.lastDir!==0 && aeea.deltaHist.length){ /* scored on bar close below */ }
+  var tf=$("aeTimeframe").value||"M1";
+  var bucket=tfBucket(feed.lastTs,tf);
   var lastBar=aeea.bars[aeea.bars.length-1];
-  if(!lastBar || feed.ordered%5===1){ aeea.bars.push({open:price,high:price,low:price,close:price,volume:volume||1,tick:feed.ordered}); if(aeea.bars.length>200)aeea.bars.shift(); }
-  else { lastBar.high=Math.max(lastBar.high,price); lastBar.low=Math.min(lastBar.low,price); lastBar.close=price; lastBar.volume+=(volume||1); }
-  if(feed.ordered%5===0) onBar(); else renderAEEA();
+  if(!lastBar || bucket!==aeea.currentBucket){
+    if(lastBar) onBar();
+    aeea.bars.push({open:price,high:price,low:price,close:price,volume:volume||1,tick:feed.ordered,t:feed.lastTs}); if(aeea.bars.length>200)aeea.bars.shift();
+    aeea.currentBucket=bucket;
+  }
+  else { lastBar.high=Math.max(lastBar.high,price); lastBar.low=Math.min(lastBar.low,price); lastBar.close=price; lastBar.volume+=(volume||1); lastBar.t=feed.lastTs; }
+  renderAEEA();
   try{ checkTrailingAndStops(); }catch(e){}
   raceTick(price);
 }
@@ -333,7 +351,7 @@ function freezeCommission(){ var isFX=/^[A-Z]{3}\/[A-Z]{3}$/.test(feed.symbol||"
 function checkTrailingAndStops(){ var trail=parseFloat($("engTrail")?$("engTrail").value:"0")||0; var moved=[]; aeea.orders.forEach(function(o){ if(o.status!=="open") return; if(trail>0){ if(o.side==="BUY"){ var ns=feed.price-trail; if(!o.sl||ns>parseFloat(o.sl)){ o.sl=String(ns.toFixed(2)); moved.push("#"+o.id); } } else { var ns2=feed.price+trail; if(!o.sl||ns2<parseFloat(o.sl)){ o.sl=String(ns2.toFixed(2)); moved.push("#"+o.id); } } } var sl=parseFloat(o.sl), tp=parseFloat(o.tp); if(isFinite(sl)&&((o.side==="BUY"&&feed.price<=sl)||(o.side==="SELL"&&feed.price>=sl))){ o.status="closed · SL"; pushAeLog("Order #"+o.id+" closed at SL "+o.sl); } else if(isFinite(tp)&&((o.side==="BUY"&&feed.price>=tp)||(o.side==="SELL"&&feed.price<=tp))){ o.status="closed · TP"; pushAeLog("Order #"+o.id+" closed at TP "+o.tp); } }); if(moved.length) pushAeLog("Trailing moved SL for "+moved.join(", ")); if(moved.length) renderOrders(); }
 function aeOnReInit(keepBarsAndOrders){ var keepBars=keepBarsAndOrders?aeea.bars.slice():[]; var keepOrders=keepBarsAndOrders?aeea.orders.slice():[]; var keepHist=aeea.signalHistory?aeea.signalHistory.slice():[]; var keepFvg=aeea.fvg.slice();
   aeea.indicators=[]; aeea.bb58=[]; aeea.m=0; aeea.n=0; aeea.delta=-2; aeea.regime="—"; aeea.parc=0; aeea.signal="⊙ NEUTRAL"; aeea.lastDir=0; aeea.count=0; aeea.toll=0; aeea.signalTick=-1; aeea.ihk=null;
-  aeea.bars=keepBars; aeea.orders=keepOrders; aeea.signalHistory=keepHist; aeea.fvg=keepFvg; freezeCommission(); renderAEEA(); renderOrders(); }
+  aeea.bars=keepBars; aeea.signalBar=-1; aeea.orders=keepOrders; aeea.signalHistory=keepHist; aeea.fvg=keepFvg; freezeCommission(); renderAEEA(); renderOrders(); }
 function aeOnInit(){ aeOnReInit(false); aeea.fvg=[]; aeea.signalHistory=[]; aeea.orders=[]; aeea.nextOrd=1; pushAeLog("OnInit — engine reset to baseline, commission frozen at "+(aeea.commissionFrozen||0)); try{ parcFrom(); }catch(e){} renderAEEA(); }
 var lingCount=0;
 async function encodeSyllable(syl){ var elL=$("lingLast"), elA=$("lingArc"), elC=$("lingCount"), elR=$("lingReply"); if(elL) elL.textContent=syl; lingCount++; if(elC) elC.textContent=String(lingCount); var arc="pending — awaiting computed arc_check"; if(elA) elA.textContent=arc; if(HAS_BACKEND){ try{ var r=await apiPost("/encode-syllable",{syllable:syl},"aei"); if(elR) elR.textContent=r&&!r.__error?JSON.stringify(r).slice(0,160):"backend unreachable — local arc check kept"; recordReply("encode-syllable","Lingoso "+syl,"POST /encode-syllable",r); renderReplies(); if(r&&!r.__error&&r.ok){ if(r.coherence===false||(r.arc_check!==undefined&&String(r.arc_check).indexOf("✗")!==-1)){ if(elA) elA.textContent="arc check REJECTED — "+(r.arc_check||"coherence=false")+" (not s = r)"; pushLog("Lingoso "+syl+" REJECTED by backend arc check."); return; } if(elA) elA.textContent=String(r.arc_check||"")+" · arc_length="+(r.arc_length!==undefined?r.arc_length:"—")+" · s="+(r.s!==undefined?r.s:"—")+" r="+(r.r!==undefined?r.r:"—"); pushLog("Lingoso "+syl+" encoded — backend arc_check: "+(r.arc_check||"—")); return; } }catch(e){ if(elR) elR.textContent="local only"; } } else { if(elR) elR.textContent="local — standalone arc check"; } if(elA) elA.textContent="local arc check — s = r (standalone, not backend-verified)"; pushLog("Lingoso "+syl+" encoded (local standalone)."); }
@@ -344,11 +362,14 @@ function synthNext(){ synthSeed=(synthSeed*1103515245+12345)%2147483648; var r=(
 async function fetchMarketTick(){
   var symbol=$("aeSymbol").value||feed.symbol; feed.symbol=symbol;
   if(HAS_BACKEND){
-    try{ var r=await apiGet("/ohlcv?symbol="+encodeURIComponent(symbol)+"&timeframe="+encodeURIComponent($("aeTimeframe").value||"M15"),6000,"aeea");
-      if(r&&!r.__error){ var px=null, vol=1; if(r.close!==undefined)px=parseFloat(r.close); else if(r.price!==undefined)px=parseFloat(r.price); else if(r.last_price!==undefined && r.last_price > 0) px=parseFloat(r.last_price); else if(Array.isArray(r.bars)&&r.bars.length)px=parseFloat(r.bars[r.bars.length-1].close); else if(Array.isArray(r.data)&&r.data.length)px=parseFloat(r.data[r.data.length-1].close);
+    try{ var r=await apiGet("/ohlcv?symbol="+encodeURIComponent(symbol)+"&timeframe="+encodeURIComponent($("aeTimeframe").value||"M1"),6000,"aeea");
+      if(r&&!r.__error){
+        if(r.timeframe && $("aeTimeframe").value!==r.timeframe){ $("aeTimeframe").value=r.timeframe; pushAeLog("Timeframe synced from backend (Heroku) → "+r.timeframe); }
+        if(Array.isArray(r.bars)&&r.bars.length && syncBackendBars(r.bars, r.provider||"backend", r.timeframe||$("aeTimeframe").value)) return;
+        var px=null, vol=1; if(r.close!==undefined)px=parseFloat(r.close); else if(r.price!==undefined)px=parseFloat(r.price); else if(r.last_price!==undefined && r.last_price > 0) px=parseFloat(r.last_price); else if(Array.isArray(r.bars)&&r.bars.length)px=parseFloat(r.bars[r.bars.length-1].c); else if(Array.isArray(r.data)&&r.data.length)px=parseFloat(r.data[r.data.length-1].c);
         if(px&&isFinite(px)){ enqueueOrderedTick({price:px,volume:vol,provider:r.provider||"backend",source:"market · backend"}); return; }
       }
-      var s=await apiGet("/signals?symbol="+encodeURIComponent(symbol),5000,"aeea"); if(s&&!s.__error&&s.price){ var px2=parseFloat(s.price); if(!px2||!isFinite(px2)) return; enqueueOrderedTick({price:px2,volume:1,provider:s.provider||"backend",source:"market · backend /signals"}); return; }
+      var s=await apiGet("/signals?symbol="+encodeURIComponent(symbol)+"&timeframe="+encodeURIComponent($("aeTimeframe").value||"M1"),5000,"aeea"); if(s&&!s.__error&&s.price){ var px2=parseFloat(s.price); if(!px2||!isFinite(px2)) return; enqueueOrderedTick({price:px2,volume:1,provider:s.provider||"backend",source:"market · backend /signals"}); return; }
     }catch(e){}
     try{ var pair=symbol.replace("/",""); if(symbol.indexOf("/")!==-1 && /BTC|ETH|SOL|DOGE|XRP|ADA|AVAX|LINK|TON/.test(pair)){ var kr=await fetch("https://api.kraken.com/0/public/Ticker?pair="+pair, {signal:AbortSignal.timeout(5000)}); var kj=await kr.json(); var key=Object.keys(kj.result||{})[0]; var last=kj.result&&key?parseFloat(kj.result[key].c[0]):null; if(last&&isFinite(last)){ enqueueOrderedTick({price:last,volume:1,provider:"Kraken",source:"market · Kraken direct"}); return; } } }catch(e){}
   }
@@ -371,7 +392,10 @@ async function doTeach(){var input=$("teachInput"); var word=input.value.trim();
 async function doReset(){if(!confirm("Reset the backend seed and your local pet?"))return; haptic("impact"); if(HAS_BACKEND){var r=await apiPost("/reset",{},"aei"); recordReply("reset","Reset","POST /reset",r); if(r&&!r.__error)pushLog("Backend reset → backend reply: "+summarizeReply("reset",r)); else pushLog("Backend reset failed — local reset only.");} pet=JSON.parse(JSON.stringify(DEFAULT_PET)); liveState=null; localSeed={tick:0,prime:2,primeCount:0,lattice:0,s2:"0/1",r2:"0/1",dev:"0/1",I:"0/1",psi:"0/1",primes:[],coh:true}; aeea.bars=[]; aeea.orders=[]; aeea.fvg=[]; race.aeHist=[]; race.nnHist=[]; nnInit(); savePet(); render(); renderLive(); renderReplies(); renderOrders(); pet.speech="Fresh start. Hello again. Feed me a prime."; pushLog("Reset — fresh Seedling."); savePet(); render();}
 $("feedBtn").addEventListener("click",doFeed); $("playBtn").addEventListener("click",doPlay); $("restBtn").addEventListener("click",doRest); $("talkBtn").addEventListener("click",function(){doTalk("");}); $("sayBtn").addEventListener("click",function(){doTalk($("talkInput").value); $("talkInput").value="";}); $("talkInput").addEventListener("keydown",function(e){if(e.key==="Enter"){doTalk($("talkInput").value); $("talkInput").value="";}}); $("teachBtn").addEventListener("click",doTeach); $("teachInput").addEventListener("keydown",function(e){if(e.key==="Enter")doTeach();}); $("resetBtn").addEventListener("click",doReset);
 $("aeSymbol").addEventListener("change",function(){feed.symbol=$("aeSymbol").value; aeea.bars=[]; pushAeLog("Symbol → "+feed.symbol+" (ordered feed continues, bars rebuild)"); fetchMarketTick();});
-$("aeTimeframe").addEventListener("change",function(){pushAeLog("Timeframe → "+$("aeTimeframe").value);});
+$("aeTimeframe").addEventListener("change",async function(){var tf=$("aeTimeframe").value; pushAeLog("Timeframe → "+tf+" — applying to backend + clearing old-TF bars…");
+  aeea.bars=[]; aeea.indicators=[]; aeea.bb58=[]; aeea.signalBar=-1; aeea.signalTick=-1; aeea.currentBucket=null; aeea.count=0; aeea.toll=0;
+  if(HAS_BACKEND){ try{ var r=await apiPost("/settings",{timeframe:tf},"aeea"); if(r&&!r.__error&&r.ok){ pushAeLog("Backend timeframe → "+(r.timeframe||tf)); } else { pushAeLog("Backend /settings timeframe failed — local bucketing still applies."); } }catch(e){ pushAeLog("Backend /settings unreachable — local bucketing still applies."); } }
+  await fetchMarketTick(); drawAeChart(); });
 $("aeChartType").addEventListener("change",drawAeChart);
 $("aeAutoBtn").addEventListener("click",function(){feed.auto=!feed.auto; $("aeAutoBtn").textContent="Auto-feed: "+(feed.auto?"ON":"OFF"); pushLog("Auto-feed "+(feed.auto?"ON":"OFF"));});
 $("aePlaceBtn").addEventListener("click",async function(){var side=$("aeOrderSide").value; var vol=$("aeOrderVol").value||$("engLots").value||"0.01"; var sl=$("aeOrderSL").value, tp=$("aeOrderTP").value; if(HAS_BACKEND){try{var r=await apiPost("/orders",{side:side,volume:vol,sl:sl,tp:tp,symbol:feed.symbol},"aeea"); if(r&&!r.__error&&r.ok){ if(!r.order_id){ pushAeLog("Backend /orders missing order_id — treating as simulated."); placeOrder(side,vol,sl,tp,null); return; } placeOrder(side,vol,sl,tp,r); pushAeLog("Backend /orders OK — order_id:"+r.order_id+" fill="+(r.fill_price!==undefined?r.fill_price:"—")); return;}}catch(e){}} placeOrder(side,vol,sl,tp);});
