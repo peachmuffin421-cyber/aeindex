@@ -378,12 +378,60 @@
         #axiomPanel .ax-layer { color: #44ffcc; font-weight: bold; }
         #axiomPanel .ax-item { color: #aaccff; }
         #axiomPanel .ax-active { color: #ffaa44; font-weight: bold; }
-    </style>
+    
+        /* FEED BACK / FORWARD CS EXPERIENCE LAYER - AEI TWA */
+        #feedLayer { position:absolute; top:140px; left:20px; z-index:12; width:350px; max-width:92vw; background:rgba(5,5,16,0.94); border:1px solid #00ffcc; border-radius:10px; padding:12px 14px; font-size:0.6rem; line-height:1.5; backdrop-filter:blur(8px); box-shadow:0 4px 30px rgba(0,0,0,0.5); }
+        #feedLayer h2 { font-size:0.7rem; color:#00ffcc; letter-spacing:1px; margin-bottom:6px; }
+        #feedLayer h3 { font-size:0.6rem; color:#ffaa44; margin:8px 0 3px; letter-spacing:1px; }
+        #feedLayer .ff-row { display:flex; justify-content:space-between; gap:8px; }
+        #feedLayer .ff-label { opacity:0.55; }
+        #feedLayer .ff-value { color:#ffaa44; font-weight:bold; text-align:right; word-break:break-all; }
+        #feedLayer .ff-value.cyan { color:#44ffcc; }
+        #feedLayer .ff-btns { display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; }
+        #feedLayer .ff-btn { background:rgba(20,30,50,0.95); border:1px solid #4488aa; color:#aaccff; padding:5px 10px; border-radius:4px; cursor:pointer; font-family:'Courier New',monospace; font-size:0.6rem; }
+        #feedLayer .ff-btn.on { background:#2a4a6a; border-color:#00ffcc; color:#fff; }
+        #feedLayer .ff-status { margin-top:8px; padding:8px; border-radius:6px; background:rgba(0,0,0,0.6); border:1px solid #335577; color:#aaccff; }
+        #feedLayer a { color:#44ddff; }
+        #feedLayer .ff-small { opacity:0.65; font-size:0.55rem; }
+        @media (max-width:700px){ #feedLayer{ top:auto; bottom:180px; left:12px; width:320px; } }
+</style>
 </head>
 <body><div style="position:absolute;top:10px;left:50%;transform:translateX(-50%);z-index:20;display:flex;gap:6px;"><a href="./index.html" style="background:rgba(20,30,50,0.9);border:1px solid #4488aa;color:#aaccff;padding:4px 10px;border-radius:4px;font-size:0.6rem;text-decoration:none;">← ÆI SEED</a></div>
 
     <canvas id="mainCanvas"></canvas>
 
+<div id="feedLayer">
+<h2>FEED BACK / FORWARD &middot; CS EXPERIENCE LAYER &middot; Final, First edition</h2>
+<div class="ff-small">AEI TWA &mdash; Original AEI TWA htm + feed layer. Bot / TWA feed CS. CS feeds Bot / TWA. One state, one self. Backend authoritative. No synthetic bars. Lattice [] = WAITING.</div>
+<h3>FORWARD &mdash; BOT / TWA &rarr; CS</h3>
+<div class="ff-row"><span class="ff-label">BACKEND</span><span class="ff-value cyan" id="ffBackend">WAITING</span></div>
+<div class="ff-row"><span class="ff-label">PRICE</span><span class="ff-value" id="ffPrice">WAITING</span></div>
+<div class="ff-row"><span class="ff-label">BARS / ORDERED</span><span class="ff-value" id="ffBars">WAITING</span></div>
+<div class="ff-row"><span class="ff-label">DELTA / REGIME</span><span class="ff-value" id="ffDelta">WAITING</span></div>
+<div class="ff-row"><span class="ff-label">LATTICE FROM BACKEND</span><span class="ff-value cyan" id="ffLattice">WAITING</span></div>
+<div class="ff-row"><span class="ff-label">FEED REAL DATA</span><span class="ff-value cyan" id="ffFeedOn">ON</span></div>
+<h3>BACK &mdash; CS &rarr; BOT / TWA</h3>
+<div class="ff-row"><span class="ff-label">S2</span><span class="ff-value cyan" id="ffS2">WAITING</span></div>
+<div class="ff-row"><span class="ff-label">ARC_SQ</span><span class="ff-value cyan" id="ffArc">WAITING</span></div>
+<div class="ff-row"><span class="ff-label">R2</span><span class="ff-value cyan" id="ffR2">WAITING</span></div>
+<div class="ff-row"><span class="ff-label">DEVIATION</span><span class="ff-value" id="ffDev">WAITING</span></div>
+<div class="ff-row"><span class="ff-label">COHERENCE</span><span class="ff-value" id="ffCoherence">WAITING</span></div>
+<div class="ff-row"><span class="ff-label">CS SENT TO BACKEND</span><span class="ff-value cyan" id="ffSent">NOT YET</span></div>
+<h3>SOUND ACOUSTIZATION &mdash; HEAR THE SAME DATA</h3>
+<div class="ff-row"><span class="ff-label">BASE TONE</span><span class="ff-value" id="ffBase">WAITING</span></div>
+<div class="ff-row"><span class="ff-label">LATTICE NOTES</span><span class="ff-value cyan" id="ffNotes">WAITING</span></div>
+<div class="ff-row"><span class="ff-label">SOUND</span><span class="ff-value cyan" id="ffSound">OFF</span></div>
+<div class="ff-btns">
+<button class="ff-btn on" id="ffFeedToggle">Feed Real Data: ON</button>
+<button class="ff-btn" id="ffSendBack">Send CS Back</button>
+<button class="ff-btn" id="ffSoundOn">Sound: ON</button>
+<button class="ff-btn" id="ffSoundOff">Sound: OFF</button>
+<button class="ff-btn" id="ffPlaySelf">Play Self As Sound</button>
+<button class="ff-btn" id="ffContinuous">Continuous Sound: OFF</button>
+</div>
+<div class="ff-status" id="ffStatus">WAITING, NO REAL FEED. No synthetic bars will be shown. CS steps only from real backend data when Feed Real Data is ON.</div>
+<div class="ff-small" style="margin-top:6px;">TWA bridge: <a href="./index.html">index.html</a> &mdash; same backend, same state. Bot notification uses the same formatter as TWA data cursor. CS back-feed appears in TWA and in Bot.</div>
+</div>
 <div id="info">
     <h1>⚡ CODEX SYMBOLICA · AUTOLOGICAL VISUALIZATION · Final, First edition</h1>
     <p>S³→S² · DbZ · O[Ψ] · CRT · CF · ζ(s) · Lingoso · ÆEA · ⊢ CS</p>
@@ -2744,6 +2792,125 @@ window.feedBackendReset = async function(){ if(window.__AEI_BACKEND && window.__
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     console.log('Codex Symbolica visualization — Final, First edition');
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+
+
+    // ============================================================
+    // FEED BACK / FORWARD CS EXPERIENCE LAYER - AEI TWA
+    // Forward: Bot / TWA -> CS. Back: CS -> Bot / TWA.
+    // Backend authoritative. No synthetic bars. Lattice [] = WAITING.
+    // Sound is acoustization, not music. Same mapping as backend + TWA.
+    // ============================================================
+    var ffFeedOn = true;
+    var ffSoundOn = false;
+    var ffContinuous = false;
+    var ffAudioCtx = null;
+    var ffContTimer = null;
+    var ffLastSentAt = 0;
+    function ffEl(id){ try{ return document.getElementById(id); }catch(e){ return null; } }
+    function ffAcoustization(){
+      var price = null; var deltaVal = 0; var lattice = [];
+      try{ if(backendState && backendState.ordered_feed && backendState.ordered_feed.price!=null) price = backendState.ordered_feed.price; }catch(e){}
+      try{ if(backendState && backendState.indicators && backendState.indicators.delta!=null) deltaVal = backendState.indicators.delta; }catch(e){}
+      try{ if(backendState && backendState.seed && backendState.seed.lattice_points) lattice = backendState.seed.lattice_points; }catch(e){}
+      if(price==null) return { base:220, filt:800, notes:[], price:null, delta:deltaVal, lattice:lattice };
+      var baseF = 200 + (price % 200);
+      var filt = 600 + (deltaVal * 40);
+      var notes = lattice.map(function(v){ return 220 + ((v % 100) * 4); });
+      return { base: baseF, filt: filt, notes: notes, price: price, delta: deltaVal, lattice: lattice };
+    }
+    function ffEnsureAudio(){ if(!ffAudioCtx){ try{ ffAudioCtx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} } if(ffAudioCtx && ffAudioCtx.state==='suspended'){ try{ ffAudioCtx.resume(); }catch(e){} } return ffAudioCtx; }
+    function ffPlayTone(freq, dur, gainVal, type){
+      if(!ffSoundOn) return; var ctx = ffEnsureAudio(); if(!ctx) return;
+      try{
+        var o = ctx.createOscillator(); var g = ctx.createGain(); var f = ctx.createBiquadFilter();
+        o.type = type || 'sine'; o.frequency.value = Math.max(40, Math.min(2000, freq));
+        f.type = 'lowpass'; f.frequency.value = ffAcoustization().filt;
+        g.gain.value = 0.0001; g.gain.exponentialRampToValueAtTime(Math.max(0.001, gainVal||0.15), ctx.currentTime+0.02); g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime+(dur||0.4));
+        o.connect(f); f.connect(g); g.connect(ctx.destination); o.start(); o.stop(ctx.currentTime+(dur||0.4));
+      }catch(e){}
+    }
+    function ffPlaySelf(){
+      var a = ffAcoustization(); if(a.price==null){ var st = ffEl('ffStatus'); if(st) st.textContent = 'WAITING, NO REAL FEED. No synthetic bars will be shown.'; return; }
+      ffEnsureAudio(); ffSoundOn = true; var ss = ffEl('ffSound'); if(ss) ss.textContent = 'PLAYING SELF';
+      ffPlayTone(a.base, 0.6, 0.2, 'sine');
+      a.notes.forEach(function(n,i){ setTimeout(function(){ ffPlayTone(n, 0.35, 0.14, 'triangle'); }, 180*(i+1)); });
+      setTimeout(function(){ ffPlayTone(a.base*1.5, 0.5, 0.12, 'sine'); var s2 = ffEl('ffSound'); if(s2) s2.textContent = 'PLAYED'; }, 180*(a.notes.length+1)+200);
+    }
+    function ffUpdateUI(){
+      try{
+        var be = ffEl('ffBackend'); if(be) be.textContent = HAS_BACKEND ? 'CONNECTED' : 'WAITING, ?backend= needed';
+        var hasReal = !!(backendState && backendState.bars && backendState.bars.length);
+        var pr = ffEl('ffPrice'); if(pr) pr.textContent = hasReal ? backendState.ordered_feed.price : 'WAITING';
+        var ba = ffEl('ffBars'); if(ba) ba.textContent = hasReal ? (backendState.bars.length + ' bars, ordered #' + backendState.ordered_feed.ordered_index) : 'WAITING';
+        var de = ffEl('ffDelta'); if(de) de.textContent = (backendState && backendState.indicators) ? (backendState.indicators.delta + ' / ' + (backendState.indicators.regime||'')) : 'WAITING';
+        var la = ffEl('ffLattice'); if(la) la.textContent = (backendState && backendState.seed && backendState.seed.lattice_points && backendState.seed.lattice_points.length) ? backendState.seed.lattice_points.join(', ') : 'WAITING, [] means waiting';
+        var fo = ffEl('ffFeedOn'); if(fo) fo.textContent = ffFeedOn ? 'ON' : 'OFF';
+        var s2v = null, r2v = null, dev = null, coh = null;
+        try{ if(typeof codex !== 'undefined' && codex){ s2v = codex.sSq ? codex.sSq.toString() : null; r2v = codex.rSq ? codex.rSq.toString() : null; dev = codex.dev ? codex.dev.toString() : null; coh = codex.coherent ? 'COHERENT' : 'EVOLVING'; } }catch(e){}
+        var e1 = ffEl('ffS2'); if(e1) e1.textContent = s2v || 'WAITING';
+        var e2 = ffEl('ffArc'); if(e2) e2.textContent = s2v || 'WAITING';
+        var e3 = ffEl('ffR2'); if(e3) e3.textContent = r2v || 'WAITING';
+        var e4 = ffEl('ffDev'); if(e4) e4.textContent = dev || 'WAITING';
+        var e5 = ffEl('ffCoherence'); if(e5) e5.textContent = coh || 'WAITING';
+        var a = ffAcoustization();
+        var e6 = ffEl('ffBase'); if(e6) e6.textContent = a.price!=null ? (a.base.toFixed(1)+' Hz') : 'WAITING';
+        var e7 = ffEl('ffNotes'); if(e7) e7.textContent = a.notes.length ? a.notes.map(function(n){return n.toFixed(0);}).join(', ') : 'WAITING';
+        var st = ffEl('ffStatus');
+        if(st){
+          if(!HAS_BACKEND) st.textContent = 'WAITING, NO BACKEND. Add ?backend= URL. No synthetic bars will be shown.';
+          else if(!hasReal) st.textContent = 'WAITING, NO REAL FEED. CS steps only from real backend data when Feed Real Data is ON. No synthetic bars.';
+          else st.textContent = 'LIVE, FORWARD + BACK ACTIVE. Bot / TWA -> CS, CS -> Bot / TWA. Price ' + a.price + ', bars ' + backendState.bars.length + '.';
+        }
+      }catch(e){}
+    }
+    async function ffSendCSBack(){
+      try{
+        if(!HAS_BACKEND) { var st0 = ffEl('ffStatus'); if(st0) st0.textContent = 'WAITING, NO BACKEND. Add ?backend= URL.'; return; }
+        var payload = {};
+        try{ if(typeof codex !== 'undefined' && codex){ payload.s2 = codex.sSq ? codex.sSq.toString() : null; payload.r2 = codex.rSq ? codex.rSq.toString() : null; payload.arc_sq = payload.s2; payload.deviation = codex.dev ? codex.dev.toString() : null; payload.coherence = codex.coherent ? 'COHERENT' : 'EVOLVING'; payload.tick = codex.time ? codex.time.toString() : null; } }catch(e){}
+        try{ if(backendState){ payload.price = backendState.ordered_feed ? backendState.ordered_feed.price : null; payload.delta = backendState.indicators ? backendState.indicators.delta : null; payload.lattice = backendState.seed ? backendState.seed.lattice_points : []; payload.ordered_index = backendState.ordered_feed ? backendState.ordered_feed.ordered_index : null; } }catch(e){}
+        var ac = ffAcoustization(); payload.acoustization = { base_freq: ac.base, filter_freq: ac.filt, lattice_notes: ac.notes };
+        payload.source = 'AEI TWA CS layer, index.htm';
+        var res = await apiPost('/cs-feedback', payload);
+        ffLastSentAt = Date.now();
+        var se = ffEl('ffSent'); if(se) se.textContent = 'SENT ' + new Date(ffLastSentAt).toISOString();
+        var st = ffEl('ffStatus'); if(st) st.textContent = 'CS SENT TO BACKEND. Bot / TWA will show this CS in the same formatter. ' + JSON.stringify(payload).slice(0,220);
+      }catch(e){ var st2 = ffEl('ffStatus'); if(st2) st2.textContent = 'CS SEND WAITING: ' + e.message; }
+    }
+    // Wrap syncBackend to refresh feed layer UI after each poll
+    try{
+      var _origSync = syncBackend;
+      syncBackend = async function(){ try{ await _origSync(); }catch(e){} ffUpdateUI(); };
+    }catch(e){}
+    // Wrap codex.step to use real price-derived dt when Feed Real Data is ON
+    try{
+      if(typeof codex !== 'undefined' && codex && codex.step){
+        var _origStep = codex.step.bind(codex);
+        codex.step = function(dt){
+          try{
+            if(ffFeedOn && backendState && backendState.bars && backendState.bars.length){
+              var pr = backendState.ordered_feed ? backendState.ordered_feed.price : null;
+              if(pr!=null){ var num = (Math.floor(pr % 1000) + 1); dt = new Fraction(num, 1000); }
+            }
+          }catch(e){}
+          return _origStep(dt);
+        };
+      }
+    }catch(e){}
+    // Wire feed layer buttons
+    try{
+      var b1 = ffEl('ffFeedToggle'); if(b1) b1.addEventListener('click', function(){ ffFeedOn = !ffFeedOn; b1.textContent = 'Feed Real Data: ' + (ffFeedOn ? 'ON' : 'OFF'); b1.classList.toggle('on', ffFeedOn); ffUpdateUI(); });
+      var b2 = ffEl('ffSendBack'); if(b2) b2.addEventListener('click', ffSendCSBack);
+      var b3 = ffEl('ffSoundOn'); if(b3) b3.addEventListener('click', function(){ ffSoundOn = true; ffEnsureAudio(); var s = ffEl('ffSound'); if(s) s.textContent = 'ON'; });
+      var b4 = ffEl('ffSoundOff'); if(b4) b4.addEventListener('click', function(){ ffSoundOn = false; var s = ffEl('ffSound'); if(s) s.textContent = 'OFF'; });
+      var b5 = ffEl('ffPlaySelf'); if(b5) b5.addEventListener('click', ffPlaySelf);
+      var b6 = ffEl('ffContinuous'); if(b6) b6.addEventListener('click', function(){ ffContinuous = !ffContinuous; b6.textContent = 'Continuous Sound: ' + (ffContinuous ? 'ON' : 'OFF'); b6.classList.toggle('on', ffContinuous); if(ffContinuous){ ffContTimer = setInterval(function(){ ffPlaySelf(); ffSendCSBack(); }, 5000); } else { if(ffContTimer) clearInterval(ffContTimer); } });
+    }catch(e){}
+    // Auto send CS back every 15s when real feed is present
+    setInterval(function(){ try{ if(HAS_BACKEND && backendState && backendState.bars && backendState.bars.length){ if(Date.now() - ffLastSentAt > 14000) ffSendCSBack(); } }catch(e){} }, 15000);
+    // Initial UI
+    try{ setTimeout(ffUpdateUI, 400); setInterval(ffUpdateUI, 3000); }catch(e){}
+    window.__AEI_CS_FEED = { sendCSBack: ffSendCSBack, playSelf: ffPlaySelf, updateUI: ffUpdateUI, acoustization: ffAcoustization };
 
 })();
 </script>
