@@ -31,8 +31,15 @@ details{margin-top:14px;background:var(--card);border:1px solid var(--line);bord
 .tbl{width:100%;border-collapse:collapse;margin-top:10px;font-size:13px}.tbl th,.tbl td{border:1px solid var(--line);padding:8px;text-align:left;vertical-align:top}.tbl th{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.04em}
 .waitbox{background:#2a230a;border:1px solid #7a6a1f;border-radius:12px;padding:10px 12px;margin-top:12px;font-size:13px}
 .buy{color:var(--green);font-weight:700}.sell{color:#ff8fa0;font-weight:700}.neut{color:var(--muted)}
+ #toastStack{position:fixed;right:12px;bottom:12px;z-index:9999;display:flex;flex-direction:column;gap:8px;max-width:280px;pointer-events:none}
+ .toast{pointer-events:auto;background:#10162e;border:1px solid var(--line);border-left:4px solid #9aa6d6;border-radius:12px;padding:9px 11px;font-size:12px;box-shadow:0 6px 24px rgba(0,0,0,.45);animation:toast-in .18s ease-out;cursor:pointer}
+ .toast.signal{border-left-color:#ffd166}.toast.execution{border-left-color:#7ee787}.toast.fvg{border-left-color:#ff8fc7}.toast.close{border-left-color:#ff8fa0}.toast.notify{border-left-color:#6ee7ff}.toast.alert{border-left-color:#ffb86b}
+ .toast.dismissing{transform:translateX(110%);opacity:0;transition:transform .18s,opacity .18s}
+ .toast .toast-title{font-weight:700;font-size:12px}.toast.signal .toast-title{color:#ffd166}.toast.execution .toast-title{color:#7ee787}.toast.fvg .toast-title{color:#ff8fc7}.toast.close .toast-title{color:#ff8fa0}.toast.notify .toast-title{color:#6ee7ff}
+ .toast .toast-line{color:var(--muted)}.toast .toast-line .v{color:var(--text);font-weight:700}
+ @keyframes toast-in{from{transform:translateX(30%);opacity:0}to{transform:none;opacity:1}}
 </style></head>
-<body><div class="wrap">
+<body><div id="toastStack"></div><div class="wrap">
 <header><div><h1>AE TWA — Seedling x AEEA</h1><p class="sub">Final, First edition. Fusion AEI + AEEA. Backend is authoritative when connected. Frontend only renders backend state. WAITING means WAITING: no bars, no price, no indicators, no seed values until the backend delivers real ones.</p></div><span class="badge"><span class="dot wait" id="dot"></span><span id="badge">WAITING — no backend</span></span></header>
 <div class="card" id="feedStrip"><h2 style="margin:0;font-size:18px">Ordered market feed — one ordered stream, consumed once</h2><p class="small" style="margin:6px 0 0">Backend owns the ordered stream. It enqueues each real tick once, drains in arrival order, assigns ordered_index exactly once in drain. This file never enqueues ticks, never builds bars, never computes indicators. It polls GET /miniapp-state and renders what the backend returns. Crawler is an ordered source via the backend, never a local fallback. Relay (backend): Kraken, then Stooq, Binance, CoinGecko, Yahoo.</p>
 <div class="strip"><span class="pill">ordered_index <b id="mOrdered">—</b></span><span class="pill">symbol <b id="mSymbol">—</b></span><span class="pill">price <b id="mPrice">—</b></span><span class="pill">provider <b id="mProvider">—</b></span><span class="pill">source <b id="mSource">WAITING</b></span><span class="pill">AEI x (display) <b id="mX">—</b></span></div>
@@ -53,7 +60,7 @@ details{margin-top:14px;background:var(--card);border:1px solid var(--line);bord
 <div class="two" style="margin-top:10px"><input id="csFeedbackNote" placeholder="CS feedback note (optional)"><button id="csFeedbackBtn">Send CS feedback</button></div><p class="small">CS feedback = POST /cs-feedback when connected. It is read back via GET /cs-state and GET /miniapp-state.</p></div>
 <div class="card"><h2 style="margin:0;font-size:18px">Lingoso — A · U · M · AUM · arc-length language</h2><p class="small" style="margin:6px 0 0">A = outward spiral, U = chord, M = closed loop, AUM = the three in order. Each tap = POST /encode-syllable when connected. With no backend the buttons are disabled and no arc check is faked locally. A syllable counts only when the backend arc_check says s = r.</p><div class="btns"><button id="lingA">A · spiral</button><button id="lingU">U · chord</button><button id="lingM">M · loop</button><button class="primary" id="lingAUM">AUM · full arc</button></div><div class="kv"><div><b>Last syllable</b><span id="lingLast">—</span></div><div><b>Arc check · s = r ?</b><span id="lingArc">—</span></div><div><b>Syllables encoded (backend-confirmed)</b><span id="lingCount">0</span></div><div><b>Backend reply</b><span id="lingReply" class="mono">—</span></div></div></div>
 <div class="card"><h2 style="margin:0;font-size:18px">AEEA Market — chart · BB · delta · regime · P_arc · FVG · orders</h2>
-<p class="small" style="margin:6px 0 0">Backend order per ordered tick: tick → bars → 13 normalised indicators + Ichimoku → m / n counted only on &gt;66.6 / &lt;33.3 → delta = m − n − 2 → regime → BB → P_arc → signal iff delta-gate → order / trailing / FVG. This page renders backend values only. It does not recompute any of them. Chart tap sets the SL / TP helper inputs below — it does not create FVG. FVG comes from the backend only.</p>
+<p class="small" style="margin:6px 0 0">Backend order per ordered tick: tick → bars → 13 normalised indicators + Ichimoku → m / n counted only on &gt;66.6 / &lt;33.3 → delta = m − n − 2 → regime → BB → P_arc → signal iff delta-gate → order / trailing / FVG. This page renders backend values only. It does not recompute any of them. Chart tap sets the SL / TP helper inputs below — it does not create FVG. FVG comes from the backend only.</p><p class="small" style="margin:6px 0 0">Same notification setup as ÆEA TWA: every signal / execution / FVG / close also arrives as a Telegram push (threaded as a reply to your last bot message) and as a toast here. Toasts poll GET /toasts?since=&lt;seq&gt; every 2 s.</p>
 <div class="grid"><div><b class="small">Timeframe (backend-configured, read-only)</b><select id="aeTimeframe" disabled><option value="M1">M1</option><option value="M5">M5</option><option value="M15" selected>M15</option><option value="H1">H1</option><option value="H4">H4</option><option value="D1">D1</option></select></div><div><b class="small">Chart type (display only)</b><select id="aeChartType"><option value="candles" selected>Candles</option><option value="line">Line</option><option value="bars">Bars</option></select></div></div>
 <canvas id="aeChartCanvas" class="chart-canvas" width="820" height="360"></canvas>
 <p class="small" id="aeChartNote">WAITING — no real bars yet. Chart draws only backend bars.</p>
@@ -112,7 +119,50 @@ function fmtHopf(h){if(!h) return "—"; if(typeof h==="string") return fmtFrac(
 function parseFracNum(v){if(v===undefined||v===null||v==="") return NaN; var s=String(v).trim(); if(s.indexOf("/")!==-1){var p=s.split("/"); var a=parseFloat(p[0]), b=parseFloat(p[1]); if(!b) return NaN; return a/b;} var n=parseFloat(s); return isFinite(n)?n:NaN;}
 function esc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
 function haptic(kind){try{if(window.Telegram&&window.Telegram.WebApp&&window.Telegram.WebApp.HapticFeedback){if(kind==="impact") window.Telegram.WebApp.HapticFeedback.impactOccurred("medium"); else window.Telegram.WebApp.HapticFeedback.selectionChanged();}}catch(e){}}
-function toast(msg){try{if(window.Telegram&&window.Telegram.WebApp&&window.Telegram.WebApp.showAlert){/* do not spam alerts; use log instead */}}catch(e){} pushLog(String(msg));}
+/* ---- AEA TWA toast stack: GET /toasts?since=<seq>, MAX 6 visible, 6 s autodismiss ---- */
+ var toastStack=document.getElementById("toastStack");
+ var toastSeqCursor=0; var TOAST_AUTODISMISS_MS=6000; var MAX_TOASTS_VISIBLE=6; var lastMarketToasts=[];
+ function dismissToast(el){if(!el||el.classList.contains("dismissing")) return; el.classList.add("dismissing"); setTimeout(function(){try{el.remove();}catch(e){}},200);}
+ function toastTitle(t){
+   if(t.kind==="signal") return "🎯 ÆEA 𝒮_signal "+(t.type==="BUY"?"📈":t.type==="SELL"?"📉":"⚪");
+   if(t.kind==="alert") return "🎯 ÆEA 𝒮_signal ℰ_alert";
+   if(t.kind==="execution") return "⚡ ÆEA ℰ_exec · "+(t.event||"ManualOrder");
+   if(t.kind==="fvg") return "ℱ_VG ÆEA ℱ_VG";
+   if(t.kind==="close") return "✂️ ÆEA 𝒜/ℬ close";
+   if(t.kind==="notify") return "🔔 ÆEA";
+   return esc(String(t.kind||"event"));
+ }
+ function toastLines(t){
+   if(t.kind==="signal"||t.kind==="alert") return "<div class=\"toast-line\">Type <span class=\"v\">"+esc(t.type||t.side||"—")+"</span> · Price <span class=\"v\">"+esc(t.price!==undefined?t.price:"—")+"</span></div><div class=\"toast-line\">m/n <span class=\"v\">"+esc(t.m!==undefined?t.m:"—")+"/"+esc(t.n!==undefined?t.n:"—")+"</span> · ℛ_regime <span class=\"v\">"+esc(t.regime||"—")+"</span> · Tick <span class=\"v\">"+esc(t.tick!==undefined?t.tick:"—")+"</span></div>";
+   if(t.kind==="execution"){var o=t.order||{}; return "<div class=\"toast-line\">"+esc(o.side||t.side||"—")+" · vol <span class=\"v\">"+esc(o.volume!==undefined?o.volume:t.volume!==undefined?t.volume:"—")+"</span> · entry <span class=\"v\">"+esc(o.price!==undefined?o.price:t.price!==undefined?t.price:"—")+"</span></div><div class=\"toast-line\">ticket <span class=\"v\">"+esc(o.ticket!==undefined?o.ticket:o.id!==undefined?o.id:"—")+"</span></div>";}
+   if(t.kind==="fvg") return "<div class=\"toast-line\">"+esc(t.action||"commit")+" · price <span class=\"v\">"+esc(t.price!==undefined?t.price:"—")+"</span> · type <span class=\"v\">"+esc(t.type||"—")+"</span></div>";
+   if(t.kind==="close"){var c=t.order||{}; return "<div class=\"toast-line\">ticket <span class=\"v\">"+esc(c.ticket!==undefined?c.ticket:c.id!==undefined?c.id:"—")+"</span> · "+esc(c.side||"—")+" · reason <span class=\"v\">"+esc(t.reason||"—")+"</span></div>";}
+   if(t.kind==="notify") return "<div class=\"toast-line\">"+esc(t.text||"")+"</div>";
+   return "<div class=\"toast-line\">"+esc(t.text||JSON.stringify(t).slice(0,120))+"</div>";
+ }
+ function pushToast(t){
+   if(!toastStack||!t) return;
+   while(toastStack.children.length>=MAX_TOASTS_VISIBLE){try{toastStack.removeChild(toastStack.firstChild);}catch(e){break;}}
+   var el=document.createElement("div"); el.className="toast "+esc(t.kind||"info");
+   el.innerHTML="<div class=\"toast-title\">"+toastTitle(t)+"</div>"+toastLines(t);
+   el.addEventListener("click",function(){dismissToast(el);});
+   toastStack.appendChild(el);
+   setTimeout(function(){dismissToast(el);},TOAST_AUTODISMISS_MS);
+   haptic(t.kind==="signal"||t.kind==="alert"?"success":"impact");
+   if(["signal","execution","fvg","close","alert","notify"].indexOf(t.kind)!==-1){
+     lastMarketToasts.push(t); if(lastMarketToasts.length>4) lastMarketToasts.shift();
+     var aeT=$("aeToasts"); if(aeT) aeT.innerHTML=lastMarketToasts.map(function(x){return "<div class=\"reply small\"><b>"+toastTitle(x)+"</b><div>"+toastLines(x)+"</div></div>";}).join("");
+     var lv=$("lv-toasts"); if(lv) lv.textContent=lastMarketToasts.map(function(x){return (x.kind||"")+":"+(x.text||x.type||(x.order&&x.order.side)||x.price||"");}).join(" · ").slice(0,240);
+   }
+ }
+ async function fetchToasts(){
+   if(!HAS_BACKEND) return;
+   var r=await apiGet("/toasts?since="+toastSeqCursor,6000);
+   if(!r||r.__error||!Array.isArray(r.toasts)) return;
+   if(typeof r.first_available_seq==="number"&&toastSeqCursor<r.first_available_seq-1){toastSeqCursor=r.first_available_seq-1;}
+   for(var i=0;i<r.toasts.length;i++){var t=r.toasts[i]; pushToast(t); if(typeof t.seq==="number"&&t.seq>toastSeqCursor) toastSeqCursor=t.seq;}
+ }
+ function toast(msg){pushToast({kind:"info",text:String(msg)});}
 function pushLog(msg){var ul=$("log"); if(!ul) return; var li=document.createElement("li"); li.textContent=new Date().toLocaleTimeString()+" · "+redact(msg); ul.insertBefore(li,ul.firstChild); while(ul.children.length>60) ul.removeChild(ul.lastChild);}
 function pushAeLog(msg){var ul=$("aeLog"); if(!ul) return; var li=document.createElement("li"); li.textContent=new Date().toLocaleTimeString()+" · AE · "+redact(msg); ul.insertBefore(li,ul.firstChild); while(ul.children.length>60) ul.removeChild(ul.lastChild);}
 async function apiGet(path,timeoutMs){
@@ -493,12 +543,7 @@ async function fetchSecondary(){
   try{
     var diag=await apiGet("/diagnostics",6000);
     if(diag&&!diag.__error&&diag.aeea){$("aeComm").textContent="commission_frozen (backend): "+(diag.aeea.commission_frozen?"true":"false")+" · FG: "+(diag.aeea.FG?"true":"false");}
-    var toasts=await apiGet("/toasts",6000);
-    if(toasts&&!toasts.__error&&Array.isArray(toasts.toasts)){
-      var t=toasts.toasts.slice(-4);
-      $("lv-toasts").textContent=t.length?t.map(function(x){return typeof x==="string"?x:(x.text||JSON.stringify(x));}).join(" · ").slice(0,240):"—";
-      var aeT=$("aeToasts"); if(aeT&&t.length){aeT.innerHTML=t.map(function(x){return "<div class=\"reply small\">"+esc(typeof x==="string"?x:(x.text||JSON.stringify(x)))+"</div>";}).join("");}
-    }
+    await fetchToasts();
     var lat=await apiGet("/lattice-state",6000);
     if(lat&&!lat.__error&&Array.isArray(lat.lattice_points)){
       $("lv-lattice-detail").textContent="count "+(lat.lattice_count!==undefined?lat.lattice_count:lat.lattice_points.length)+" · prime "+(lat.prime!==undefined?lat.prime:"—")+" · generation "+(lat.generation!==undefined?lat.generation:"—")+" · s2 "+fmtFrac(lat.s2)+" · r2 "+fmtFrac(lat.r2)+" · dev "+fmtFrac(lat.deviation);
@@ -508,7 +553,7 @@ async function fetchSecondary(){
     var cs=await apiGet("/cs-state",6000);
     if(cs&&!cs.__error&&cs.cs){var csTxt=JSON.stringify(cs.cs).slice(0,200); if(csTxt!=="{}") $("lv-symbolic").textContent="cs "+csTxt;}
     var sig=await apiGet("/signals",6000);
-    if(sig&&!sig.__error&&Array.isArray(sig.signal_history)){var h=sig.signal_history; if(h.length) $("aeSigHist").textContent=h.slice(-6).map(function(s){return (s.side||"—")+" @ "+(s.price!==undefined?s.price:"—")+" delta "+(s.delta!==undefined?s.delta:"—")+" idx "+(s.ordered_index!==undefined?s.ordered_index:"—");}).join("\n");}
+    if(sig&&!sig.__error&&Array.isArray(sig.signal_history||sig.signals)){var h=sig.signal_history||sig.signals; if(h.length) $("aeSigHist").textContent=h.slice(-6).map(function(s){return (s.side||"—")+" @ "+(s.price!==undefined?s.price:"—")+" delta "+(s.delta!==undefined?s.delta:"—")+" idx "+(s.ordered_index!==undefined?s.ordered_index:"—");}).join("\n");}
     var ord=await apiGet("/orders",6000);
     if(ord&&!ord.__error&&Array.isArray(ord.orders)){renderOrdersFrom(ord.orders,"backend GET /orders");}
   }catch(e){pushLog("Secondary fetch: "+e.message);}
@@ -580,6 +625,7 @@ async function boot(){
   recordReply("handshake0","Handshake","POST /handshake",hs);
   await refreshState(); await fetchSecondary();
   setInterval(function(){if(autoPoll) refreshState();},3000);
+   setInterval(function(){if(autoPoll) fetchToasts();},2000);
   setInterval(function(){if(autoPoll) fetchSecondary();},10000);
 }
 boot();
