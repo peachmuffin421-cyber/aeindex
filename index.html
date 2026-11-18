@@ -60,12 +60,12 @@ details{margin-top:14px;background:var(--card);border:1px solid var(--line);bord
 <div class="two" style="margin-top:10px"><input id="csFeedbackNote" placeholder="CS feedback note (optional)"><button id="csFeedbackBtn">Send CS feedback</button></div><p class="small">CS feedback = POST /cs-feedback when connected. It is read back via GET /cs-state and GET /miniapp-state.</p></div>
 <div class="card"><h2 style="margin:0;font-size:18px">Lingoso — A · U · M · AUM · arc-length language</h2><p class="small" style="margin:6px 0 0">A = outward spiral, U = chord, M = closed loop, AUM = the three in order. Each tap = POST /encode-syllable when connected. With no backend the buttons are disabled and no arc check is faked locally. A syllable counts only when the backend arc_check says s = r.</p><div class="btns"><button id="lingA">A · spiral</button><button id="lingU">U · chord</button><button id="lingM">M · loop</button><button class="primary" id="lingAUM">AUM · full arc</button></div><div class="kv"><div><b>Last syllable</b><span id="lingLast">—</span></div><div><b>Arc check · s = r ?</b><span id="lingArc">—</span></div><div><b>Syllables encoded (backend-confirmed)</b><span id="lingCount">0</span></div><div><b>Backend reply</b><span id="lingReply" class="mono">—</span></div></div></div>
 <div class="card"><h2 style="margin:0;font-size:18px">AEEA Market — chart · BB · delta · regime · P_arc · FVG · orders</h2>
-<p class="small" style="margin:6px 0 0">Backend order per ordered tick: tick → bars → 13 normalised indicators + Ichimoku → m / n counted only on &gt;66.6 / &lt;33.3 → delta = m − n − 2 → regime → BB → P_arc → signal iff delta-gate → order / trailing / FVG. This page renders backend values only. It does not recompute any of them. Chart tap sets the SL / TP helper inputs below — it does not create FVG. FVG comes from the backend only.</p><p class="small" style="margin:6px 0 0">Same notification setup as ÆEA TWA: every signal / execution / FVG / close also arrives as a Telegram push (threaded as a reply to your last bot message) and as a toast here. Toasts poll GET /toasts?since=&lt;seq&gt; every 2 s.</p>
+<p class="small" style="margin:6px 0 0">Backend order per ordered tick: tick → bars → 13 normalised indicators + Ichimoku → m / n counted on effective thresholds &gt;69.33 / &lt;30.66 (F_PLUS_GF = 208/3, G_MINUS_GF = 92/3). Max m/n is 14 (13 loop votes + 1 Ichimoku vote) → delta = m − n − 2 → regime → BB → P_arc → signal iff delta-gate → order / trailing / FVG. This page renders backend values only. It does not recompute any of them. Chart tap sets the SL / TP helper inputs below — it does not create FVG. FVG comes from the backend only.</p><p class="small" style="margin:6px 0 0">Same notification setup as ÆEA TWA: every signal / execution / FVG / close also arrives as a Telegram push (threaded as a reply to your last bot message) and as a toast here. Toasts poll GET /toasts?since=&lt;seq&gt; every 2 s.</p>
 <div class="grid"><div><b class="small">Timeframe (backend-configured, read-only)</b><select id="aeTimeframe" disabled><option value="M1">M1</option><option value="M5">M5</option><option value="M15" selected>M15</option><option value="H1">H1</option><option value="H4">H4</option><option value="D1">D1</option></select></div><div><b class="small">Chart type (display only)</b><select id="aeChartType"><option value="candles" selected>Candles</option><option value="line">Line</option><option value="bars">Bars</option></select></div></div>
 <canvas id="aeChartCanvas" class="chart-canvas" width="820" height="360"></canvas>
 <p class="small" id="aeChartNote">WAITING — no real bars yet. Chart draws only backend bars.</p>
-<div class="kv"><div><b>delta · m − n − 2 (backend)</b><span id="aeDelta">—</span></div><div><b>m / n · overbought / oversold (backend)</b><span id="aeMN">—</span></div><div><b>Signal (backend)</b><span id="aeSignal">— WAITING</span></div><div><b>Regime (backend)</b><span id="aeRegime">—</span></div><div><b>P_arc · projection (backend)</b><span id="aeParc">—</span></div><div><b>FVG anchors (backend)</b><span id="aeFVG">—</span></div><div><b>BB · backend band (highest available period)</b><span id="aeBB">—</span></div><div><b>Orders / open (backend)</b><span id="aeOrdersCount">—</span></div></div>
-<div><h3 style="margin:14px 0 6px;font-size:15px">BB — backend band</h3><p class="small">Backend returns one BB band (highest available period, population sigma, dev = 2). Until 3 bars exist it returns null and this shows WAITING. This page does not fabricate 58 rows.</p><div id="aeBB58" class="small mono" style="white-space:pre-wrap;word-break:break-word">—</div></div>
+<div class="kv"><div><b>delta · m − n − 2 (backend)</b><span id="aeDelta">—</span></div><div><b>m / n · overbought / oversold (backend)</b><span id="aeMN">—</span></div><div><b>Signal (backend)</b><span id="aeSignal">— WAITING</span></div><div><b>Regime (backend)</b><span id="aeRegime">—</span></div><div><b>P_arc · projection (backend)</b><span id="aeParc">—</span></div><div><b>FVG anchors (backend)</b><span id="aeFVG">—</span></div><div><b>BBx58 · backend band (period 58)</b><span id="aeBB">—</span></div><div><b>Orders / open (backend)</b><span id="aeOrdersCount">—</span></div></div>
+<div><h3 style="margin:14px 0 6px;font-size:15px">BB — backend band</h3><p class="small">Backend returns BBx58 (period 58, population sigma, dev = 2). Null until 58 real bars exist and this shows WAITING. This page does not fabricate 58 rows.</p><div id="aeBB58" class="small mono" style="white-space:pre-wrap;word-break:break-word">—</div></div>
 <div><h3 style="margin:14px 0 6px;font-size:15px">13D grid — indicator matrix (backend)</h3><div id="aeGrid13" class="small mono" style="white-space:pre-wrap;word-break:break-word">—</div><p class="small">Each indicator is null until 14 real bars exist. Null is shown as — WAITING, never as 100.00.</p></div>
 <div><h3 style="margin:14px 0 6px;font-size:15px">Derivatives + projection panel</h3><div id="aeDeriv" class="small mono" style="white-space:pre-wrap;word-break:break-word">—</div><div id="aeProj" class="small" style="margin-top:6px">—</div><p class="small">P_arc is a slope extrapolation from backend bars, not a forecast. It is shown only when the backend provides it.</p></div>
 <div style="background:#2a1a1a;border:1px solid #7a2f2f;border-radius:12px;padding:10px 12px;margin-top:12px"><b>Risk disclosure — read before using orders or signals.</b><p class="small" style="margin:6px 0 0">Not financial advice. Signals, delta, and P_arc are projections, not predictions. You can lose money. Orders in this file are backend orders only: POST /order when connected. An order counts as backend-confirmed only when the backend returns it with a ticket / id and status. Orders do not move markets. Do not trade on WAITING, warming-up, or unreachable-backend values. Final, First edition.</p></div>
@@ -88,7 +88,7 @@ details{margin-top:14px;background:var(--card);border:1px solid var(--line);bord
 <p class="small" id="raceNote" style="margin-top:8px">Winner means winner against the small toy NN baseline on the backend, not a proof about neural networks in general. Race parameters are backend-configured; the inputs above are read-only displays.</p></div>
 <div class="card"><h2 style="margin:0;font-size:18px">Backend replies — what the backend said back</h2><p class="small" style="margin:6px 0 0">Last reply per button that talks to the backend. Play Hopf and Rest are companion-only and never call the backend, so they have no backend reply. AEEA polling replies are summarised in its log below.</p><div id="replies"></div><p class="small" style="margin-top:10px">URLs and auth values are redacted in logs below. This UI never shows a backend URL.</p></div>
 <div class="card"><h2 style="margin:0;font-size:18px">Loop log + AEEA log</h2><ul class="log" id="log"></ul><ul class="log" id="aeLog" style="margin-top:10px"></ul></div>
-<details><summary>What is AE? — tap to expand</summary><h3>What it is</h3><p>Fusion of AEI (Seedling) and AEEA (market engine) — Final, First edition. Seedling stays the AEI frontend. AEEA stays the market engine. The fusion is the shared ordered feed + the selection loop that closes both. Display in this file caps and truncates for readability, so the display itself is not lossless. See Risk disclosure.</p><h3>One ordered tick, two consumers (backend)</h3><ol><li><b>Market tick → ordered tick</b> — backend producer enqueues once; drain assigns ordered_index += 1 and consumes in arrival order.</li><li><b>AEEA OnTick</b> — tick → bars → 13 indicators + Ichimoku → m / n (only &gt;66.6 / &lt;33.3) / delta → regime → BB → P_arc → signal iff delta-gate → order / trailing / FVG.</li><li><b>AEI x from the same tick</b> — x = Fraction(price-delta, scale) → prime → lattice → Hopf → s2 vs r2 → deviation → DbZ → I → SelfEvolution step + observer integral.</li><li><b>Selection closes the loop</b> — delta-gate firing + deviation falling keeps that generation; deviation growing rectifies psi and the next prime mutates the lattice.</li></ol><h3>Why AE is compared with NN learning speed</h3><p>NN must re-see data: epochs × dataset, gradients, replay, batch wait. AE sees each ordered tick once and takes one exact step. Learning speed is measured in ordered ticks, not epochs. A win here is a win against the small toy baseline on the backend, not a proof about neural networks in general.</p><h3>Backend wiring</h3><p><b>No backend URL is stored in this file.</b> Supply it at runtime, in this order: <span class="mono">window.AE_BACKEND_URL</span> → <span class="mono">?backend=</span> (read once, saved to localStorage, stripped from address bar) → saved localStorage → same-origin only if this file is served BY the backend itself. UI never shows a URL, only connected / WAITING / backing off. Without a supplied backend this page shows WAITING and posts nothing.</p><h3>WAITING</h3><p>With no backend, or with the backend unreachable, every panel shows WAITING. No bars, no price, no indicators, no seed values, no orders, no race values are faked locally. That is the whole point: WAITING is honest.</p><h3>What it does NOT do</h3><ul><li>It does not run the backend seed loop itself. It does not compute backend seed values with floats.</li><li>It does not replace app.py / AEI_Seed / SelfEvolutionCore / AEEA engine.</li><li>It does not talk to any exchange directly. Market data comes only via the backend.</li><li>It does not talk to the crawler relay directly for seed x — crawler is an ordered source via the backend.</li><li>It does not store a bot token or any secret. It only forwards the initData Telegram itself injected, in a header, never in a query string.</li><li>It does not store any backend URL — not plain, not base64, not encoded.</li><li>It does not train a local NN, does not generate local bars, and does not create local orders.</li></ul></details>
+<details><summary>What is AE? — tap to expand</summary><h3>What it is</h3><p>Fusion of AEI (Seedling) and AEEA (market engine) — Final, First edition. Seedling stays the AEI frontend. AEEA stays the market engine. The fusion is the shared ordered feed + the selection loop that closes both. Display in this file caps and truncates for readability, so the display itself is not lossless. See Risk disclosure.</p><h3>One ordered tick, two consumers (backend)</h3><ol><li><b>Market tick → ordered tick</b> — backend producer enqueues once; drain assigns ordered_index += 1 and consumes in arrival order.</li><li><b>AEEA OnTick</b> — tick → bars → 13 indicators + Ichimoku → m / n (effective thresholds &gt;69.33 / &lt;30.66; max 14) / delta → regime → BB → P_arc → signal iff delta-gate → order / trailing / FVG.</li><li><b>AEI x from the same tick</b> — x = |price − prevPrice| / 10000 in the backend (or 1/100 when zero). Frontend never sends x → prime → lattice → Hopf → s2 vs r2 → deviation → DbZ → I → SelfEvolution step + observer integral.</li><li><b>Selection closes the loop</b> — delta-gate firing + deviation falling keeps that generation; deviation growing rectifies psi and the next prime mutates the lattice.</li></ol><h3>Why AE is compared with NN learning speed</h3><p>NN must re-see data: epochs × dataset, gradients, replay, batch wait. AE sees each ordered tick once and takes one exact step. Learning speed is measured in ordered ticks, not epochs. A win here is a win against the small toy baseline on the backend, not a proof about neural networks in general.</p><h3>Backend wiring</h3><p><b>No backend URL is stored in this file.</b> Supply it at runtime, in this order: <span class="mono">window.AE_BACKEND_URL</span> → <span class="mono">?backend=</span> (read once, saved to localStorage, stripped from address bar) → saved localStorage → same-origin only if this file is served BY the backend itself. UI never shows a URL, only connected / WAITING / backing off. Without a supplied backend this page shows WAITING and posts nothing.</p><h3>WAITING</h3><p>With no backend, or with the backend unreachable, every panel shows WAITING. No bars, no price, no indicators, no seed values, no orders, no race values are faked locally. That is the whole point: WAITING is honest.</p><h3>What it does NOT do</h3><ul><li>It does not run the backend seed loop itself. It does not compute backend seed values with floats.</li><li>It does not replace app.py / AEI_Seed / SelfEvolutionCore / AEEA engine.</li><li>It does not talk to any exchange directly. Market data comes only via the backend.</li><li>It does not talk to the crawler relay directly for seed x — crawler is an ordered source via the backend.</li><li>It does not store a bot token or any secret. It only forwards the initData Telegram itself injected, in a header, never in a query string.</li><li>It does not store any backend URL — not plain, not base64, not encoded.</li><li>It does not train a local NN, does not generate local bars, and does not create local orders.</li></ul></details>
 <p class="nav">Also: <a href="./index.htm">Codex Symbolica</a></p></div>
 <script>(function(){"use strict";
 /* No backend URL in this file — not plain, not base64, not encoded. See resolveBackend() below. */
@@ -202,74 +202,7 @@ function renderPet(backendGen){
 function setPetSpeech(s){pet.speech=s; savePet(); renderPet(currentBackendGen);}
 var currentBackendGen=null;
 var liveState=null; var lastFeedPrice=null; var lastOrderedSeen=-1; var failures=0; var backoffUntil=0; var autoPoll=true;
-function currentMarketXDisplay(){
-  if(lastFeedPrice===null||lastFeedPrice===undefined) return "—";
-  var prev=window.__prevFeedPrice;
-  if(prev===undefined||prev===null||prev===lastFeedPrice) return "1/100";
-  var d=Math.abs(lastFeedPrice-prev);
-  if(d===0) return "1/100";
-  return marketXFromDelta(d,10000);
-}
-function marketXFromDelta(d,scale){
-  /* Display-only x for the Feed button. Backend does the exact Fraction lift. */
-  var num=Math.round(d*scale); if(num<=0) num=1; return num+"/"+scale;
-}
-function updateFeedStripFrom(state){
-  if(!state) return;
-  var feed=state.feed||{};
-  var aeea=state.aeea||{};
-  var price=null;
-  if(feed.price!==undefined&&feed.price!==null){var pf=parseFloat(feed.price); if(isFinite(pf)) price=pf;}
-  if(price===null&&aeea.last_price!==undefined&&aeea.last_price!==null){var pa=parseFloat(aeea.last_price); if(isFinite(pa)) price=pa;}
-  window.__prevFeedPrice=(lastFeedPrice!==null&&lastFeedPrice!==undefined)?lastFeedPrice:price;
-  lastFeedPrice=price;
-  $("mOrdered").textContent=(state.ordered!==undefined?state.ordered:(feed.ordered!==undefined?feed.ordered:"—"));
-  $("mSymbol").textContent=aeea.symbol||"—";
-  $("mPrice").textContent=price!==null?price.toFixed(2):"—";
-  $("mProvider").textContent=feed.provider||aeea.last_provider||"—";
-  $("mSource").textContent=feed.provider||aeea.last_provider||"WAITING";
-  $("mX").textContent=currentMarketXDisplay();
-  var sel=$("aeSymbol"); if(sel){sel.innerHTML=""; var o=document.createElement("option"); o.value=aeea.symbol||"BTC/USD"; o.textContent=aeea.symbol||"BTC/USD"; sel.appendChild(o); sel.value=o.value;}
-  var tf=$("aeTimeframe"); if(tf&&aeea.timeframe){for(var i=0;i<tf.options.length;i++){if(tf.options[i].value===aeea.timeframe){tf.value=aeea.timeframe; break;}}}
-  var fw=$("feedWait"); if(fw){fw.style.display="none";}
-}
-function renderWaiting(reason){
-  setBadge("wait",reason||"WAITING — no backend");
-  $("mOrdered").textContent="—"; $("mPrice").textContent="—"; $("mProvider").textContent="—"; $("mSource").textContent="WAITING"; $("mX").textContent="—";
-  $("liveNote").textContent=reason||"WAITING — no backend yet. No seed values are shown until the backend delivers them.";
-  var ids=["lv-state","lv-tick","lv-gen","lv-prime-count","lv-lattice","lv-primes","lv-s2","lv-r2","lv-dev","lv-coh","lv-i","lv-psi","lv-hopf","lv-phi"];
-  ids.forEach(function(id){var el=$(id); if(el) el.textContent="—";});
-  $("aeDelta").textContent="—"; $("aeMN").textContent="—"; var sg=$("aeSignal"); sg.textContent="— WAITING"; sg.className="neut";
-  $("aeRegime").textContent="—"; $("aeParc").textContent="—"; $("aeFVG").textContent="—"; $("aeBB").textContent="—"; $("aeOrdersCount").textContent="—";
-  $("aeBB58").textContent="— WAITING — no real bars yet.";
-  $("aeGrid13").textContent="— WAITING — no real bars yet.";
-  $("aeDeriv").textContent="— WAITING"; $("aeProj").textContent="WAITING — no backend projection yet.";
-  $("aeChartNote").textContent="WAITING — no real bars yet. Chart draws only backend bars.";
-  $("raceAeDev").textContent="—"; $("raceNnLoss").textContent="—"; $("raceAeTicks").textContent="—"; $("raceNnTicks").textContent="—"; $("raceDeltaAcc").textContent="—"; $("raceWinner").textContent="—";
-  $("aeOrdersBody").innerHTML="<tr><td colspan=\"7\" class=\"small\">WAITING — no backend orders yet.</td></tr>";
-  drawAeChartWaiting(); drawRaceWaiting(); drawCodexWaiting();
-  renderPet(null);
-}
-
-/* ---- Rendering: backend values only. No local computation of truth. ---- */
-function renderLiveSeed(state){
-  var seed=state.seed||state.aei||{};
-  var aeea=state.aeea||{};
-  var race=state.race||state.evolution_vs_nn||{};
-  var cs=state.cs_feedback||state.cs||{};
-  var obs=state.observer||{};
-  var ac=state.acoustization||{};
-  currentBackendGen=(seed.generation!==undefined?seed.generation:null);
-  $("liveNote").textContent="Backend state · ordered="+(state.ordered!==undefined?state.ordered:"—")+" · version="+(state.version||"—");
-  $("lv-state").textContent=(seed.coherent===true?"coherent":"")+((aeea.regime&&aeea.regime!=="WAITING")?" · "+aeea.regime:"");
-  $("lv-tick").textContent=(seed.tick!==undefined?seed.tick:"—");
-  $("lv-gen").textContent=(seed.generation!==undefined?seed.generation:"—");
-  $("lv-prime-count").textContent=(seed.prime_count!==undefined?seed.prime_count:"—");
-  var pts=seed.lattice_points;
-  if(Array.isArray(pts)){
-    $("lv-lattice").textContent=pts.length?("["+pts.slice(0,12).join(", ")+(pts.length>12?" … +"+(pts.length-12)+" more":"")+"]"):"[] (WAITING — empty)";
-    $("lv-primes").textContent=pts.length?pts.slice(-12).join(", "):"—";
-  } else if(typeof pts==="number"){
+function currentMarketXDisplay(){ if(liveState&&liveState.seed&&liveState.seed.last_x) return liveState.seed.last_x; if(liveState&&liveState.feed&&liveState.feed.x) return liveState.feed.x; return "—"; } else if(typeof pts==="number"){
     $("lv-lattice").textContent="REJECTED — backend sent numeric placeholder "+pts+" (WAITING)";
     $("lv-primes").textContent="—";
   } else { $("lv-lattice").textContent="—"; $("lv-primes").textContent="—"; }
@@ -418,20 +351,18 @@ function updateButtonStates(){
 function setBusy(el,b){if(el) el.disabled=b||!HAS_BACKEND;}
 async function doFeed(){
   if(!HAS_BACKEND){pushLog("Feed blocked — WAITING, no backend."); return;}
-  var x="1/100";
-  if(lastFeedPrice!==null&&window.__prevFeedPrice!==undefined&&window.__prevFeedPrice!==null&&window.__prevFeedPrice!==lastFeedPrice){var d=Math.abs(lastFeedPrice-window.__prevFeedPrice); x=marketXFromDelta(d,10000);}
   var btn=$("feedBtn"); setBusy(btn,true);
-  var r=await apiPost("/step",{x:x});
+  var r=await apiPost("/step",{});
   setBusy(btn,false);
   recordReply("step","Feed a Prime · Step","POST /step",r);
-  if(r&&!r.__error){pet.localPrimes+=1; pet.bond=clamp(pet.bond+2,0,100); pet.xp+=1; savePet(); setPetSpeech("Backend stepped the seed with x = "+x+". Generation is backend truth, not my hunger."); pushLog("Feed: POST /step x="+x+" ok."); await refreshState();}
-  else {pushLog("Feed failed: "+(r.error||"unknown")); setPetSpeech("Feed failed — backend did not confirm. WAITING.");}
+  if(r&&!r.__error&&r.ok){pet.localPrimes+=1; pet.bond=clamp(pet.bond+2,0,100); pet.xp+=1; savePet(); var bx=(r.x||(r.seed&&r.seed.last_x)||"—"); setPetSpeech("Backend stepped the seed with x = "+bx+". Generation is backend truth, not my hunger."); pushLog("Feed: POST /step x="+bx+" ok."); await refreshState();}
+  else {pushLog("Feed failed: "+((r&&r.error)||"unknown")); setPetSpeech("Feed failed — backend did not confirm. WAITING.");}
 }
 async function encodeSyllable(syl){
   if(!HAS_BACKEND){pushLog("Lingoso blocked — WAITING, no backend."); return;}
   var r=await apiPost("/encode-syllable",{syllable:syl});
   recordReply("encode","Lingoso "+syl,"POST /encode-syllable",r);
-  var enc=r&&r.encoded?r.encoded:null;
+  var enc=r&&(r.encoding||r.encoded)?(r.encoding||r.encoded):null;
   if(r&&!r.__error&&enc){
     $("lingLast").textContent=enc.syllable||syl;
     $("lingArc").textContent=enc.arc_check||"—";

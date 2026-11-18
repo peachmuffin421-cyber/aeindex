@@ -202,7 +202,7 @@ a{color:#6ee7ff}
 <div><span class="ax-layer">ℬ:</span> <span class="ax-item" id="ax-q">Q = L(J)A = W + dU</span> · <span class="ax-item" id="ax-t4">T₄ = A∧dA</span></div>
 <div><span class="ax-layer">𝒞:</span> <span class="ax-item" id="ax-hopf">π: S³→S²</span> · <span class="ax-item" id="ax-t0">T₀ / ¬T₀</span></div>
 <div><span class="ax-layer">ℱ:</span> <span class="ax-item" id="ax-dbz">DbZ(a,b)</span> · <span class="ax-item" id="ax-i">I = (vp/tp)·exp[−|Δ|²/(C²x log²x)]·|∇×Φ|norm</span></div>
-<div><span class="ax-layer">ℋ:</span> <span class="ax-item" id="ax-aeae">Î = Σ(Π^{&gt;66.6} − Π^{&lt;33.3})</span> · <span class="ax-item" id="ax-delta">δ(m−n−2)</span></div>
+<div><span class="ax-layer">ℋ:</span> <span class="ax-item" id="ax-aeae">Î = Σ(Π^{&gt;69.33} − Π^{&lt;30.66})</span> · <span class="ax-item" id="ax-delta">δ(m−n−2)</span></div>
 <div><span class="ax-layer">𝒮:</span> <span class="ax-item" id="ax-obs">O[Ψ] = ∫ψ†Φψ d⁴q</span> · <span class="ax-item" id="ax-c">C = Tr(Oρ)</span></div>
 <div><span class="ax-layer">𝒲:</span> <span class="ax-item" id="ax-zeta">ζ(s) = Σ n⁻ˢ</span> · <span class="ax-item" id="ax-fe">ζ(s) = 2ˢπˢ⁻¹sin(πs/2)Γ(1−s)ζ(1−s)</span></div>
 <div><span class="ax-layer">𝒜𝒜:</span> <span class="ax-item" id="ax-self">CS ⊨ CS</span> · <span class="ax-item" id="ax-box">□ ↔ ⊤</span></div>
@@ -702,18 +702,15 @@ async function ffSendCSBack(){
 async function doStep(){
   if(!HAS_BACKEND) return;
   if(!liveNorm){var st=$("ffStatus"); if(st) st.textContent="WAITING, NO REAL FEED."; return;}
-  /* Display-only x for the Step button. Backend does the exact Fraction lift. */
-  var xStr="1/100";
-  var p=parseFracNum(liveNorm.price), pp=parseFracNum(liveNorm.prevPrice);
-  if(isFinite(p)&&isFinite(pp)&&p!==pp){var xv=Math.abs(p-pp)/10000; if(isFinite(xv)&&xv>0) xStr=String(xv);}
-  var r=await apiPost("/step",{x:xStr});
-  if(r&&!r.__error){var st2=$("ffStatus"); if(st2) st2.textContent="Step confirmed by backend with x = "+xStr+" (display). Generation is backend truth."; refreshState();}
+  /* Backend lifts x exactly. Frontend never sends x. */
+  var r=await apiPost("/step",{});
+  if(r&&!r.__error&&r.ok){var st2=$("ffStatus"); var bx=(r.x||(r.seed&&r.seed.last_x)||"—"); if(st2) st2.textContent="Step confirmed by backend with x = "+bx+". Generation is backend truth."; refreshState();}
   else {var st3=$("ffStatus"); if(st3) st3.textContent="Step failed — backend did not confirm. WAITING.";}
 }
 async function doEncode(syl){
   if(!HAS_BACKEND) return;
   var r=await apiPost("/encode-syllable",{syllable:syl});
-  var enc=(r&&(r.encoded||r))||{};
+  var enc=(r&&(r.encoding||r.encoded||r))||{};
   var arcCheck=enc.arc_check||(r&&r.arc_check)||"";
   if(r&&!r.__error&&arcCheck==="s = r"){
     lingosoCount+=1;
