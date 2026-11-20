@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Codex Symbolica · Autological Visualization · Final, First edition · Backend authoritative · WAITING means WAITING</title>
+<!-- x lift (backend only): crawler-hash first (x_source='crawler-hash'), else price-fallback |Δprice|/10000, else 1/100 tick-fallback. Price-fallback x is never presented as FG x. Frontend never computes or sends x. | AEEA TWA is FF itself. AEI TWA is FG itself. AE TWA is the FF/FG fusion. Intelligence gate I >= 2/3. Unity I = 1. Coherence gate s = r. --><title>Codex Symbolica · Autological Visualization · Backend authoritative · WAITING means WAITING</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -78,7 +78,7 @@ a{color:#6ee7ff}
 <div id="backendBadge"><span class="dot" id="badgeDot"></span><span id="badgeText">WAITING — no backend</span></div>
 <div id="waitingBanner">WAITING — no backend yet. No seed values, bars, indicators, or sound until the backend delivers them.</div>
 <div id="feedLayer">
-<h2>FEED BACK / FORWARD · CS EXPERIENCE LAYER · Final, First edition</h2>
+<h2>FEED BACK / FORWARD · CS EXPERIENCE LAYER · </h2>
 <div class="ff-small">AEI TWA — Codex Symbolica + feed layer. Bot / TWA feed CS. CS feeds Bot / TWA. One state, one self. Backend authoritative. No synthetic bars. Lattice [] = WAITING. All values below come from GET /miniapp-state. CS back-feed sends backend values only, never local ones.</div>
 <h3>FORWARD — BOT / TWA → CS</h3>
 <div class="ff-row"><span class="ff-label">BACKEND</span><span class="ff-value cyan" id="ffBackend">WAITING</span></div>
@@ -111,7 +111,7 @@ a{color:#6ee7ff}
 <div class="ff-small" style="margin-top:6px;">TWA bridge: <a href="./index.html">index.html</a> — same backend, same state. Bot notification uses the same formatter as TWA data cursor. CS back-feed appears in TWA and in Bot.</div>
 </div>
 <div id="info">
-<h1>⚡ CODEX SYMBOLICA · AUTOLOGICAL VISUALIZATION · Final, First edition</h1>
+<h1>⚡ CODEX SYMBOLICA · AUTOLOGICAL VISUALIZATION · </h1>
 <p>S³→S² · DbZ · O[Ψ] · CRT · CF · ζ(s) · Lingoso · ÆEA · ⊢ CS</p>
 <p style="margin-top:4px;"><span style="color:#ffaa44;">H</span> = help · <span style="color:#ffaa44;">A</span> = axioms · <span style="color:#ffaa44;">Drag</span> = rotate · <span style="color:#ffaa44;">Scroll</span> = zoom · <span style="color:#ffaa44;">T</span> = trace</p>
 <p style="margin-top:6px;font-size:0.55rem;opacity:0.75;max-width:520px;">Visualization only. Not financial advice. Not a formal proof. Not a prediction. ÆEA delta shown here is display only, not a trade signal. Canvas rendering uses float approximations for display; state uses the backend's exact rational values. No seed values are computed locally.</p>
@@ -186,7 +186,7 @@ a{color:#6ee7ff}
 <div><span class="label">Im[∫ψ†Φψd⁴q]</span> <span class="value" id="obs-imag">— WAITING</span></div>
 <div class="label" style="margin-top:4px;">GRID CELLS:</div><div style="color:#ffaa44; font-weight:bold;" id="obs-grid-count">— WAITING</div>
 <div class="label" style="margin-top:4px;">‖ψ‖² (L²):</div><div style="color:#aa66ff; font-weight:bold;" id="obs-psi-norm">— WAITING</div>
-<div class="label" style="margin-top:4px;">I (INTELLIGENCE):</div><div style="color:#44ffcc; font-weight:bold;" id="obs-intelligence">— WAITING</div>
+<div class="label" style="margin-top:4px;">I (INTELLIGENCE):</div><div style="color:#44ffcc; font-weight:bold;" id="obs-intelligence">— WAITING</div><div class="label" style="margin-top:4px;">I GATE · 2/3 · UNITY 1:</div><div style="color:#44ffcc; font-weight:bold;" id="obs-intelligence-gate">— WAITING</div>
 </div>
 <div id="zetaPanel">
 <div class="label">ζ(s) on CRITICAL LINE:</div>
@@ -206,7 +206,7 @@ a{color:#6ee7ff}
 <div><span class="ax-layer">𝒮:</span> <span class="ax-item" id="ax-obs">O[Ψ] = ∫ψ†Φψ d⁴q</span> · <span class="ax-item" id="ax-c">C = Tr(Oρ)</span></div>
 <div><span class="ax-layer">𝒲:</span> <span class="ax-item" id="ax-zeta">ζ(s) = Σ n⁻ˢ</span> · <span class="ax-item" id="ax-fe">ζ(s) = 2ˢπˢ⁻¹sin(πs/2)Γ(1−s)ζ(1−s)</span></div>
 <div><span class="ax-layer">𝒜𝒜:</span> <span class="ax-item" id="ax-self">CS ⊨ CS</span> · <span class="ax-item" id="ax-box">□ ↔ ⊤</span></div>
-<div style="opacity:0.6;margin-top:4px;">Axiom labels are display only. Highlighting follows backend coherence / delta-gate, never a local proof.</div>
+<div style="opacity:0.6;margin-top:4px;">Axiom labels are display only. Highlighting follows backend coherence / H/L gate, never a local proof.</div>
 </div>
 <div id="explainPanel" style="display:none;position:absolute;top:20px;left:50%;transform:translateX(-50%);z-index:11;background:rgba(5,5,16,0.95);border:1px solid #335577;border-radius:8px;padding:12px 20px;font-size:0.6rem;max-width:600px;backdrop-filter:blur(8px);box-shadow:0 4px 30px rgba(0,0,0,0.5);line-height:1.6;">
 <h3 style="color:#00ffcc;margin-bottom:6px;font-size:0.75rem;letter-spacing:1px;">⚡ CODEX SYMBOLICA — VISUALIZATION KEY</h3>
@@ -216,13 +216,13 @@ a{color:#6ee7ff}
 <div><span style="color:#ffaa44;font-weight:bold;">Δ = s² − r²</span> <span style="opacity:0.8;">— Deviation from Arc-Length Axiom (s=r). Zero → coherence. Backend value only.</span></div>
 <div><span style="color:#ffaa44;font-weight:bold;">O[Ψ] (4D)</span> <span style="opacity:0.8;">— Observer Operator: backend value when the backend returns it, else WAITING. Never integrated locally.</span></div>
 <div><span style="color:#ffaa44;font-weight:bold;">‖ψ‖² (L²)</span> <span style="opacity:0.8;">— Backend value when the backend returns it, else WAITING.</span></div>
-<div><span style="color:#ffaa44;font-weight:bold;">I (Intelligence)</span> <span style="opacity:0.8;">— FF ℱ₅ metric from backend, else WAITING.</span></div>
+<div><span style="color:#ffaa44;font-weight:bold;">I (Intelligence)</span> <span style="opacity:0.8;">— FG ℱ₅ metric from backend, else WAITING.</span></div>
 <div><span style="color:#ffaa44;font-weight:bold;">ζ(½+it)</span> <span style="opacity:0.8;">— Backend does not return ζ in /miniapp-state. Shown as WAITING. Nothing is computed locally.</span></div>
 <div><span style="color:#ffaa44;font-weight:bold;">DbZ Branch</span> <span style="opacity:0.8;">— FF ℱ₃: DbZ(a,b) = a if b=0, else a⊕b, branched on backend Re[ψ].</span></div>
 <div><span style="color:#ffaa44;font-weight:bold;">ÆEA δ</span> <span style="opacity:0.8;">— FF ℋ₇: Kronecker delta δ(m−n−2) on backend exact integer counts.</span></div>
 <div><span style="color:#ffaa44;font-weight:bold;">⊢ CS</span> <span style="opacity:0.8;">— Self-reference closure display: shows the closure value as defined in this file, not a formal proof (𝒜𝒜₁–𝒜𝒜₄₀).</span></div>
 <div><span style="color:#ffaa44;font-weight:bold;">TRACE</span> <span style="opacity:0.8;">— Backend-confirmed trace: one line per /miniapp-state poll. No local derivation steps.</span></div>
-<div><span style="color:#ffaa44;font-weight:bold;">A (Axioms)</span> <span style="opacity:0.8;">— Axiom layer panel. Highlighting follows backend coherence / delta-gate.</span></div>
+<div><span style="color:#ffaa44;font-weight:bold;">A (Axioms)</span> <span style="opacity:0.8;">— Axiom layer panel. Highlighting follows backend coherence / H/L gate.</span></div>
 <div><span style="color:#ffaa44;font-weight:bold;">Lingoso</span> <span style="opacity:0.8;">— Phonosyllabic encoding via backend POST /encode-syllable. Counts only when backend arc_check says s = r.</span></div>
 <div style="margin-top:6px;opacity:0.6;">Press <span style="color:#ffaa44;">H</span> to toggle help. Press <span style="color:#ffaa44;">T</span> to toggle TRACE. Press <span style="color:#ffaa44;">A</span> to toggle axiom panel. Press <span style="color:#ffaa44;">Space</span> to pause canvas redraw.</div>
 <div style="margin-top:6px;opacity:0.6;">With no backend, or with the backend unreachable, every panel shows WAITING. No bars, no price, no seed values, no sound.</div>
@@ -233,19 +233,14 @@ a{color:#6ee7ff}
 <script>
 (function(){
 "use strict";
-/* No backend URL in this file, not plain, not encoded in any form. Backend is resolved at runtime only from window.AE_BACKEND_URL, ?backend= query, localStorage (same key as index.html: ae_backend_url), or same-origin when this file is served BY the backend itself. Empty means WAITING. */
-var LS_KEY="ae_backend_url";
-var BACKEND_URL="", HAS_BACKEND=false, BACKEND_QS_WAS_MALFORMED=false;
+
+var BACKEND_URL="", HAS_BACKEND=false;
 function cleanU(u){if(!u) return ""; var s=String(u).trim(); if(/%3A%2F%2F/i.test(s)){try{s=decodeURIComponent(s);}catch(e){}} if(!/^https?:\/\//i.test(s)) return ""; return s.replace(/\/+$/,"")+"/";}
 function qsGet(name){try{return new URLSearchParams(window.location.search).get(name);}catch(e){return null;}}
-function stripBackendQs(){try{var u=new URL(window.location.href); if(u.searchParams.has("backend")){u.searchParams.delete("backend"); history.replaceState({},"",u.pathname+u.search+u.hash);}}catch(e){}}
 function resolveBackend(){
   var fused="";
   try{if(window.AE_BACKEND_URL){var n=cleanU(window.AE_BACKEND_URL); if(n) fused=n;}}catch(e){}
-  if(!fused){var q=qsGet("backend"); if(q){try{var u=new URL(q); fused=cleanU(u.toString());}catch(e){BACKEND_QS_WAS_MALFORMED=true;}}}
-  stripBackendQs();
-  if(fused){try{localStorage.setItem(LS_KEY,fused);}catch(e){}}
-  else{try{var s=localStorage.getItem(LS_KEY); if(s) fused=cleanU(s);}catch(e){}}
+  // Backend URL comes only from window.AE_BACKEND_URL or same-origin. No query-string backend.
   if(!fused){
     try{
       var loc=window.location;
@@ -261,6 +256,8 @@ function resolveBackend(){
 resolveBackend();
 function baseFor(){return BACKEND_URL;}
 var tmaInitData="";
+function tmaUsername(){try{if(window.Telegram&&window.Telegram.WebApp&&window.Telegram.WebApp.initDataUnsafe&&window.Telegram.WebApp.initDataUnsafe.user) return window.Telegram.WebApp.initDataUnsafe.user.username||"";}catch(e){} return "";}
+function tmaChatId(){try{if(window.Telegram&&window.Telegram.WebApp&&window.Telegram.WebApp.initDataUnsafe&&window.Telegram.WebApp.initDataUnsafe.chat) return window.Telegram.WebApp.initDataUnsafe.chat.id;}catch(e){} return null;}
 try{if(window.Telegram&&window.Telegram.WebApp&&window.Telegram.WebApp.initData) tmaInitData=window.Telegram.WebApp.initData;}catch(e){}
 function redact(s){var t=String(s==null?"":s); t=t.replace(/initData=[^&\s"]+/gi,"initData=[redacted]"); t=t.replace(/backend=[^&\s"]+/gi,"backend=[redacted]"); t=t.replace(/https?:\/\/[^\s"']+/gi,"[backend-url-redacted]"); return t;}
 async function apiGet(path,timeoutMs){
@@ -269,7 +266,7 @@ async function apiGet(path,timeoutMs){
   try{ctrl=new AbortController(); setTimeout(function(){try{ctrl.abort();}catch(e){}},timeoutMs||8000);}catch(e){}
   try{
     var h={}; if(tmaInitData) h["X-Telegram-Init-Data"]=tmaInitData;
-    var res=await fetch(baseFor()+path.replace(/^\//,""),{headers:h,signal:ctrl?ctrl.signal:undefined});
+    var res=await fetch(baseFor()+path,{headers:h,signal:ctrl?ctrl.signal:undefined});
     var data=await res.json().catch(function(){return {__error:true,error:"non-JSON from backend"};});
     if(!res.ok) return {__error:true,error:"HTTP "+res.status,http:res.status,data:data};
     return data;
@@ -281,7 +278,7 @@ async function apiPost(path,body){
   try{ctrl=new AbortController(); setTimeout(function(){try{ctrl.abort();}catch(e){}},12000);}catch(e){}
   try{
     var h={"Content-Type":"application/json"}; if(tmaInitData) h["X-Telegram-Init-Data"]=tmaInitData;
-    var res=await fetch(baseFor()+path.replace(/^\//,""),{method:"POST",headers:h,body:JSON.stringify(body||{}),signal:ctrl?ctrl.signal:undefined});
+    var res=await fetch(baseFor()+path,{method:"POST",headers:h,body:JSON.stringify(body||{}),signal:ctrl?ctrl.signal:undefined});
     var data=await res.json().catch(function(){return {__error:true,error:"non-JSON from backend"};});
     if(!res.ok) return {__error:true,error:"HTTP "+res.status,http:res.status,data:data};
     return data;
@@ -316,12 +313,12 @@ function fmtHopf(v){
 }
 function trunc(s,n){s=String(s==null?"":s); return s.length>n?s.slice(0,n)+"…":s;}
 /* ---- Normalize the two backend state shapes. Both are backend truth, never local. ----
-   Shape A (revised index.html): {ordered, feed:{...}, seed:{s2,r2,...}, aeea:{bars,delta,...}, race:{...}}
+   Shape: {ordered, feed:{...}, seed:{s2,r2,...}, aeea:{bars,delta,...}}
    Shape B (app.py _build_miniapp_state): {ordered_feed:{...}, indicators:{...}, bars, seed:{arc_sq,...}, cs:{s2,r2,...}, acoustization:{...}}
    Anything absent in both shapes stays WAITING. Nothing is filled in locally. */
 function normalizeState(st){
   if(!st||typeof st!=="object") return null;
-  var out={raw:st,ordered:null,price:null,prevPrice:null,provider:null,symbol:null,timeframe:null,status:st.status||null,bars:[],delta:null,m:null,n:null,signal:null,regime:null,bb:null,grid13:{},signalHistory:[],orders:[],fvg:[],projection:null,seed:null,race:null,observer:null,acoustization:null,cs_feedback:st.cs_feedback||null,aea_notification:st.aea_notification||null};
+  var out={raw:st,ordered:null,price:null,prevPrice:null,provider:null,symbol:null,timeframe:null,status:st.status||null,bars:[],delta:null,m:null,n:null,signal:null,regime:null,bb:null,grid13:{},signalHistory:[],orders:[],fvg:[],projection:null,seed:null,observer:null,acoustization:null,cs_feedback:st.cs_feedback||null,aea_notification:st.aea_notification||null};
   var feed=st.feed||null, orderedFeed=st.ordered_feed||null, aeea=st.aeea||null, ind=st.indicators||null;
   out.ordered=(st.ordered!==undefined?st.ordered:(orderedFeed&&orderedFeed.ordered_index!==undefined?orderedFeed.ordered_index:null));
   out.price=(feed&&feed.price!==undefined?feed.price:(orderedFeed&&orderedFeed.price!==undefined?orderedFeed.price:(aeea&&aeea.last_price!==undefined?aeea.last_price:null)));
@@ -338,6 +335,7 @@ function normalizeState(st){
   out.signal=sig;
   out.regime=(aeea&&aeea.regime!==undefined?aeea.regime:(ind&&ind.regime!==undefined?ind.regime:null));
   out.bb=(aeea&&aeea.bb!==undefined?aeea.bb:(ind&&ind.bb!==undefined?ind.bb:null));
+  out.bb_family=(st&&st.bb_family!==undefined?st.bb_family:null); // canonical BB family (periods 3-60); out.bb is BB58 member only
   if(aeea&&aeea.indicators&&typeof aeea.indicators==="object") out.grid13=aeea.indicators;
   else if(ind&&ind.grid_13d&&typeof ind.grid_13d==="object") out.grid13=ind.grid_13d;
   if(Array.isArray(aeea&&aeea.signal_history)) out.signalHistory=aeea.signal_history;
@@ -365,8 +363,6 @@ function normalizeState(st){
     hopf:(seedSrc&&seedSrc.hopf!==undefined?seedSrc.hopf:(cs?cs.hopf_base:undefined)),
     state:(seedSrc?seedSrc.state:undefined)
   };
-  var raceSrc=st.race||st.evolution_vs_nn||null;
-  out.race=raceSrc;
   var obs=st.observer||null;
   if(obs&&typeof obs==="object") out.observer={O_psi:(obs.O_psi!==undefined?obs.O_psi:(obs.observer!==undefined?obs.observer:null)),grid:(obs.grid||null),real:(obs.real!==undefined?obs.real:null),imag:(obs.imag!==undefined?obs.imag:null)};
   else if(seedSrc&&seedSrc.observer!==undefined) out.observer={O_psi:seedSrc.observer,grid:null,real:null,imag:null};
@@ -425,13 +421,7 @@ function isCoherent(c){
   var s=String(c==null?"":c).toUpperCase();
   return s.indexOf("COHERENT")!==-1||s==="S = R"||s==="S=R";
 }
-function dbzBranchFrom(norm){
-  var raw=norm?raw:null;
-  if(!raw) return null;
-  var candidates=[raw.seed&&raw.seed.dbz_branch, raw.cs&&raw.cs.dbz_branch, raw.seed&&raw.seed.dbz, raw.seed&&raw.seed.branch];
-  for(var i=0;i<candidates.length;i++){if(candidates[i]!==undefined&&candidates[i]!==null) return candidates[i];}
-  return null;
-}
+function dbzBranchFrom(norm){ if(norm && norm.dbz_branch) return norm.dbz_branch; return null; }
 function epsilonFrom(norm){
   var raw=norm?raw:null;
   if(!raw) return null;
@@ -452,7 +442,7 @@ function renderAll(norm){
   var oPsi=(norm.observer&&norm.observer.O_psi!==undefined)?norm.observer.O_psi:null;
   setTxt("obs-val",(oPsi===null?"— WAITING":fmtFrac(oPsi)));
   var s2n=parseFracNum(seed.s2), r2n=parseFracNum(seed.r2);
-  var sr=(isFinite(s2n)&&isFinite(r2n)&&r2n>0)?Math.sqrt(s2n/r2n):NaN;
+  var sr=(liveNorm && liveNorm.sr_ratio)?parseFloat(liveNorm.sr_ratio):NaN;
   setTxt("sr-ratio",isFinite(sr)?sr.toFixed(4)+" (display, from backend s²/r²)":"—");
   /* Curl, commutator, L2 norm, zeta: backend does not return them in /miniapp-state. WAITING, never computed locally. */
   setTxt("curl-val","— WAITING"); setTxt("comm-val","— WAITING"); setTxt("psi-norm-val","— WAITING"); setTxt("zeta-val","— WAITING");
@@ -479,6 +469,7 @@ function renderAll(norm){
   setTxt("obs-grid-count",(norm.observer&&norm.observer.grid!==undefined&&norm.observer.grid!==null)?String(norm.observer.grid):"— WAITING");
   setTxt("obs-psi-norm","— WAITING");
   setTxt("obs-intelligence",(seed.I!==undefined&&seed.I!==null)?fmtFrac(seed.I):"— WAITING");
+  (function(){var iv=parseFracNum(seed.I); if(seed.I===undefined||seed.I===null){setTxt("obs-intelligence-gate","— WAITING");} else if(iv===1){setTxt("obs-intelligence-gate","UNITY · I = 1 · s = r");} else if(iv>=2/3){setTxt("obs-intelligence-gate","GATE MET · I >= 2/3");} else {setTxt("obs-intelligence-gate","GATE NOT MET · I < 2/3");}})();
   /* Zeta panel: backend does not return zeta. */
   ["zeta-re","zeta-im","zeta-mag","zeta-terms","zeta-cf-depth"].forEach(function(id){setTxt(id,"— WAITING");});
   /* Lingoso panel: only the last backend /encode-syllable reply. */
@@ -498,7 +489,7 @@ function renderAll(norm){
   var pp=$("proofProgress"); if(pp) pp.style.width=Math.min(100,pollHistory.length)+" %".replace(" ","");
   var pl=$("proofLatest"); if(pl) pl.textContent=traceLines.length?traceLines[traceLines.length-1]:"";
   renderTrace();
-  /* Axiom highlighting follows backend coherence / delta-gate only. */
+  /* Axiom highlighting follows backend coherence / H/L gate only. */
   var coh=isCoherent(seed.coherence);
   var axSr=$("ax-sr"); if(axSr) axSr.className="ax-item"+(coh?" ax-active":"");
   var axDelta=$("ax-delta"); if(axDelta) axDelta.className="ax-item"+(norm.delta===0?" ax-active":"");
@@ -678,17 +669,9 @@ async function ffSendCSBack(){
   if(!liveNorm){var st1=$("ffStatus"); if(st1) st1.textContent="WAITING, NO REAL FEED."; return;}
   var seed=liveNorm.seed||{};
   var payload={
-    s2:(seed.s2!==undefined?String(seed.s2):null),
-    r2:(seed.r2!==undefined?String(seed.r2):null),
-    arc_sq:(seed.s2!==undefined?String(seed.s2):null),
-    deviation:(seed.deviation!==undefined?String(seed.deviation):null),
-    coherence:coherenceText(seed.coherence),
-    tick:(seed.tick!==undefined?seed.tick:null),
-    price:liveNorm.price, delta:liveNorm.delta,
-    lattice:(seed.lattice_points||[]),
-    ordered_index:liveNorm.ordered,
-    acoustization:liveNorm.acoustization,
-    source:"AEI TWA CS layer, index.htm"
+    kind:"feedback",
+    text:JSON.stringify({s2:(seed.s2!==undefined?String(seed.s2):null),r2:(seed.r2!==undefined?String(seed.r2):null),arc_sq:(seed.s2!==undefined?String(seed.s2):null),deviation:(seed.deviation!==undefined?String(seed.deviation):null),coherence:coherenceText(seed.coherence),tick:(seed.tick!==undefined?seed.tick:null),price:liveNorm.price,delta:liveNorm.delta,lattice:(seed.lattice_points||[]),ordered_index:liveNorm.ordered,acoustization:liveNorm.acoustization,source:"AEI TWA CS layer, index.htm"}),
+    user:tmaUsername()
   };
   var res=await apiPost("/cs-feedback",payload);
   if(res&&!res.__error){
@@ -702,10 +685,9 @@ async function ffSendCSBack(){
 async function doStep(){
   if(!HAS_BACKEND) return;
   if(!liveNorm){var st=$("ffStatus"); if(st) st.textContent="WAITING, NO REAL FEED."; return;}
-  /* Backend lifts x exactly. Frontend never sends x. */
   var r=await apiPost("/step",{});
-  if(r&&!r.__error&&r.ok){var st2=$("ffStatus"); var bx=(r.x||(r.seed&&r.seed.last_x)||"—"); if(st2) st2.textContent="Step confirmed by backend with x = "+bx+". Generation is backend truth."; refreshState();}
-  else {var st3=$("ffStatus"); if(st3) st3.textContent="Step failed — backend did not confirm. WAITING.";}
+  if(r&&!r.__error){var st2=$("ffStatus"); if(st2) st2.textContent="Step returns current seed. Seed advances only on ordered market tick. Generation is backend truth."; refreshState();}
+  else {var st3=$("ffStatus"); if(st3) st3.textContent="Step failed - backend did not confirm. WAITING.";}
 }
 async function doEncode(syl){
   if(!HAS_BACKEND) return;
@@ -722,7 +704,7 @@ async function doEncode(syl){
 }
 async function doReset(){
   if(!HAS_BACKEND) return;
-  if(!window.confirm("Reset = backend POST /reset. This resets AEEA + race + seed on the backend.")) return;
+  if(!window.confirm("Reset = backend POST /reset. This resets AEEA + seed on the backend.")) return;
   var r=await apiPost("/reset",{});
   if(r&&!r.__error){
     pollHistory=[]; traceLines=[]; lingosoLast=null; lingosoCount=0; lastFeedPrice=null;
@@ -839,10 +821,9 @@ function boot(){
     else if(e.key===" "){e.preventDefault(); $("pauseBtn").click();}
   });
   updateButtonStates();
-  if(BACKEND_QS_WAS_MALFORMED) showError("?backend= was malformed and ignored.");
   if(!HAS_BACKEND){setWaiting("WAITING — no backend"); return;}
   setBadge("wait","connecting — backend");
-  apiPost("/handshake",{}).catch(function(){});
+  apiPost("/handshake",{initData:tmaInitData,chat_id:tmaChatId()}).catch(function(){});
   refreshState();
   setInterval(refreshState,3000);
   (function loop(){if(!paused) drawCanvas(liveNorm); requestAnimationFrame(loop);})();

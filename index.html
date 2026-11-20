@@ -1,111 +1,103 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>AE TWA — Seedling x AEEA · Backend authoritative · WAITING means WAITING</title>
+<!-- AEEA TWA is FF itself. AEI TWA is FG itself. AE TWA is the FF/FG fusion. Intelligence gate I >= 2/3. Unity I = 1. Coherence gate s = r. --><title>AE TWA — Seedling x AEEA · Backend authoritative · WAITING means WAITING</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
-:root{--bg:#0b1020;--card:#141b31;--card2:#1a2342;--line:#2a3560;--text:#eef1ff;--muted:#9aa6d6;--green:#7ee787;--cyan:#6ee7ff;--pink:#ff8fc7;--gold:#ffd166;--btn:#2b3a6e;--btn2:#3b2f6e}
+:root{--bg:#0A1024;--card:#121B36;--card2:#1E2A4A;--line:#1E2A4A;--text:#eef1ff;--muted:#9aa6d6;--green:#34D399;--cyan:#5CE1E6;--pink:#ff8fc7;--gold:#FBBF24;--btn:#2b3a6e;--btn2:#3b2f6e}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;line-height:1.45}
 a{color:var(--cyan)}.wrap{max-width:880px;margin:0 auto;padding:16px 14px 40px}
 header{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}h1{font-size:26px;margin:4px 0 2px}.sub{color:var(--muted);font-size:13px;margin:0}
-.badge{display:inline-flex;gap:6px;align-items:center;border:1px solid var(--line);border-radius:999px;padding:6px 10px;font-size:12px;white-space:nowrap;background:#10162e}
-.dot{width:9px;height:9px;border-radius:50%;background:#888}.dot.ok{background:var(--green)}.dot.wait{background:var(--gold)}.dot.err{background:#ff6b6b}
+.badge{display:inline-flex;gap:6px;align-items:center;border:1px solid var(--line);border-radius:999px;padding:6px 10px;font-size:12px;white-space:nowrap;background:#121B36}
+.dot{width:9px;height:9px;border-radius:50%;background:#888}.dot.ok{background:var(--green)}.dot.wait{background:var(--gold)}.dot.err{background:#F87171}
 .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin-top:14px}
 .pet{display:flex;gap:16px;align-items:center}.avatar{font-size:72px;line-height:1;filter:brightness(var(--glow,1));transition:filter .3s}.bubble{flex:1;background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:10px 12px;font-size:14px}
 .mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}.small{font-size:12px;color:var(--muted)}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
 @media(max-width:520px){.grid{grid-template-columns:1fr}.pet{flex-direction:column;align-items:flex-start}.avatar{font-size:64px}}
-.bar{height:8px;background:#0a0f24;border-radius:999px;overflow:hidden;border:1px solid var(--line)}.fill{height:100%;background:linear-gradient(90deg,var(--cyan),var(--green));border-radius:999px}
-.fill.hunger{background:linear-gradient(90deg,#ffb86b,#ff6b6b)}.fill.energy{background:linear-gradient(90deg,#ffe066,#7ee787)}
+.bar{height:8px;background:#0A1024;border-radius:999px;overflow:hidden;border:1px solid var(--line)}.fill{height:100%;background:linear-gradient(90deg,var(--cyan),var(--green));border-radius:999px}
+.fill.hunger{background:linear-gradient(90deg,#ffb86b,#F87171)}.fill.energy{background:linear-gradient(90deg,#ffe066,#34D399)}
 .row{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin:2px 0 4px}.row b{color:var(--text)}
 .btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}button{border:0;border-radius:12px;padding:11px 14px;font-size:14px;font-weight:600;cursor:pointer;color:#fff;background:var(--btn)}button.primary{background:#1f7a4d}button.warn{background:#7a2f2f}button:disabled{opacity:.55;cursor:not-allowed}
-input,select{width:100%;padding:11px 12px;border-radius:12px;border:1px solid var(--line);background:#0a0f24;color:var(--text);font-size:14px}input:disabled,select:disabled{opacity:.6}
+input,select{width:100%;padding:11px 12px;border-radius:12px;border:1px solid var(--line);background:#0A1024;color:var(--text);font-size:14px}input:disabled,select:disabled{opacity:.6}
 .two{display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:8px}@media(max-width:520px){.two{grid-template-columns:1fr}}
 .kv{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}@media(max-width:520px){.kv{grid-template-columns:1fr}}
-.kv div{background:#0f1730;border:1px solid var(--line);border-radius:12px;padding:9px 10px;font-size:13px}.kv b{display:block;font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin-bottom:2px}
+.kv div{background:#121B36;border:1px solid var(--line);border-radius:12px;padding:9px 10px;font-size:13px}.kv b{display:block;font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin-bottom:2px}
 .log{max-height:220px;overflow:auto;margin:10px 0 0;padding-left:18px;font-size:13px}.log li{margin:6px 0}
 details{margin-top:14px;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:6px 16px}details summary{cursor:pointer;padding:12px 0;font-weight:700;font-size:16px;list-style:none}details summary::-webkit-details-marker{display:none}details summary::after{content:"  +";color:var(--cyan)}details[open] summary::after{content:"  -"}details p,details li{font-size:14px;color:#d8defa}details h3{margin:18px 0 6px;font-size:15px}
-.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.chip{background:#0a0f24;border:1px solid var(--line);border-radius:999px;padding:4px 9px;font-size:12px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.chip{background:#0A1024;border:1px solid var(--line);border-radius:999px;padding:4px 9px;font-size:12px}
 .nav{margin-top:14px;font-size:13px;color:var(--muted)}.nav a{margin-right:12px}
 .codex-canvas,.chart-canvas{width:100%;height:auto;display:block;background:#050510;border:1px solid var(--line);border-radius:14px;margin-top:10px}
-.reply{background:#0f1730;border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-top:8px;font-size:13px}.reply b{color:var(--cyan)}
-.strip{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}.pill{background:#0f1730;border:1px solid var(--line);border-radius:999px;padding:6px 10px;font-size:12px}.pill b{color:var(--text)}
+.reply{background:#121B36;border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-top:8px;font-size:13px}.reply b{color:var(--cyan)}
+.strip{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}.pill{background:#121B36;border:1px solid var(--line);border-radius:999px;padding:6px 10px;font-size:12px}.pill b{color:var(--text)}
 .tbl{width:100%;border-collapse:collapse;margin-top:10px;font-size:13px}.tbl th,.tbl td{border:1px solid var(--line);padding:8px;text-align:left;vertical-align:top}.tbl th{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.04em}
 .waitbox{background:#2a230a;border:1px solid #7a6a1f;border-radius:12px;padding:10px 12px;margin-top:12px;font-size:13px}
-.buy{color:var(--green);font-weight:700}.sell{color:#ff8fa0;font-weight:700}.neut{color:var(--muted)}
+.buy{color:var(--green);font-weight:700}.sell{color:#F87171;font-weight:700}.neut{color:var(--muted)}
  #toastStack{position:fixed;right:12px;bottom:12px;z-index:9999;display:flex;flex-direction:column;gap:8px;max-width:280px;pointer-events:none}
- .toast{pointer-events:auto;background:#10162e;border:1px solid var(--line);border-left:4px solid #9aa6d6;border-radius:12px;padding:9px 11px;font-size:12px;box-shadow:0 6px 24px rgba(0,0,0,.45);animation:toast-in .18s ease-out;cursor:pointer}
- .toast.signal{border-left-color:#ffd166}.toast.execution{border-left-color:#7ee787}.toast.fvg{border-left-color:#ff8fc7}.toast.close{border-left-color:#ff8fa0}.toast.notify{border-left-color:#6ee7ff}.toast.alert{border-left-color:#ffb86b}
+ .toast{pointer-events:auto;background:#121B36;border:1px solid var(--line);border-left:4px solid #9aa6d6;border-radius:12px;padding:9px 11px;font-size:12px;box-shadow:0 6px 24px rgba(0,0,0,.45);animation:toast-in .18s ease-out;cursor:pointer}
+ .toast.signal{border-left-color:#FBBF24}.toast.execution{border-left-color:#34D399}.toast.fvg{border-left-color:#ff8fc7}.toast.close{border-left-color:#F87171}.toast.notify{border-left-color:#2DD4BF}.toast.alert{border-left-color:#ffb86b}
  .toast.dismissing{transform:translateX(110%);opacity:0;transition:transform .18s,opacity .18s}
- .toast .toast-title{font-weight:700;font-size:12px}.toast.signal .toast-title{color:#ffd166}.toast.execution .toast-title{color:#7ee787}.toast.fvg .toast-title{color:#ff8fc7}.toast.close .toast-title{color:#ff8fa0}.toast.notify .toast-title{color:#6ee7ff}
+ .toast .toast-title{font-weight:700;font-size:12px}.toast.signal .toast-title{color:#FBBF24}.toast.execution .toast-title{color:#34D399}.toast.fvg .toast-title{color:#ff8fc7}.toast.close .toast-title{color:#F87171}.toast.notify .toast-title{color:#2DD4BF}
  .toast .toast-line{color:var(--muted)}.toast .toast-line .v{color:var(--text);font-weight:700}
  @keyframes toast-in{from{transform:translateX(30%);opacity:0}to{transform:none;opacity:1}}
 </style></head>
 <body><div id="toastStack"></div><div class="wrap">
-<header><div><h1>AE TWA — Seedling x AEEA</h1><p class="sub">Final, First edition. Fusion AEI + AEEA. Backend is authoritative when connected. Frontend only renders backend state. WAITING means WAITING: no bars, no price, no indicators, no seed values until the backend delivers real ones.</p></div><span class="badge"><span class="dot wait" id="dot"></span><span id="badge">WAITING — no backend</span></span></header>
+<header><div><h1>AE TWA — Seedling x AEEA</h1><p class="sub">Fusion AEI + AEEA. Backend is authoritative when connected. Frontend only renders backend state. WAITING means WAITING: no bars, no price, no indicators, no seed values until the backend delivers real ones.</p></div><span class="badge"><span class="dot wait" id="dot"></span><span id="badge">WAITING — no backend</span></span></header>
 <div class="card" id="feedStrip"><h2 style="margin:0;font-size:18px">Ordered market feed — one ordered stream, consumed once</h2><p class="small" style="margin:6px 0 0">Backend owns the ordered stream. It enqueues each real tick once, drains in arrival order, assigns ordered_index exactly once in drain. This file never enqueues ticks, never builds bars, never computes indicators. It polls GET /miniapp-state and renders what the backend returns. Crawler is an ordered source via the backend, never a local fallback. Relay (backend): Kraken, then Stooq, Binance, CoinGecko, Yahoo.</p>
 <div class="strip"><span class="pill">ordered_index <b id="mOrdered">—</b></span><span class="pill">symbol <b id="mSymbol">—</b></span><span class="pill">price <b id="mPrice">—</b></span><span class="pill">provider <b id="mProvider">—</b></span><span class="pill">source <b id="mSource">WAITING</b></span><span class="pill">AEI x (display) <b id="mX">—</b></span></div>
-<div class="two" style="margin-top:10px"><select id="aeSymbol" disabled><option value="BTC/USD">BTC/USD</option></select><button id="aeAutoBtn">Auto-poll: ON</button></div>
+<div style="margin-top:10px"><label class="small" for="aeSymbolSearch">Symbol picker - 5 sections (FF universe, pruned to live triples). Search, then pick. Picking posts a symbol change to the backend.</label><input id="aeSymbolSearch" placeholder="Search symbol - e.g. BTC, ES, AAPL, EUR" style="width:100%;margin:6px 0;padding:10px;border-radius:10px;border:1px solid var(--line);background:var(--card2);color:var(--text)"><div id="aePicker" class="small" style="max-height:220px;overflow:auto;border:1px solid var(--line);border-radius:12px;padding:8px"></div><div class="two" style="margin-top:10px"><select id="aeSymbol"><option value="BTC/USD">BTC/USD</option></select><button id="aeAutoBtn">Auto-poll: ON</button></div><p class="small">Picker shows Crypto / Futures / Equities / Forex / Indices. Full backend SYMBOL_MAP has 1177 keys including Binance-native aliases; picker shows the pruned live-triple set. CoinGecko-only entries (BNB-USD, OKB-USD, HT-USD, KCS-USD, USDT-USD) serve usd_24h_vol under volume, not tick volume.</p></div>
 <p class="small" style="margin-top:8px">Auto-poll ON = this page re-reads GET /miniapp-state every 3 seconds. It does not auto-post steps. Symbol and timeframe below are backend-configured and shown here read-only. Feed a Prime below posts one step on demand.</p>
 <div class="waitbox" id="feedWait">WAITING — no real feed yet. Nothing below is market data until the backend delivers it.</div></div>
 <div class="card"><div class="pet"><div class="avatar" id="avatar">🌱</div><div style="flex:1;min-width:0"><div class="bubble" id="speech">Hello. I am your Seedling. Connect the backend, then feed me a prime.</div><div class="small" style="margin-top:8px"><span id="stageLabel">Stage: Seedling</span> &nbsp;·&nbsp; <span id="petGen">Seed generation (backend): —</span> &nbsp;·&nbsp; <span id="localPrimes">Backend-confirmed steps: 0</span></div><div class="chips" id="taughtChips"></div></div></div>
-<div class="grid"><div><div class="row"><span>Hunger (companion UI)</span><b id="hungerVal">40 / 100</b></div><div class="bar"><div class="fill hunger" id="hungerBar" style="width:40%"></div></div></div><div><div class="row"><span>Energy (companion UI)</span><b id="energyVal">70 / 100</b></div><div class="bar"><div class="fill energy" id="energyBar" style="width:70%"></div></div></div><div><div class="row"><span>Bond (companion UI)</span><b id="bondVal">15 / 100</b></div><div class="bar"><div class="fill" id="bondBar" style="width:15%"></div></div></div><div><div class="row"><span>XP (companion UI)</span><b id="xpVal">0</b></div><div class="bar"><div class="fill" id="xpBar" style="width:0%"></div></div></div></div>
+<div class="grid"><div><div class="row"><span>Hunger (companion UI)</span><b id="hungerVal">WAITING</b></div><div class="bar"><div class="fill hunger" id="hungerBar" style="width:0%"></div></div></div><div><div class="row"><span>Energy (companion UI)</span><b id="energyVal">WAITING</b></div><div class="bar"><div class="fill energy" id="energyBar" style="width:0%"></div></div></div><div><div class="row"><span>Bond (companion UI)</span><b id="bondVal">WAITING</b></div><div class="bar"><div class="fill" id="bondBar" style="width:0%"></div></div></div><div><div class="row"><span>XP (companion UI)</span><b id="xpVal">0</b></div><div class="bar"><div class="fill" id="xpBar" style="width:0%"></div></div></div></div>
 <p class="small" style="margin-top:8px">Hunger / Energy / Bond / XP are companion UI only, stored locally. They are not seed truth. Seed generation, lattice, s2, r2, deviation and I come only from the backend.</p>
 <div class="btns"><button class="primary" id="feedBtn">Feed a Prime · Step</button><button id="playBtn">Play Hopf</button><button id="restBtn">Rest</button><button id="talkBtn">Talk</button><button class="warn" id="resetBtn">Reset</button></div>
 <div class="two"><input id="teachInput" placeholder="Teach a word — A / U / M / AUM go to backend encoder"><button id="teachBtn">Teach</button></div>
 <div class="two"><input id="talkInput" placeholder="Say something — POST /say when connected"><button id="sayBtn">Say</button></div>
 <canvas id="codexCanvas" class="codex-canvas" width="820" height="220"></canvas><p class="small" id="codexNote">Codex canvas draws only backend seed values. WAITING until the backend delivers them.</p></div>
+<div class="card"><h2 style="margin:0;font-size:18px">Sound — backend acoustization</h2><p class="small" style="margin:6px 0 0">Sound is acoustization, not music. The backend computes it from seed deviation: frequency, amplitude, type, source. This page plays the backend object back. It never sends CS back.</p><div class="btns"><button id="sndOnBtn">Sound ON</button><button id="sndOffBtn">Sound OFF</button><button id="sndPlaySelfBtn">Play Self As Sound</button><button id="sndContBtn">Continuous Sound: OFF</button></div><p class="small" id="sndState">Sound OFF — WAITING</p></div>
 <div class="card"><h2 style="margin:0;font-size:18px">Live Seed — AEI · exact Fractions from backend</h2><p class="small" id="liveNote" style="margin:6px 0 0">WAITING — no backend yet. No seed values are shown until the backend delivers them.</p>
-<div class="kv"><div><b>State</b><span id="lv-state">—</span></div><div><b>Tick</b><span id="lv-tick">—</span></div><div><b>Generation (backend)</b><span id="lv-gen">—</span></div><div><b>Prime count</b><span id="lv-prime-count">—</span></div><div><b>Lattice · points (list, WAITING = empty)</b><span id="lv-lattice">—</span></div><div><b>Primes tail (last 12 lattice points)</b><span id="lv-primes">—</span></div><div><b>s2 · arc_sq</b><span id="lv-s2" class="mono">—</span></div><div><b>r2 · radius_sq</b><span id="lv-r2" class="mono">—</span></div><div><b>Deviation · deviation_sq</b><span id="lv-dev" class="mono">—</span></div><div><b>Coherence · s2 = r2 ?</b><span id="lv-coh">—</span></div><div><b>I · intelligence</b><span id="lv-i" class="mono">—</span></div><div><b>Psi · backend quaternion</b><span id="lv-psi" class="mono">—</span></div><div><b>Hopf · hopf_base</b><span id="lv-hopf" class="mono">—</span></div><div><b>Phi · backend quaternion</b><span id="lv-phi" class="mono">—</span></div></div>
+<div class="kv"><div><b>State</b><span id="lv-state">—</span></div><div><b>Tick</b><span id="lv-tick">—</span></div><div><b>Generation (backend)</b><span id="lv-gen">—</span></div><div><b>Prime count</b><span id="lv-prime-count">—</span></div><div><b>Lattice · points (list, WAITING = empty)</b><span id="lv-lattice">—</span></div><div><b>Primes tail (last 12 lattice points)</b><span id="lv-primes">—</span></div><div><b>s2 · arc_sq</b><span id="lv-s2" class="mono">—</span></div><div><b>r2 · radius_sq</b><span id="lv-r2" class="mono">—</span></div><div><b>Deviation · deviation_sq</b><span id="lv-dev" class="mono">—</span></div><div><b>Coherence · s2 = r2 ?</b><span id="lv-coh">—</span></div><div><b>I · intelligence</b><span id="lv-i" class="mono">—</span></div><div><b>I gate · 2/3 · unity 1</b><span id="lv-i-gate" class="mono">—</span></div><div><b>Psi · backend quaternion</b><span id="lv-psi" class="mono">—</span></div><div><b>Hopf · hopf_base</b><span id="lv-hopf" class="mono">—</span></div><div><b>Phi · backend quaternion</b><span id="lv-phi" class="mono">—</span></div></div>
 <div class="kv"><div><b>Crawler · frontier / visited</b><span id="lv-crawler" class="mono">—</span></div><div><b>Symbolic · exact Q</b><span id="lv-symbolic" class="mono">—</span></div><div><b>Lattice · detail</b><span id="lv-lattice-detail" class="mono">—</span></div><div><b>Fibration · Hopf</b><span id="lv-fibration" class="mono">—</span></div><div><b>Observer · O[Psi]</b><span id="lv-observer" class="mono">—</span></div><div><b>Evolution · SelfEvolution</b><span id="lv-evolution" class="mono">—</span></div><div><b>DbZ · branch</b><span id="lv-dbz" class="mono">—</span></div><div><b>Toasts · backend</b><span id="lv-toasts" class="mono">—</span></div></div>
 <div class="two" style="margin-top:10px"><input id="crawlerUrl" placeholder="Crawler URL to enqueue — POST /crawler-enqueue when connected"><button id="crawlerEnqueueBtn">Enqueue crawler URL</button></div><p class="small">Enqueue = POST /crawler-enqueue when connected. With no backend the button is disabled and nothing is queued locally.</p>
 <div class="two" style="margin-top:10px"><input id="csFeedbackNote" placeholder="CS feedback note (optional)"><button id="csFeedbackBtn">Send CS feedback</button></div><p class="small">CS feedback = POST /cs-feedback when connected. It is read back via GET /cs-state and GET /miniapp-state.</p></div>
 <div class="card"><h2 style="margin:0;font-size:18px">Lingoso — A · U · M · AUM · arc-length language</h2><p class="small" style="margin:6px 0 0">A = outward spiral, U = chord, M = closed loop, AUM = the three in order. Each tap = POST /encode-syllable when connected. With no backend the buttons are disabled and no arc check is faked locally. A syllable counts only when the backend arc_check says s = r.</p><div class="btns"><button id="lingA">A · spiral</button><button id="lingU">U · chord</button><button id="lingM">M · loop</button><button class="primary" id="lingAUM">AUM · full arc</button></div><div class="kv"><div><b>Last syllable</b><span id="lingLast">—</span></div><div><b>Arc check · s = r ?</b><span id="lingArc">—</span></div><div><b>Syllables encoded (backend-confirmed)</b><span id="lingCount">0</span></div><div><b>Backend reply</b><span id="lingReply" class="mono">—</span></div></div></div>
 <div class="card"><h2 style="margin:0;font-size:18px">AEEA Market — chart · BB · delta · regime · P_arc · FVG · orders</h2>
-<p class="small" style="margin:6px 0 0">Backend order per ordered tick: tick → bars → 13 normalised indicators + Ichimoku → m / n counted on effective thresholds &gt;69.33 / &lt;30.66 (F_PLUS_GF = 208/3, G_MINUS_GF = 92/3). Max m/n is 14 (13 loop votes + 1 Ichimoku vote) → delta = m − n − 2 → regime → BB → P_arc → signal iff delta-gate → order / trailing / FVG. This page renders backend values only. It does not recompute any of them. Chart tap sets the SL / TP helper inputs below — it does not create FVG. FVG comes from the backend only.</p><p class="small" style="margin:6px 0 0">Same notification setup as ÆEA TWA: every signal / execution / FVG / close also arrives as a Telegram push (threaded as a reply to your last bot message) and as a toast here. Toasts poll GET /toasts?since=&lt;seq&gt; every 2 s.</p>
+<p class="small" style="margin:6px 0 0">Backend order per ordered tick: tick → bars → 13 normalised indicators + Ichimoku → m / n counted only on &gt;69.33 / &lt;30.66 → delta = m − n − 2 → regime → BB → P_arc → signal iff H/L gate (m>=12 or n>=12); Kronecker gate reported separately → order / trailing / FVG. This page renders backend values only. It does not recompute any of them. Chart tap sets the SL / TP helper inputs below — it does not create FVG. FVG comes from the backend only.</p><p class="small" style="margin:6px 0 0">Same notification setup as ÆEA TWA: every signal / execution / FVG / close also arrives as a Telegram push (threaded as a reply to your last bot message) and as a toast here. Toasts poll GET /toasts?since=&lt;seq&gt; every 2 s.</p>
 <div class="grid"><div><b class="small">Timeframe (backend-configured, read-only)</b><select id="aeTimeframe" disabled><option value="M1">M1</option><option value="M5">M5</option><option value="M15" selected>M15</option><option value="H1">H1</option><option value="H4">H4</option><option value="D1">D1</option></select></div><div><b class="small">Chart type (display only)</b><select id="aeChartType"><option value="candles" selected>Candles</option><option value="line">Line</option><option value="bars">Bars</option></select></div></div>
 <canvas id="aeChartCanvas" class="chart-canvas" width="820" height="360"></canvas>
-<p class="small" id="aeChartNote">WAITING — no real bars yet. Chart draws only backend bars.</p>
-<div class="kv"><div><b>delta · m − n − 2 (backend)</b><span id="aeDelta">—</span></div><div><b>m / n · overbought / oversold (backend)</b><span id="aeMN">—</span></div><div><b>Signal (backend)</b><span id="aeSignal">— WAITING</span></div><div><b>Regime (backend)</b><span id="aeRegime">—</span></div><div><b>P_arc · projection (backend)</b><span id="aeParc">—</span></div><div><b>FVG anchors (backend)</b><span id="aeFVG">—</span></div><div><b>BBx58 · backend band (period 58)</b><span id="aeBB">—</span></div><div><b>Orders / open (backend)</b><span id="aeOrdersCount">—</span></div></div>
-<div><h3 style="margin:14px 0 6px;font-size:15px">BB — backend band</h3><p class="small">Backend returns BBx58 (period 58, population sigma, dev = 2). Null until 58 real bars exist and this shows WAITING. This page does not fabricate 58 rows.</p><div id="aeBB58" class="small mono" style="white-space:pre-wrap;word-break:break-word">—</div></div>
+<p class="small" id="aeChartNote">WAITING — no real bars yet. Chart draws only backend bars.</p><p class="small" id="aeBotPreview">Bot preview — tap a candle to fetch /aea-notification?cursor=index for that bar.</p>
+<div class="kv"><div><b>delta · m − n − 2 (backend)</b><span id="aeDelta">—</span></div><div><b>m / n · overbought / oversold (backend)</b><span id="aeMN">—</span></div><div><b>Signal (backend)</b><span id="aeSignal">— WAITING</span></div><div><b>Regime (backend)</b><span id="aeRegime">—</span></div><div><b>P_arc · projection (backend)</b><span id="aeParc">—</span></div><div><b>FVG anchors (backend)</b><span id="aeFVG">—</span></div><div><b>BB · backend family (periods 3-60)</b><span id="aeBB">—</span></div><div><b>Orders / open (backend)</b><span id="aeOrdersCount">—</span></div></div>
+<div><h3 style="margin:14px 0 6px;font-size:15px">BB — backend band</h3><p class="small">Backend returns BB family (periods 3-60, dev 2, population sigma). Until 3 bars exist it returns empty and this shows WAITING. This page does not fabricate rows.</p><div id="aeBB58" class="small mono" style="white-space:pre-wrap;word-break:break-word">—</div></div>
 <div><h3 style="margin:14px 0 6px;font-size:15px">13D grid — indicator matrix (backend)</h3><div id="aeGrid13" class="small mono" style="white-space:pre-wrap;word-break:break-word">—</div><p class="small">Each indicator is null until 14 real bars exist. Null is shown as — WAITING, never as 100.00.</p></div>
 <div><h3 style="margin:14px 0 6px;font-size:15px">Derivatives + projection panel</h3><div id="aeDeriv" class="small mono" style="white-space:pre-wrap;word-break:break-word">—</div><div id="aeProj" class="small" style="margin-top:6px">—</div><p class="small">P_arc is a slope extrapolation from backend bars, not a forecast. It is shown only when the backend provides it.</p></div>
-<div style="background:#2a1a1a;border:1px solid #7a2f2f;border-radius:12px;padding:10px 12px;margin-top:12px"><b>Risk disclosure — read before using orders or signals.</b><p class="small" style="margin:6px 0 0">Not financial advice. Signals, delta, and P_arc are projections, not predictions. You can lose money. Orders in this file are backend orders only: POST /order when connected. An order counts as backend-confirmed only when the backend returns it with a ticket / id and status. Orders do not move markets. Do not trade on WAITING, warming-up, or unreachable-backend values. Final, First edition.</p></div>
+<div style="background:#2a1a1a;border:1px solid #7a2f2f;border-radius:12px;padding:10px 12px;margin-top:12px"><b>Risk disclosure — read before using orders or signals.</b><p class="small" style="margin:6px 0 0">Not financial advice. Signals, delta, and P_arc are projections, not predictions. You can lose money. Orders in this file are backend orders only: POST /order when connected. An order counts as backend-confirmed only when the backend returns it with a ticket / id and status. Orders do not move markets. Do not trade on WAITING, warming-up, or unreachable-backend values. .</p></div>
 <h3 style="margin:14px 0 6px;font-size:15px">Order ticket — backend orders only</h3>
 <div class="grid"><div><b class="small">Side</b><select id="aeOrderSide"><option value="BUY">BUY</option><option value="SELL">SELL</option></select></div><div><b class="small">Volume / lots</b><input id="aeOrderVol" value="0.01"></div><div><b class="small">Stop-loss price (optional)</b><input id="aeOrderSL" placeholder="optional"></div><div><b class="small">Take-profit price (optional)</b><input id="aeOrderTP" placeholder="optional"></div></div>
 <div class="btns"><button class="primary" id="aePlaceBtn">Place order (POST /order)</button><button id="aeCloseBtn">Close all (POST /order/close)</button><button id="aeFVGAddBtn">Refresh FVG (backend)</button><button id="aeFVGClrBtn">Re-read FVG (backend)</button></div>
-<p class="small">FVG buttons re-read backend FVG. They do not add or clear backend FVG, because the backend has no FVG add / clear endpoint.</p>
+<p class="small">FVG buttons re-read backend FVG. FVG anchors are added with POST /fvg and removed with DELETE /fvg/&lt;id&gt;.</p>
 <table class="tbl"><thead><tr><th># / ticket</th><th>Side</th><th>Vol</th><th>Entry</th><th>SL / TP</th><th>Status</th><th>Source</th></tr></thead><tbody id="aeOrdersBody"><tr><td colspan="7" class="small">WAITING — no backend orders yet.</td></tr></tbody></table>
 <h3 style="margin:14px 0 6px;font-size:15px">Engine settings</h3>
 <div class="grid"><div><b class="small">Lots (default for new order ticket)</b><input id="engLots" value="0.01"></div><div><b class="small">Slippage (backend-configured, read-only)</b><input id="engSlip" value="3" disabled></div><div><b class="small">Magic (backend-configured, read-only)</b><input id="engMagic" value="20260211" disabled></div><div><b class="small">BB deviation (backend-configured, read-only)</b><input id="engBBDev" value="2" disabled></div><div><b class="small">Max orders (backend-configured, read-only)</b><input id="engMaxOrd" value="10" disabled></div><div><b class="small">Trailing (backend-enforced, read-only)</b><input id="engTrail" value="0" disabled></div></div>
 <p class="small">Only Lots is used locally, as the default volume for the order ticket above. All other engine settings are backend-configured. Editing them here does not change backend logic. Trailing SL / TP enforcement is backend-side, on each ordered tick.</p>
-<h3 style="margin:14px 0 6px;font-size:15px">AEEA lifecycle — OnInit / OnReInit · commission · trailing · FVG list · signal history</h3><div class="btns"><button id="aeOnInitBtn">OnInit — backend reset (POST /reset)</button><button id="aeReInitBtn">OnReInit — re-read backend state</button></div><p class="small">Backend has no separate OnInit endpoint. OnInit maps to backend POST /reset (AEEA reset + race reset + seed reset). OnReInit re-reads GET /miniapp-state + GET /diagnostics and re-renders, without wiping backend state.</p><div class="kv"><div><b>Trailing · backend enforcement</b><span id="aeTrailLive" class="mono">—</span></div><div><b>Commission · backend frozen flag</b><span id="aeComm" class="mono">—</span></div><div><b>FVG list (backend)</b><span id="aeFvgList" class="mono">—</span></div><div><b>Signal history (backend)</b><span id="aeSigHist" class="mono">—</span></div></div>
 <div id="aeToasts"></div></div>
-<div class="card"><h2 style="margin:0;font-size:18px">AE Evolution vs NN — same ordered ticks, learning speed</h2>
-<p class="small" style="margin:6px 0 0">Both learners are backend-side, on the same ordered ticks. AE: 1 exact SelfEvolution step per tick. NN baseline: epochs / tick gradient steps per tick on the same tick. Learning speed = ordered ticks to hold deviation ≤ target + accuracy ≥ target for the hold window. This page only renders the backend race snapshot. It does not train any NN locally, does not use random numbers, and does not fabricate a race from local ticks.</p>
-<div class="grid"><div><b class="small">NN epochs / tick (backend-configured, read-only)</b><input id="raceEpochs" value="5" disabled></div><div><b class="small">NN learning rate (backend-configured, read-only)</b><input id="raceLR" value="0.01" disabled></div><div><b class="small">Deviation target (backend)</b><input id="raceTarget" value="0.02" disabled></div><div><b class="small">Hold window, ticks (backend)</b><input id="raceHold" value="20" disabled></div></div>
-<div class="btns"><button class="primary" id="raceStartBtn">Re-read race (POST /handshake)</button><button id="raceResetBtn">Reset race + seed + AEEA (POST /reset)</button></div>
-<canvas id="raceCanvas" class="chart-canvas" width="820" height="260"></canvas>
-<div class="kv"><div><b>AE deviation now (backend)</b><span id="raceAeDev">—</span></div><div><b>NN loss now (backend)</b><span id="raceNnLoss">—</span></div><div><b>AE ticks to target, held (backend)</b><span id="raceAeTicks">—</span></div><div><b>NN ticks to target, held (backend)</b><span id="raceNnTicks">—</span></div><div><b>Accuracy · backend</b><span id="raceDeltaAcc">—</span></div><div><b>Winner (backend)</b><span id="raceWinner">—</span></div></div>
-<p class="small" id="raceNote" style="margin-top:8px">Winner means winner against the small toy NN baseline on the backend, not a proof about neural networks in general. Race parameters are backend-configured; the inputs above are read-only displays.</p></div>
 <div class="card"><h2 style="margin:0;font-size:18px">Backend replies — what the backend said back</h2><p class="small" style="margin:6px 0 0">Last reply per button that talks to the backend. Play Hopf and Rest are companion-only and never call the backend, so they have no backend reply. AEEA polling replies are summarised in its log below.</p><div id="replies"></div><p class="small" style="margin-top:10px">URLs and auth values are redacted in logs below. This UI never shows a backend URL.</p></div>
 <div class="card"><h2 style="margin:0;font-size:18px">Loop log + AEEA log</h2><ul class="log" id="log"></ul><ul class="log" id="aeLog" style="margin-top:10px"></ul></div>
-<details><summary>What is AE? — tap to expand</summary><h3>What it is</h3><p>Fusion of AEI (Seedling) and AEEA (market engine) — Final, First edition. Seedling stays the AEI frontend. AEEA stays the market engine. The fusion is the shared ordered feed + the selection loop that closes both. Display in this file caps and truncates for readability, so the display itself is not lossless. See Risk disclosure.</p><h3>One ordered tick, two consumers (backend)</h3><ol><li><b>Market tick → ordered tick</b> — backend producer enqueues once; drain assigns ordered_index += 1 and consumes in arrival order.</li><li><b>AEEA OnTick</b> — tick → bars → 13 indicators + Ichimoku → m / n (effective thresholds &gt;69.33 / &lt;30.66; max 14) / delta → regime → BB → P_arc → signal iff delta-gate → order / trailing / FVG.</li><li><b>AEI x from the same tick</b> — x = |price − prevPrice| / 10000 in the backend (or 1/100 when zero). Frontend never sends x → prime → lattice → Hopf → s2 vs r2 → deviation → DbZ → I → SelfEvolution step + observer integral.</li><li><b>Selection closes the loop</b> — delta-gate firing + deviation falling keeps that generation; deviation growing rectifies psi and the next prime mutates the lattice.</li></ol><h3>Why AE is compared with NN learning speed</h3><p>NN must re-see data: epochs × dataset, gradients, replay, batch wait. AE sees each ordered tick once and takes one exact step. Learning speed is measured in ordered ticks, not epochs. A win here is a win against the small toy baseline on the backend, not a proof about neural networks in general.</p><h3>Backend wiring</h3><p><b>No backend URL is stored in this file.</b> Supply it at runtime, in this order: <span class="mono">window.AE_BACKEND_URL</span> → <span class="mono">?backend=</span> (read once, saved to localStorage, stripped from address bar) → saved localStorage → same-origin only if this file is served BY the backend itself. UI never shows a URL, only connected / WAITING / backing off. Without a supplied backend this page shows WAITING and posts nothing.</p><h3>WAITING</h3><p>With no backend, or with the backend unreachable, every panel shows WAITING. No bars, no price, no indicators, no seed values, no orders, no race values are faked locally. That is the whole point: WAITING is honest.</p><h3>What it does NOT do</h3><ul><li>It does not run the backend seed loop itself. It does not compute backend seed values with floats.</li><li>It does not replace app.py / AEI_Seed / SelfEvolutionCore / AEEA engine.</li><li>It does not talk to any exchange directly. Market data comes only via the backend.</li><li>It does not talk to the crawler relay directly for seed x — crawler is an ordered source via the backend.</li><li>It does not store a bot token or any secret. It only forwards the initData Telegram itself injected, in a header, never in a query string.</li><li>It does not store any backend URL — not plain, not base64, not encoded.</li><li>It does not train a local NN, does not generate local bars, and does not create local orders.</li></ul></details>
 <p class="nav">Also: <a href="./index.htm">Codex Symbolica</a></p></div>
 <script>(function(){"use strict";
 /* No backend URL in this file — not plain, not base64, not encoded. See resolveBackend() below. */
-var BACKEND_URL="", HAS_BACKEND=false, BACKEND_QS_WAS_MALFORMED=false;
+var BACKEND_URL="", HAS_BACKEND=false;
 function cleanU(u){return String(u||"").replace(/\/+$/,"");}
 function qsGet(k){try{return new URLSearchParams(window.location.search).get(k);}catch(e){return null;}}
 function resolveBackend(){
   var fused="";
   if(window.AE_BACKEND_URL) fused=cleanU(window.AE_BACKEND_URL);
-  else{var q=qsGet("backend"); if(q){try{var u=new URL(q); fused=cleanU(u.toString()); try{localStorage.setItem("ae_backend_url",fused);}catch(e){} try{history.replaceState({},"",window.location.pathname);}catch(e){}}catch(e){BACKEND_QS_WAS_MALFORMED=true;}}}
-  if(!fused){try{var s=localStorage.getItem("ae_backend_url"); if(s) fused=cleanU(s);}catch(e){}}
   if(!fused){try{var o=window.location&&window.location.origin||""; var h=window.location&&window.location.hostname||""; if(o&&o!=="null"&&window.location.protocol&&window.location.protocol.indexOf("http")===0&&h.indexOf("github.io")===-1&&h!=="localhost"&&h!=="127.0.0.1"){fused=cleanU(o);}}catch(e){}}
   BACKEND_URL=fused; HAS_BACKEND=!!fused;
 }
 resolveBackend();
 function baseFor(){return BACKEND_URL;}
 function getInitData(){try{if(window.Telegram&&window.Telegram.WebApp&&window.Telegram.WebApp.initData) return window.Telegram.WebApp.initData;}catch(e){} return "";}
+function telegramChatId(){try{if(window.Telegram&&window.Telegram.WebApp&&window.Telegram.WebApp.initDataUnsafe&&window.Telegram.WebApp.initDataUnsafe.chat) return window.Telegram.WebApp.initDataUnsafe.chat.id;}catch(e){} return null;}
+function telegramUsername(){try{if(window.Telegram&&window.Telegram.WebApp&&window.Telegram.WebApp.initDataUnsafe&&window.Telegram.WebApp.initDataUnsafe.user) return window.Telegram.WebApp.initDataUnsafe.user.username||"";}catch(e){} return "";}
 function redact(s){var t=String(s==null?"":s); t=t.replace(/initData=[^&\s"]+/gi,"initData=[redacted]"); t=t.replace(/backend=[^&\s"]+/gi,"backend=[redacted]"); t=t.replace(/https?:\/\/[^\s"']+/g,"[url redacted]"); return t;}
 function summarizeReply(kind,r){try{if(!r) return kind+" — no reply"; if(r.__error) return kind+" — error: "+(r.error||"unknown"); var keys=Object.keys(r||{}).slice(0,6).join(", "); return kind+" — ok="+(r.ok!==undefined?r.ok:"—")+" keys: "+keys;}catch(e){return kind+" — reply";}}
 var replies={};
@@ -181,12 +173,19 @@ async function apiDelete(path){
   var init=getInitData(); var headers={}; if(init) headers["X-Telegram-Init-Data"]=init;
   try{var res=await fetch(base+path,{method:"DELETE",headers:headers}); var data=await res.json().catch(function(){return {__error:true,error:"bad json"};}); if(!res.ok) data.__error=true; return data;}catch(e){return {__error:true,error:String(e&&e.message||e)};}
 }
+window.postAeSymbol = async function(sym){
+  var fx = {"EUR/USD":"EURUSD=X","GBP/USD":"GBPUSD=X","USD/JPY":"USDJPY=X","USD/CHF":"USDCHF=X","AUD/USD":"AUDUSD=X","USD/CAD":"USDCAD=X","NZD/USD":"NZDUSD=X","EUR/GBP":"EURGBP=X","EUR/JPY":"EURJPY=X","GBP/JPY":"GBPJPY=X","USD/ZAR":"USDZAR=X","EUR/ZAR":"EURZAR=X"};
+  var out = fx[sym] || sym;
+  if(!fx[sym] && typeof sym === "string" && sym.slice(-4) === "/USD"){ out = sym.replace("/", "-"); }
+  if(!HAS_BACKEND){pushLog("Symbol change blocked — WAITING, no backend."); return;}
+  var r = await apiPost("/symbol", {symbol: out});
+  recordReply("symbol", "Symbol " + out, "POST /symbol", r);
+  if(r && !r.__error){pushLog("Symbol: " + out); await refreshState();} else {pushLog("Symbol failed: " + (r.error || "unknown"));}
+};
 function setBadge(kind,text){var b=$("badge"), d=$("dot"); if(!b||!d) return; b.textContent=text; d.className="dot "+(kind==="ok"?"ok":kind==="err"?"err":"wait");}
 /* ---- Pet: companion UI only. Seed truth is backend-only. ---- */
-var DEFAULT_PET={hunger:40,energy:70,bond:15,xp:0,taught:[],localPrimes:0};
-var pet=JSON.parse(JSON.stringify(DEFAULT_PET));
-try{var saved=localStorage.getItem("ae_pet_v2"); if(saved){var p=JSON.parse(saved); if(p&&typeof p==="object"){pet.hunger=clamp(Number(p.hunger)||0,0,100); pet.energy=clamp(Number(p.energy)||0,0,100); pet.bond=clamp(Number(p.bond)||0,0,100); pet.xp=Math.max(0,Number(p.xp)||0); pet.taught=Array.isArray(p.taught)?p.taught.slice(0,40):[]; pet.localPrimes=Math.max(0,Number(p.localPrimes)||0);}}}catch(e){}
-function savePet(){try{localStorage.setItem("ae_pet_v2",JSON.stringify(pet));}catch(e){}}
+var pet={hunger:null,energy:null,bond:null,xp:0,taught:[],localPrimes:0,speech:""};
+function savePet(){}
 function renderPet(backendGen){
   $("speech").textContent=pet.speech||"Hello. I am your Seedling.";
   $("stageLabel").textContent="Stage: Seedling";
@@ -202,7 +201,61 @@ function renderPet(backendGen){
 function setPetSpeech(s){pet.speech=s; savePet(); renderPet(currentBackendGen);}
 var currentBackendGen=null;
 var liveState=null; var lastFeedPrice=null; var lastOrderedSeen=-1; var failures=0; var backoffUntil=0; var autoPoll=true;
-function currentMarketXDisplay(){ if(liveState&&liveState.seed&&liveState.seed.last_x) return liveState.seed.last_x; if(liveState&&liveState.feed&&liveState.feed.x) return liveState.feed.x; return "—"; } else if(typeof pts==="number"){
+/* x lift (backend only): crawler-hash first (x_source='crawler-hash'), else price-fallback |Δprice|/10000, else 1/100 tick-fallback. Price-fallback x is never presented as FG x. Frontend never computes or sends x. */
+  function currentMarketXDisplay(){ if(liveState && liveState.seed && liveState.seed.last_x) return String(liveState.seed.last_x); return "—"; }
+function updateFeedStripFrom(state){
+  if(!state) return;
+  var feed=state.feed||{};
+  var aeea=state.aeea||{};
+  var price=null;
+  if(feed.price!==undefined&&feed.price!==null){var pf=parseFloat(feed.price); if(isFinite(pf)) price=pf;}
+  if(price===null&&aeea.last_price!==undefined&&aeea.last_price!==null){var pa=parseFloat(aeea.last_price); if(isFinite(pa)) price=pa;}
+  window.__prevFeedPrice=(lastFeedPrice!==null&&lastFeedPrice!==undefined)?lastFeedPrice:price;
+  lastFeedPrice=price;
+  $("mOrdered").textContent=(state.ordered!==undefined?state.ordered:(feed.ordered!==undefined?feed.ordered:"—"));
+  $("mSymbol").textContent=aeea.symbol||"—";
+  $("mPrice").textContent=price!==null?price.toFixed(2):"—";
+  $("mProvider").textContent=feed.provider||aeea.last_provider||"—";
+  $("mSource").textContent=feed.provider||aeea.last_provider||"WAITING";
+  $("mX").textContent=currentMarketXDisplay();
+  var sel=$("aeSymbol"); if(sel){sel.innerHTML=""; var o=document.createElement("option"); o.value=aeea.symbol||"BTC/USD"; o.textContent=aeea.symbol||"BTC/USD"; sel.appendChild(o); sel.value=o.value;}
+  var tf=$("aeTimeframe"); if(tf&&aeea.timeframe){for(var i=0;i<tf.options.length;i++){if(tf.options[i].value===aeea.timeframe){tf.value=aeea.timeframe; break;}}}
+  var fw=$("feedWait"); if(fw){fw.style.display="none";}
+}
+function renderWaiting(reason){
+  setBadge("wait",reason||"WAITING — no backend");
+  $("mOrdered").textContent="—"; $("mPrice").textContent="—"; $("mProvider").textContent="—"; $("mSource").textContent="WAITING"; $("mX").textContent="—";
+  $("liveNote").textContent=reason||"WAITING — no backend yet. No seed values are shown until the backend delivers them.";
+  var ids=["lv-state","lv-tick","lv-gen","lv-prime-count","lv-lattice","lv-primes","lv-s2","lv-r2","lv-dev","lv-coh","lv-i","lv-psi","lv-hopf","lv-phi"];
+  ids.forEach(function(id){var el=$(id); if(el) el.textContent="—";});
+  $("aeDelta").textContent="—"; $("aeMN").textContent="—"; var sg=$("aeSignal"); sg.textContent="— WAITING"; sg.className="neut";
+  $("aeRegime").textContent="—"; $("aeParc").textContent="—"; $("aeFVG").textContent="—"; $("aeBB").textContent="—"; $("aeOrdersCount").textContent="—";
+  $("aeBB58").textContent="— WAITING — no real bars yet.";
+  $("aeGrid13").textContent="— WAITING — no real bars yet.";
+  $("aeDeriv").textContent="— WAITING"; $("aeProj").textContent="WAITING — no backend projection yet.";
+  $("aeChartNote").textContent="WAITING — no real bars yet. Chart draws only backend bars.";
+  $("aeOrdersBody").innerHTML="<tr><td colspan=\"7\" class=\"small\">WAITING — no backend orders yet.</td></tr>";
+  renderPet(null);
+}
+
+/* ---- Rendering: backend values only. No local computation of truth. ---- */
+function renderLiveSeed(state){
+  var seed=state.seed||state.aei||{};
+  var aeea=state.aeea||{};
+  var cs=state.cs_feedback||state.cs||{};
+  var obs=state.observer||{};
+  var ac=state.acoustization||{};
+  currentBackendGen=(seed.generation!==undefined?seed.generation:null);
+  $("liveNote").textContent="Backend state · ordered="+(state.ordered!==undefined?state.ordered:"—");
+  $("lv-state").textContent=(seed.coherent===true?"coherent":"")+((aeea.regime&&aeea.regime!=="WAITING")?" · "+aeea.regime:"");
+  $("lv-tick").textContent=(seed.tick!==undefined?seed.tick:"—");
+  $("lv-gen").textContent=(seed.generation!==undefined?seed.generation:"—");
+  $("lv-prime-count").textContent=(seed.prime_count!==undefined?seed.prime_count:"—");
+  var pts=seed.lattice_points;
+  if(Array.isArray(pts)){
+    $("lv-lattice").textContent=pts.length?("["+pts.slice(0,12).join(", ")+(pts.length>12?" … +"+(pts.length-12)+" more":"")+"]"):"[] (WAITING — empty)";
+    $("lv-primes").textContent=pts.length?pts.slice(-12).join(", "):"—";
+  } else if(typeof pts==="number"){
     $("lv-lattice").textContent="REJECTED — backend sent numeric placeholder "+pts+" (WAITING)";
     $("lv-primes").textContent="—";
   } else { $("lv-lattice").textContent="—"; $("lv-primes").textContent="—"; }
@@ -211,6 +264,7 @@ function currentMarketXDisplay(){ if(liveState&&liveState.seed&&liveState.seed.l
   $("lv-dev").textContent=fmtFrac(seed.deviation_sq!==undefined?seed.deviation_sq:seed.deviation);
   $("lv-coh").textContent=(seed.coherent===true?"s2 = r2 · coherent":seed.coherent===false?"s2 != r2":"—");
   $("lv-i").textContent=fmtFrac(seed.I!==undefined?seed.I:seed.intelligence);
+  (function(){var iv=parseFracNum(seed.I!==undefined?seed.I:seed.intelligence); if(seed.I===undefined&&seed.intelligence===undefined){$("lv-i-gate").textContent="—";} else if(iv===1){$("lv-i-gate").textContent="UNITY · I = 1 · s = r";} else if(iv>=2/3){$("lv-i-gate").textContent="GATE MET · I >= 2/3";} else {$("lv-i-gate").textContent="GATE NOT MET · I < 2/3";}})();
   $("lv-psi").textContent=fmtQuat(seed.psi);
   $("lv-hopf").textContent=fmtHopf(seed.hopf);
   $("lv-phi").textContent=fmtQuat(seed.phi);
@@ -220,7 +274,6 @@ function currentMarketXDisplay(){ if(liveState&&liveState.seed&&liveState.seed.l
   $("lv-lattice-detail").textContent="count "+(seed.lattice_count!==undefined?seed.lattice_count:(Array.isArray(pts)?pts.length:"—"))+" · prime "+(seed.prime!==undefined?seed.prime:"—")+" · generation "+(seed.generation!==undefined?seed.generation:"—");
   $("lv-fibration").textContent="phi "+fmtQuat(seed.phi)+" · hopf "+fmtHopf(seed.hopf);
   $("lv-observer").textContent="O[Psi] "+fmtFrac(obs.O_psi!==undefined?obs.O_psi:obs.observer)+" · grid "+(obs.grid||"4^4");
-  $("lv-evolution").textContent="race tick "+(race.tick!==undefined?race.tick:"—")+" · ae_dev "+(race.ae_dev!==undefined&&race.ae_dev!==null?race.ae_dev:"—")+" · winner "+(race.winner||"—");
   $("lv-dbz").textContent=(seed.phi&&seed.phi.a!==undefined?("Re[phi] branch "+(parseFracNum(seed.phi.a)>0?"A":"B")):"—")+" · I "+fmtFrac(seed.I);
   $("lv-toasts").textContent=(state.aea_notification?JSON.stringify(state.aea_notification).slice(0,160):"—");
   renderPet(currentBackendGen);
@@ -240,10 +293,12 @@ function renderAEEA(state){
   $("aeParc").textContent=proj&&proj.P_arc!==undefined&&proj.P_arc!==null?Number(proj.P_arc).toFixed(2):"—";
   var fvg=Array.isArray(aeea.fvg)?aeea.fvg:[];
   $("aeFVG").textContent=String(fvg.length);
-  var bb=aeea.bb||null;
-  if(bb&&bb.mid!==undefined){$("aeBB").textContent="P"+(bb.period||"—")+" · "+Number(bb.lower).toFixed(2)+" / "+Number(bb.mid).toFixed(2)+" / "+Number(bb.upper).toFixed(2);
-    $("aeBB58").textContent="P"+(bb.period||"—")+" (highest available period, backend) · lower "+Number(bb.lower).toFixed(2)+" · mid "+Number(bb.mid).toFixed(2)+" · upper "+Number(bb.upper).toFixed(2)+" · sd "+(bb.sd!==undefined?Number(bb.sd).toFixed(4):"—")+" · last "+(bb.last!==undefined?Number(bb.last).toFixed(2):"—");}
-  else {$("aeBB").textContent="— WAITING (need ≥3 bars)"; $("aeBB58").textContent="— WAITING — backend BB is null until 3 real bars exist.";}
+  var fam=(state&&state.bb_family)||[];
+    if(fam&&fam.length){$("aeBB").textContent="BB family (backend, periods 3-60, dev 2, population sigma) · "+fam.length+" periods · latest P"+fam[fam.length-1].period+" mid "+fam[fam.length-1].mid+" upper "+fam[fam.length-1].upper+" lower "+fam[fam.length-1].lower; renderBbFamily(fam);}
+    else {$("aeBB").textContent="— WAITING (need ≥3 bars)"; renderBbFamily([]);}
+    var bb=aeea.bb||null;
+    if(bb&&bb.mid!==undefined){$("aeBB58").textContent="P58 member only (backend) · lower "+Number(bb.lower).toFixed(2)+" · mid "+Number(bb.mid).toFixed(2)+" · upper "+Number(bb.upper).toFixed(2)+" · sd "+(bb.sd!==undefined?Number(bb.sd).toFixed(4):"—")+" · last "+(bb.last!==undefined?Number(bb.last).toFixed(2):"—");}
+    else {$("aeBB58").textContent="— WAITING — BB58 member is null until 58 real bars exist. See BB family above.";}
   var ind=aeea.indicators||{};
   var keys=["ADX","STOCH","RVI","AC","FORCE","OBV","AD","MFI","MOM","DeM","WPR","CCI","RSI"];
   var lines=keys.map(function(k){var v=ind[k]; return k+": "+(v===null||v===undefined?"— WAITING":Number(v).toFixed(2));});
@@ -275,31 +330,15 @@ function renderOrdersFrom(orders,src){
     return "<tr><td>#"+esc(o.ticket!==undefined?o.ticket:o.id)+" (id "+esc(o.id)+")</td><td class=\""+cls+"\">"+esc(o.side)+"</td><td>"+esc(o.volume)+"</td><td>"+esc(o.price)+"</td><td>"+esc(sltp)+"</td><td>"+esc(o.status)+"</td><td>"+esc(src)+"</td></tr>";
   }).join("");
 }
-function renderRace(state){
-  var race=state.race||state.evolution_vs_nn||{};
-  if(!race||Object.keys(race).length===0){renderRaceWaiting(); return;}
-  $("raceAeDev").textContent=(race.ae_dev!==undefined&&race.ae_dev!==null?Number(race.ae_dev).toFixed(4):"—");
-  $("raceNnLoss").textContent=(race.nn_loss!==undefined&&race.nn_loss!==null?Number(race.nn_loss).toFixed(6):"—");
-  $("raceAeTicks").textContent=(race.ae_done_at!==undefined&&race.ae_done_at!==null?race.ae_done_at:"— (not held yet)")+" · hold "+(race.ae_hold!==undefined?race.ae_hold:"—")+"/"+(race.hold_window||20);
-  $("raceNnTicks").textContent=(race.nn_done_at!==undefined&&race.nn_done_at!==null?race.nn_done_at:"— (not held yet)")+" · hold "+(race.nn_hold!==undefined?race.nn_hold:"—")+"/"+(race.hold_window||20);
-  $("raceDeltaAcc").textContent="AE acc "+(race.ae_acc!==undefined?Number(race.ae_acc).toFixed(1)+"%":"—")+" ("+(race.ae_correct||0)+"/"+(race.ae_total||0)+") · NN acc "+(race.nn_acc!==undefined?Number(race.nn_acc).toFixed(1)+"%":"—")+" ("+(race.nn_correct||0)+"/"+(race.nn_total||0)+")";
-  $("raceWinner").textContent=race.winner||"— (no winner yet)";
-  var t=$("raceTarget"); if(t) t.value=race.target_dev!==undefined?race.target_dev:"0.02";
-  var h=$("raceHold"); if(h) h.value=race.hold_window!==undefined?race.hold_window:"20";
-  $("raceNote").textContent="Backend race · tick "+(race.tick!==undefined?race.tick:"—")+" · target_dev "+(race.target_dev!==undefined?race.target_dev:"—")+" · target_acc "+(race.target_acc!==undefined?race.target_acc:"—")+"% · hold "+(race.hold_window||"—")+" ticks · running "+(race.running?"yes":"no")+". "+(race.learning_speed||"");
-  drawRace(race);
-}
 function drawAeChartWaiting(){
-  var c=$("aeChartCanvas"); if(!c) return; var ctx=c.getContext("2d"); ctx.fillStyle="#050510"; ctx.fillRect(0,0,c.width,c.height); ctx.strokeStyle="#2a3560"; ctx.strokeRect(0.5,0.5,c.width-1,c.height-1); ctx.fillStyle="#9aa6d6"; ctx.font="16px system-ui"; ctx.fillText("WAITING — no real bars yet",20,30); ctx.fillStyle="#ffd166"; ctx.font="12px system-ui"; ctx.fillText("Chart draws only backend bars from GET /miniapp-state.",20,52);
+  var c=$("aeChartCanvas"); if(!c) return; var ctx=c.getContext("2d"); ctx.fillStyle="#050510"; ctx.fillRect(0,0,c.width,c.height); ctx.strokeStyle="#1E2A4A"; ctx.strokeRect(0.5,0.5,c.width-1,c.height-1); ctx.fillStyle="#9aa6d6"; ctx.font="16px system-ui"; ctx.fillText("WAITING — no real bars yet",20,30); ctx.fillStyle="#FBBF24"; ctx.font="12px system-ui"; ctx.fillText("Chart draws only backend bars from GET /miniapp-state.",20,52);
 }
-function drawRaceWaiting(){
-  var c=$("raceCanvas"); if(!c) return; var ctx=c.getContext("2d"); ctx.fillStyle="#050510"; ctx.fillRect(0,0,c.width,c.height); ctx.strokeStyle="#2a3560"; ctx.strokeRect(0.5,0.5,c.width-1,c.height-1); ctx.fillStyle="#9aa6d6"; ctx.font="16px system-ui"; ctx.fillText("WAITING — no backend race yet",20,30);
-}
+
 function drawCodexWaiting(){
-  var c=$("codexCanvas"); if(!c) return; var ctx=c.getContext("2d"); ctx.fillStyle="#050510"; ctx.fillRect(0,0,c.width,c.height); ctx.strokeStyle="#2a3560"; ctx.strokeRect(0.5,0.5,c.width-1,c.height-1); ctx.fillStyle="#9aa6d6"; ctx.font="16px system-ui"; ctx.fillText("WAITING — no backend seed yet",20,30); ctx.fillStyle="#ffd166"; ctx.font="12px system-ui"; ctx.fillText("Codex draws only backend s2 / r2 / deviation / lattice.",20,52);
+  var c=$("codexCanvas"); if(!c) return; var ctx=c.getContext("2d"); ctx.fillStyle="#050510"; ctx.fillRect(0,0,c.width,c.height); ctx.strokeStyle="#1E2A4A"; ctx.strokeRect(0.5,0.5,c.width-1,c.height-1); ctx.fillStyle="#9aa6d6"; ctx.font="16px system-ui"; ctx.fillText("WAITING — no backend seed yet",20,30); ctx.fillStyle="#FBBF24"; ctx.font="12px system-ui"; ctx.fillText("Codex draws only backend s2 / r2 / deviation / lattice.",20,52);
 }
 function drawAeChart(bars){
-  var c=$("aeChartCanvas"); if(!c) return; var ctx=c.getContext("2d"); ctx.fillStyle="#050510"; ctx.fillRect(0,0,c.width,c.height); ctx.strokeStyle="#2a3560"; ctx.strokeRect(0.5,0.5,c.width-1,c.height-1);
+  var c=$("aeChartCanvas"); if(!c) return; var ctx=c.getContext("2d"); ctx.fillStyle="#050510"; ctx.fillRect(0,0,c.width,c.height); ctx.strokeStyle="#1E2A4A"; ctx.strokeRect(0.5,0.5,c.width-1,c.height-1);
   if(!bars||!bars.length){drawAeChartWaiting(); return;}
   var type=($("aeChartType")||{}).value||"candles";
   var lo=Math.min.apply(null,bars.map(function(b){return Number(b.low);})), hi=Math.max.apply(null,bars.map(function(b){return Number(b.high);}));
@@ -307,62 +346,51 @@ function drawAeChart(bars){
   var pad=24, W=c.width-2*pad, H=c.height-2*pad;
   function X(i){return pad+(i/(Math.max(1,bars.length-1)))*W;}
   function Y(p){return pad+H-((p-lo)/(hi-lo))*H;}
-  ctx.strokeStyle="#2a3560"; ctx.beginPath(); ctx.moveTo(pad,pad); ctx.lineTo(pad,pad+H); ctx.lineTo(pad+W,pad+H); ctx.stroke();
+  ctx.strokeStyle="#1E2A4A"; ctx.beginPath(); ctx.moveTo(pad,pad); ctx.lineTo(pad,pad+H); ctx.lineTo(pad+W,pad+H); ctx.stroke();
   ctx.fillStyle="#9aa6d6"; ctx.font="11px system-ui"; ctx.fillText("hi "+hi.toFixed(2),pad+6,pad+12); ctx.fillText("lo "+lo.toFixed(2),pad+6,pad+H-6);
   var bw=Math.max(2,(W/bars.length)*0.7);
   bars.forEach(function(b,i){
     var x=X(i), o=Number(b.open), h=Number(b.high), l=Number(b.low), cl=Number(b.close);
-    var up=cl>=o; ctx.strokeStyle=up?"#7ee787":"#ff8fa0"; ctx.fillStyle=up?"#7ee787":"#ff8fa0";
+    var up=cl>=o; ctx.strokeStyle=up?"#34D399":"#F87171"; ctx.fillStyle=up?"#34D399":"#F87171";
     ctx.beginPath(); ctx.moveTo(x,Y(h)); ctx.lineTo(x,Y(l)); ctx.stroke();
-    if(type==="line"){if(i>0){var p=bars[i-1]; ctx.strokeStyle="#6ee7ff"; ctx.beginPath(); ctx.moveTo(X(i-1),Y(Number(p.close))); ctx.lineTo(x,Y(cl)); ctx.stroke();}}
+    if(type==="line"){if(i>0){var p=bars[i-1]; ctx.strokeStyle="#5CE1E6"; ctx.beginPath(); ctx.moveTo(X(i-1),Y(Number(p.close))); ctx.lineTo(x,Y(cl)); ctx.stroke();}}
     else if(type==="bars"){ctx.beginPath(); ctx.moveTo(x-bw/2,Y(o)); ctx.lineTo(x,Y(o)); ctx.moveTo(x,Y(cl)); ctx.lineTo(x+bw/2,Y(cl)); ctx.stroke();}
     else {var top=Y(Math.max(o,cl)), bot=Y(Math.min(o,cl)); ctx.fillRect(x-bw/2,top,bw,Math.max(1,bot-top));}
   });
   ctx.fillStyle="#eef1ff"; ctx.font="12px system-ui"; ctx.fillText("Backend bars: "+bars.length+" · last close "+Number(bars[bars.length-1].close).toFixed(2),pad+6,pad+H+16);
 }
-function drawRace(race){
-  var c=$("raceCanvas"); if(!c) return; var ctx=c.getContext("2d"); ctx.fillStyle="#050510"; ctx.fillRect(0,0,c.width,c.height); ctx.strokeStyle="#2a3560"; ctx.strokeRect(0.5,0.5,c.width-1,c.height-1);
-  if(!race){drawRaceWaiting(); return;}
-  ctx.fillStyle="#6ee7ff"; ctx.font="14px system-ui"; ctx.fillText("AE deviation: "+(race.ae_dev!==undefined&&race.ae_dev!==null?Number(race.ae_dev).toFixed(4):"—"),20,28);
-  ctx.fillStyle="#ffd166"; ctx.fillText("NN loss: "+(race.nn_loss!==undefined&&race.nn_loss!==null?Number(race.nn_loss).toFixed(6):"—"),20,50);
-  ctx.fillStyle="#7ee787"; ctx.fillText("Target dev ≤ "+(race.target_dev!==undefined?race.target_dev:"0.02")+" · hold "+(race.hold_window||20)+" ticks · AE hold "+(race.ae_hold||0)+" · NN hold "+(race.nn_hold||0),20,72);
-  ctx.fillStyle="#eef1ff"; ctx.fillText("Winner: "+(race.winner||"— (no winner yet)"),20,94);
-  ctx.fillStyle="#9aa6d6"; ctx.font="12px system-ui"; ctx.fillText("Backend race only. No local NN training, no local race ticks.",20,116);
-  var dev=race.ae_dev; if(typeof dev==="number"&&isFinite(dev)){var w=Math.min(1,dev/0.1)* (c.width-40); ctx.fillStyle="#6ee7ff"; ctx.fillRect(20,130,w,14); ctx.strokeStyle="#2a3560"; ctx.strokeRect(20,130,c.width-40,14);}
-}
 function drawCodex(seed){
-  var c=$("codexCanvas"); if(!c) return; var ctx=c.getContext("2d"); ctx.fillStyle="#050510"; ctx.fillRect(0,0,c.width,c.height); ctx.strokeStyle="#2a3560"; ctx.strokeRect(0.5,0.5,c.width-1,c.height-1);
+  var c=$("codexCanvas"); if(!c) return; var ctx=c.getContext("2d"); ctx.fillStyle="#050510"; ctx.fillRect(0,0,c.width,c.height); ctx.strokeStyle="#1E2A4A"; ctx.strokeRect(0.5,0.5,c.width-1,c.height-1);
   if(!seed||seed.s2===undefined){drawCodexWaiting(); return;}
   var s2=parseFracNum(seed.s2), r2=parseFracNum(seed.r2), dev=parseFracNum(seed.deviation!==undefined?seed.deviation:seed.deviation_sq);
   ctx.fillStyle="#eef1ff"; ctx.font="13px system-ui"; ctx.fillText("s2 "+fmtFrac(seed.s2)+" · r2 "+fmtFrac(seed.r2)+" · dev "+fmtFrac(seed.deviation),20,26);
   ctx.fillStyle="#9aa6d6"; ctx.font="12px system-ui"; ctx.fillText("generation "+(seed.generation!==undefined?seed.generation:"—")+" · prime "+(seed.prime!==undefined?seed.prime:"—")+" · lattice "+(Array.isArray(seed.lattice_points)?seed.lattice_points.length:"—"),20,46);
   var cx=c.width/2, cy=120, R=70;
-  ctx.strokeStyle="#6ee7ff"; ctx.beginPath(); ctx.arc(cx,cy,R,0,Math.PI*2); ctx.stroke();
+  ctx.strokeStyle="#5CE1E6"; ctx.beginPath(); ctx.arc(cx,cy,R,0,Math.PI*2); ctx.stroke();
   if(isFinite(s2)&&isFinite(r2)&&r2!==0){var ratio=Math.max(0,Math.min(1,s2/(r2*2+0.000001))); ctx.fillStyle="#ff8fc7"; ctx.beginPath(); ctx.arc(cx,cy,R*ratio,0,Math.PI*2); ctx.fill();}
-  ctx.fillStyle="#ffd166"; ctx.font="12px system-ui"; ctx.fillText("deviation (display): "+(isFinite(dev)?dev.toFixed(4):"—"),20,196);
+  ctx.fillStyle="#FBBF24"; ctx.font="12px system-ui"; ctx.fillText("deviation (display): "+(isFinite(dev)?dev.toFixed(4):"—"),20,196);
   $("codexNote").textContent="Codex canvas draws only backend seed values (s2 / r2 / deviation / lattice).";
 }
 
 /* ---- Actions: backend only. No local fallback, no local truth. ---- */
 function updateButtonStates(){
-  var ids=["feedBtn","teachBtn","sayBtn","crawlerEnqueueBtn","csFeedbackBtn","lingA","lingU","lingM","lingAUM","aePlaceBtn","aeCloseBtn","aeFVGAddBtn","aeFVGClrBtn","aeOnInitBtn","aeReInitBtn","raceStartBtn","raceResetBtn"];
   ids.forEach(function(id){var el=$(id); if(el) el.disabled=!HAS_BACKEND;});
 }
 function setBusy(el,b){if(el) el.disabled=b||!HAS_BACKEND;}
 async function doFeed(){
-  if(!HAS_BACKEND){pushLog("Feed blocked — WAITING, no backend."); return;}
+  if(!HAS_BACKEND){pushLog("Feed blocked - WAITING, no backend."); return;}
   var btn=$("feedBtn"); setBusy(btn,true);
   var r=await apiPost("/step",{});
   setBusy(btn,false);
-  recordReply("step","Feed a Prime · Step","POST /step",r);
-  if(r&&!r.__error&&r.ok){pet.localPrimes+=1; pet.bond=clamp(pet.bond+2,0,100); pet.xp+=1; savePet(); var bx=(r.x||(r.seed&&r.seed.last_x)||"—"); setPetSpeech("Backend stepped the seed with x = "+bx+". Generation is backend truth, not my hunger."); pushLog("Feed: POST /step x="+bx+" ok."); await refreshState();}
-  else {pushLog("Feed failed: "+((r&&r.error)||"unknown")); setPetSpeech("Feed failed — backend did not confirm. WAITING.");}
+  recordReply("step","Feed a Prime - Step","POST /step",r);
+  if(r&&!r.__error){setPetSpeech("Seed advances only on ordered market tick. POST /step returns current seed. Generation is backend truth, not my hunger."); pushLog("Feed: POST /step {} ok."); await refreshState();}
+  else {pushLog("Feed failed: "+(r.error||"unknown")); setPetSpeech("Feed failed - backend did not confirm. WAITING.");}
 }
 async function encodeSyllable(syl){
   if(!HAS_BACKEND){pushLog("Lingoso blocked — WAITING, no backend."); return;}
   var r=await apiPost("/encode-syllable",{syllable:syl});
   recordReply("encode","Lingoso "+syl,"POST /encode-syllable",r);
-  var enc=r&&(r.encoding||r.encoded)?(r.encoding||r.encoded):null;
+  var enc=r&&r.encoding?r.encoding:null;
   if(r&&!r.__error&&enc){
     $("lingLast").textContent=enc.syllable||syl;
     $("lingArc").textContent=enc.arc_check||"—";
@@ -390,11 +418,10 @@ async function doSay(){
   var r=await apiPost("/say",{text:text});
   recordReply("say","Say","POST /say",r);
   if(r&&!r.__error){
-    var enc=r.encoded?(" Backend encoded AUM syllables: "+(r.encoded.arc_check||"")+" arc_sq "+fmtFrac(r.encoded.arc_sq)):"";
+    var enc=r.say?(" Backend CS: "+r.say):"";
     setPetSpeech("You said: "+text+"."+enc);
     pushLog("Say: "+text);
-    if(r.aea) {liveState=r.aea; updateFeedStripFrom(r.aea); renderLiveSeed(r.aea); renderAEEA(r.aea); renderRace(r.aea);}
-    else await refreshState();
+    await refreshState();
   } else {pushLog("Say failed: "+(r.error||"unknown"));}
   $("talkInput").value="";
 }
@@ -411,7 +438,7 @@ async function doCrawlerEnqueue(){
 async function doCsFeedback(){
   if(!HAS_BACKEND){pushLog("CS feedback blocked — WAITING, no backend."); return;}
   var note=($("csFeedbackNote").value||"").trim();
-  var r=await apiPost("/cs-feedback",{feedback:note||"frontend heartbeat",source:"frontend",ordered:liveState?liveState.ordered:null});
+  var r=await apiPost("/cs-feedback",{kind:"feedback",text:note,user:telegramUsername()});
   recordReply("cs","CS feedback","POST /cs-feedback",r);
   pushLog("CS feedback → "+(r&&r.ok?"ok":"failed"));
   $("csFeedbackNote").value="";
@@ -423,7 +450,7 @@ async function doPlaceOrder(){
   var vol=parseFloat($("aeOrderVol").value||"0.01");
   if(!isFinite(vol)||vol<=0){pushLog("Place order: volume must be > 0."); return;}
   var slRaw=($("aeOrderSL").value||"").trim(), tpRaw=($("aeOrderTP").value||"").trim();
-  var sl=slRaw===""?null:parseFloat(slRaw), tp=tpRaw===""?null:parseFloat(tpRaw);
+  var sl=slRaw===""?0:parseFloat(slRaw), tp=tpRaw===""?0:parseFloat(tpRaw);
   if(slRaw!==""&&!isFinite(sl)){pushLog("Place order: SL must be a number or empty."); return;}
   if(tpRaw!==""&&!isFinite(tp)){pushLog("Place order: TP must be a number or empty."); return;}
   var r=await apiPost("/order",{side:side,volume:vol,sl:sl,tp:tp});
@@ -435,7 +462,7 @@ async function doPlaceOrder(){
 }
 async function doCloseAll(){
   if(!HAS_BACKEND){pushLog("Close all blocked — WAITING, no backend."); return;}
-  var r=await apiPost("/order/close",{});
+  var r=await apiPost("/order/close",{all:true});
   recordReply("close","Close all","POST /order/close",r);
   if(r&&!r.__error){pushAeLog("Close all: backend says "+JSON.stringify(r).slice(0,240)); pushLog("Close all: backend confirmed.");}
   else {pushAeLog("Close all failed: "+(r.error||"unknown"));}
@@ -443,7 +470,6 @@ async function doCloseAll(){
 }
 async function doOnInit(){
   if(!HAS_BACKEND){pushLog("OnInit blocked — WAITING, no backend."); return;}
-  if(!window.confirm("OnInit = backend POST /reset. This resets AEEA + race + seed on the backend. Continue?")) return;
   var r=await apiPost("/reset",{});
   recordReply("reset","OnInit","POST /reset",r);
   pushLog("OnInit → POST /reset "+(r&&r.ok?"ok":"failed"));
@@ -453,21 +479,6 @@ async function doReInit(){
   if(!HAS_BACKEND){pushLog("OnReInit blocked — WAITING, no backend."); return;}
   pushLog("OnReInit: re-reading backend state (no backend wipe).");
   await refreshState(); await fetchSecondary();
-}
-async function doRaceStart(){
-  if(!HAS_BACKEND){pushLog("Race re-read blocked — WAITING, no backend."); return;}
-  var r=await apiPost("/handshake",{});
-  recordReply("handshake","Race handshake","POST /handshake",r);
-  pushLog("Race handshake → "+(r&&r.ok?"ok":"failed"));
-  await refreshState();
-}
-async function doRaceReset(){
-  if(!HAS_BACKEND){pushLog("Race reset blocked — WAITING, no backend."); return;}
-  if(!window.confirm("Reset race = backend POST /reset. This resets AEEA + race + seed on the backend. Continue?")) return;
-  var r=await apiPost("/reset",{});
-  recordReply("reset2","Race reset","POST /reset",r);
-  pushLog("Race reset → POST /reset "+(r&&r.ok?"ok":"failed"));
-  await refreshState();
 }
 async function fetchSecondary(){
   if(!HAS_BACKEND) return;
@@ -505,15 +516,19 @@ async function refreshState(){
   if(data&&data.synthetic===true){pushLog("Rejected: backend flagged synthetic. Showing WAITING."); renderWaiting("WAITING — backend flagged synthetic (rejected)."); return;}
   liveState=data; lastOrderedSeen=data.ordered!==undefined?data.ordered:lastOrderedSeen;
   setBadge("ok","connected");
-  updateFeedStripFrom(data); renderLiveSeed(data); renderAEEA(data); renderRace(data);
   $("aeChartNote").textContent="Backend bars: "+((data.aeea&&data.aeea.bars)?data.aeea.bars.length:0)+" · provider "+((data.feed&&data.feed.provider)||(data.aeea&&data.aeea.last_provider)||"—")+". Chart tap sets SL / TP helper — it does not create FVG.";
 }
+var sndOn=false, sndCtx=null, sndTimer=null;
+function sndEnsureCtx(){if(!sndCtx){try{sndCtx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){}} if(sndCtx&&sndCtx.state==="suspended"){try{sndCtx.resume();}catch(e){}} return sndCtx;}
+function sndPlayTone(freq,dur,gainVal,type){if(!sndOn) return; var ctx=sndEnsureCtx(); if(!ctx) return; try{var o=ctx.createOscillator(), g=ctx.createGain(); o.type=type||"sine"; o.frequency.value=Math.max(40,Math.min(2000,freq)); g.gain.value=0.0001; g.gain.exponentialRampToValueAtTime(Math.max(0.001,gainVal||0.15),ctx.currentTime+0.02); g.gain.exponentialRampToValueAtTime(0.0001,ctx.currentTime+(dur||2)); o.connect(g); g.connect(ctx.destination); o.start(); o.stop(ctx.currentTime+(dur||2));}catch(e){}}
+function sndPlaySelf(){var ac=(liveState&&liveState.acoustization)?liveState.acoustization:null; if(!ac||ac.frequency===null||ac.frequency===undefined){$("sndState").textContent="Sound — WAITING, no backend acoustization yet."; return;} sndEnsureCtx(); sndOn=true; var f=parseFracNum(ac.frequency), a=parseFracNum(ac.amplitude); if(!isFinite(f)) f=440; if(!isFinite(a)) a=0.15; sndPlayTone(f,2,Math.max(0.001,Math.min(1,a)),ac.type||"sine"); $("sndState").textContent="Sound — played backend acoustization · frequency "+f+" · amplitude "+a;}
+function sndSetOn(on){sndOn=on; if(!on&&sndTimer){clearInterval(sndTimer); sndTimer=null; $("sndContBtn").textContent="Continuous Sound: OFF";} if(on) sndEnsureCtx(); $("sndState").textContent=on?"Sound ON — tap Play Self As Sound, or Continuous Sound for the 5-second timer.":"Sound OFF.";}
+function sndToggleContinuous(){if(sndTimer){clearInterval(sndTimer); sndTimer=null; $("sndContBtn").textContent="Continuous Sound: OFF"; $("sndState").textContent="Continuous Sound OFF."; return;} sndEnsureCtx(); sndOn=true; $("sndContBtn").textContent="Continuous Sound: ON"; $("sndState").textContent="Continuous Sound ON — replaying the latest backend acoustization on a 5-second timer."; sndPlaySelf(); sndTimer=setInterval(function(){sndPlaySelf();},5000);}
 function wire(){
   $("feedBtn").addEventListener("click",function(){haptic("impact"); doFeed();});
   $("playBtn").addEventListener("click",function(){haptic("impact"); pet.energy=clamp(pet.energy-5,0,100); pet.bond=clamp(pet.bond+3,0,100); savePet(); setPetSpeech("Hopf play (companion only). My phi is backend truth — this play does not change the seed.");});
   $("restBtn").addEventListener("click",function(){haptic("impact"); pet.energy=clamp(pet.energy+15,0,100); pet.hunger=clamp(pet.hunger+5,0,100); savePet(); setPetSpeech("Rest (companion only). Energy +15. Seed is untouched.");});
   $("talkBtn").addEventListener("click",function(){haptic("impact"); $("talkInput").focus(); setPetSpeech("What do you want to say? Type below and tap Say — Say goes to the backend.");});
-  $("resetBtn").addEventListener("click",async function(){if(!HAS_BACKEND){pushLog("Reset blocked — WAITING, no backend."); return;} if(!window.confirm("Reset = backend POST /reset (AEEA + race + seed) and clears companion pet. Continue?")) return; var r=await apiPost("/reset",{}); recordReply("reset3","Reset","POST /reset",r); pet=JSON.parse(JSON.stringify(DEFAULT_PET)); savePet(); setPetSpeech("Reset confirmed by backend. I am a fresh Seedling."); pushLog("Reset → POST /reset "+(r&&r.ok?"ok":"failed")); await refreshState();});
   $("teachBtn").addEventListener("click",function(){haptic("impact"); doTeach();});
   $("sayBtn").addEventListener("click",function(){haptic("impact"); doSay();});
   $("teachInput").addEventListener("keydown",function(e){if(e.key==="Enter") doTeach();});
@@ -524,14 +539,16 @@ function wire(){
   $("lingAUM").addEventListener("click",function(){encodeSyllable("AUM");});
   $("crawlerEnqueueBtn").addEventListener("click",function(){doCrawlerEnqueue();});
   $("csFeedbackBtn").addEventListener("click",function(){doCsFeedback();});
+  $("sndOnBtn").addEventListener("click",function(){haptic("impact"); sndSetOn(true);});
+  $("sndOffBtn").addEventListener("click",function(){haptic("impact"); sndSetOn(false);});
+  $("sndPlaySelfBtn").addEventListener("click",function(){haptic("impact"); sndPlaySelf();});
+  $("sndContBtn").addEventListener("click",function(){haptic("impact"); sndToggleContinuous();});
   $("aePlaceBtn").addEventListener("click",function(){haptic("impact"); doPlaceOrder();});
   $("aeCloseBtn").addEventListener("click",function(){haptic("impact"); doCloseAll();});
   $("aeFVGAddBtn").addEventListener("click",function(){pushLog("FVG: re-read from backend (no local add)."); refreshState();});
   $("aeFVGClrBtn").addEventListener("click",function(){pushLog("FVG: re-read from backend (no local clear)."); refreshState();});
   $("aeOnInitBtn").addEventListener("click",function(){doOnInit();});
   $("aeReInitBtn").addEventListener("click",function(){doReInit();});
-  $("raceStartBtn").addEventListener("click",function(){doRaceStart();});
-  $("raceResetBtn").addEventListener("click",function(){doRaceReset();});
   $("aeAutoBtn").addEventListener("click",function(){autoPoll=!autoPoll; $("aeAutoBtn").textContent="Auto-poll: "+(autoPoll?"ON":"OFF"); pushLog("Auto-poll "+(autoPoll?"ON":"OFF"));});
   $("aeChartType").addEventListener("change",function(){if(liveState&&liveState.aeea) drawAeChart(liveState.aeea.bars||[]);});
   $("engLots").addEventListener("change",function(){var v=$("engLots").value; if(v) $("aeOrderVol").value=v;});
@@ -541,18 +558,18 @@ function wire(){
     var bars=liveState.aeea.bars; var lo=Math.min.apply(null,bars.map(function(b){return Number(b.low);})), hi=Math.max.apply(null,bars.map(function(b){return Number(b.high);}));
     var rect=ev.target.getBoundingClientRect(); var y=(ev.clientY-rect.top)/rect.height; var pad=24, H=ev.target.height-2*pad; var frac=1-((ev.clientY-rect.top-pad)/H); if(frac<0) frac=0; if(frac>1) frac=1; var price=lo+(hi-lo)*frac;
     $("aeOrderSL").value=price.toFixed(2); pushLog("Chart tap set SL helper to "+price.toFixed(2)+" — does not create FVG or an order.");
+    var xi=(ev.clientX-rect.left)/rect.width; var idx=Math.floor(xi*bars.length); if(idx<0) idx=0; if(idx>=bars.length) idx=bars.length-1;
+    apiGet("/aea-notification?cursor="+idx,6000).then(function(r){if(r&&!r.__error&&r.text){$("aeBotPreview").textContent="Bot preview · cursor "+idx+": "+r.text;} else {$("aeBotPreview").textContent="Bot preview — backend did not confirm cursor "+idx+". WAITING.";}});
   });
 }
 async function boot(){
   try{if(window.Telegram&&window.Telegram.WebApp){window.Telegram.WebApp.ready(); try{window.Telegram.WebApp.expand();}catch(e){}}}catch(e){}
   wire(); updateButtonStates(); renderPet(null); renderReplies();
-  if(BACKEND_QS_WAS_MALFORMED) pushLog("?backend= was malformed and ignored. Supply a valid backend URL at runtime.");
-  if(!HAS_BACKEND){renderWaiting("WAITING — no backend"); pushLog("No backend supplied at runtime (?backend= / window.AE_BACKEND_URL / localStorage / same-origin). Showing WAITING."); return;}
   pushLog("Backend supplied at runtime (URL hidden). Checking /health, then handshake.");
   var health=await apiGet("/health",6000);
   if(health&&!health.__error) pushLog("GET /health ok · ordered="+(health.ordered!==undefined?health.ordered:"—")+" · provider="+(health.provider||"—"));
   else pushLog("GET /health failed: "+(health&&health.error||"unknown")+" — will still try /miniapp-state.");
-  var hs=await apiPost("/handshake",{});
+  var hs=await apiPost("/handshake",{initData:getInitData(),chat_id:telegramChatId()});
   recordReply("handshake0","Handshake","POST /handshake",hs);
   await refreshState(); await fetchSecondary();
   setInterval(function(){if(autoPoll) refreshState();},3000);
@@ -560,5 +577,53 @@ async function boot(){
   setInterval(function(){if(autoPoll) fetchSecondary();},10000);
 }
 boot();
-})();</script>
+})();
+/* 5-section picker + BB family */
+var AE_PICKER = {
+  Crypto: ["BTC/USD","ETH/USD","XRP/USD","ADA/USD","SOL/USD","DOGE/USD","LTC/USD","LINK/USD","DOT/USD","AVAX/USD","MATIC/USD","UNI/USD","ATOM/USD","NEAR/USD","FIL/USD","ETC/USD","ICP/USD","XLM/USD","HBAR/USD","QNT/USD","TON/USD","ARB/USD","OP/USD","SUI/USD","APT/USD","INJ/USD","TIA/USD","SEI/USD","STX/USD","IMX/USD","AAVE/USD","MKR/USD","COMP/USD","CRV/USD","SNX/USD","SUSHI/USD","YFI-USD".replace("YFI-USD","YFI/USD"),"PEPE/USD","SHIB/USD","WIF/USD","BONK/USD","FLOKI/USD","BNB/USD","OKB/USD","HT/USD","KCS/USD","USDT/USD","USDC/USD","DAI/USD"],
+  Futures: ["GC=F","SI=F","CL=F","NG=F","ZB=F","ZN=F","ZS=F","ZM=F","ZW=F","KE=F","HG=F","PL=F","PA=F","RB=F","HO=F","CC=F","KC=F","SB=F","CT=F","ES=F","NQ=F","YM=F","RTY=F"],
+  Equities: ["AAPL","MSFT","GOOGL","AMZN","META","NVDA","TSLA","BRK-B","BRK-A","JPM","V","JNJ","WMT","MA","PG","ORCL","AVGO","COST","HD","BAC"],
+  Forex: ["EUR/USD","GBP/USD","USD/JPY","USD/CHF","AUD/USD","USD/CAD","NZD/USD","EUR/GBP","EUR/JPY","GBP/JPY","USD/ZAR","EUR/ZAR"],
+  Indices: ["^GSPC","^DJI","^IXIC","^FTSE","^GDAXI","^N225","^HSI","^AXJO","^BVSP","^MXX"]
+};
+
+function renderAePicker(filter){
+  try{
+    var el = document.getElementById("aePicker"); if(!el) return;
+    var f = (filter||"").toUpperCase();
+    var out = "";
+    Object.keys(AE_PICKER).forEach(function(sec){
+      var list = AE_PICKER[sec].filter(function(sym){ return !f || sym.toUpperCase().indexOf(f) !== -1; });
+      if(!list.length) return;
+      out += "<div style='margin:6px 0'><b>"+sec+"</b>: " + list.map(function(sym){ return "<button type='button' data-sym='"+sym+"' class='aePickBtn' style='margin:2px;padding:6px 8px'>"+sym+"</button>"; }).join("") + "</div>";
+    });
+    el.innerHTML = out || "<span> No match. Try BTC, ES, AAPL, EUR. </span>";
+    el.querySelectorAll(".aePickBtn").forEach(function(b){
+      b.addEventListener("click", function(){
+        var sym = b.getAttribute("data-sym");
+        var sel = document.getElementById("aeSymbol");
+        if(sel){ var o=document.createElement("option"); o.value=sym; o.textContent=sym; sel.appendChild(o); sel.value=sym; }
+        // Symbol change goes through backend; frontend never changes price locally.
+        try{ if(window.postAeSymbol) window.postAeSymbol(sym); }catch(e){}
+      });
+    });
+  }catch(e){}
+}
+function renderBbFamily(family){
+  try{
+    var el = document.getElementById("aeBB58"); if(!el) return;
+    if(!family || !family.length){ el.textContent = "WAITING - no BB family yet (need 3+ real bars)"; return; }
+    var rows = family.map(function(r){ return "P"+r.period+" mid "+r.mid+" upper "+r.upper+" lower "+r.lower; });
+    el.textContent = "BB family (backend, periods 3-60, dev 2, population sigma):\n" + rows.slice(-8).join("\n") + "\n... total " + family.length + " periods. Highest period shown last.";
+  }catch(e){}
+}
+try{
+  var _search = document.getElementById("aeSymbolSearch");
+  if(_search){ _search.addEventListener("input", function(){ renderAePicker(_search.value); }); }
+  renderAePicker("");
+}catch(e){}
+
+
+
+</script>
 </body></html>
